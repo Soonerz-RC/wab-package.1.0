@@ -1,6 +1,6 @@
 # WAB Package 1.0
 
-A static, link-gated data room for buyers evaluating **WAB Package 1.0** — a mineral and ORRI package in the Western Anadarko Basin owned by GBK International Group, Ltd. (Oklahoma Minerals).
+A static, link-gated data room for buyers evaluating **WAB Package 1.0** — a mineral and ORRI package in the Western Anadarko Basin owned by GBK International Group, Ltd and TPC Minerals, LLC.
 
 The portal presents the package tract-by-tract with OCC permit, completion, production, leasing, and regulatory activity tied to the legals where assets are owned, plus a daily-updated WTI and Henry Hub closing price block.
 
