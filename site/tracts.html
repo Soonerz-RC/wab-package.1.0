@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Tracts — WAB Package 1.0</title>
+  <meta name="robots" content="noindex,nofollow" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@400;500;700&family=Roboto:wght@400;500;700&display=swap" />
+
+  <link rel="stylesheet" href="styles.css?v=2026-05-22-6" />
+</head>
+
+<body data-page="tracts">
+
+  <header class="site-header">
+    <div class="container site-header__inner">
+      <div class="wordmark">
+        <span class="wordmark__primary">Oklahoma Minerals</span>
+        <span class="wordmark__secondary">WAB Package 1.0</span>
+      </div>
+      <nav class="site-nav" aria-label="Primary">
+        <a href="index.html">Overview</a>
+        <a href="tracts.html" class="is-current">Tracts</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="container hero hero--compact">
+      <div class="hero__eyebrow">Tract list</div>
+      <h1 class="hero__title hero__title--compact">All tracts in the package</h1>
+      <p class="hero__subtitle">
+        <span data-text="result-count">—</span> tracts. Click any row to open its detail page. Use the filters to narrow by type, county, or status; sort any column by clicking its header.
+      </p>
+    </section>
+
+    <section class="container section--tight">
+      <div class="filter-bar" role="group" aria-label="Tract filters">
+        <label class="filter-bar__field">
+          <span class="filter-bar__label">Type</span>
+          <select data-filter="type">
+            <option value="">All</option>
+            <option value="mineral">Mineral</option>
+            <option value="orri">ORRI</option>
+          </select>
+        </label>
+        <label class="filter-bar__field">
+          <span class="filter-bar__label">County</span>
+          <select data-filter="county">
+            <option value="">All</option>
+          </select>
+        </label>
+        <label class="filter-bar__field">
+          <span class="filter-bar__label">Status</span>
+          <select data-filter="status">
+            <option value="">All</option>
+          </select>
+        </label>
+        <label class="filter-bar__field filter-bar__field--search">
+          <span class="filter-bar__label">Search</span>
+          <input type="search" data-filter="search" placeholder="Tract ID, deal, STR, status…" />
+        </label>
+        <button type="button" class="filter-bar__reset" data-action="reset-filters">Reset</button>
+      </div>
+    </section>
+
+    <section class="container section--tight tracts-section">
+      <div class="table-wrap">
+        <table class="data-table" id="tracts-table">
+          <thead>
+            <tr>
+              <th scope="col" data-sort="tract_id" class="data-table__th--sortable">ID</th>
+              <th scope="col" data-sort="county" class="data-table__th--sortable">County</th>
+              <th scope="col" data-sort="str" class="data-table__th--sortable">STR</th>
+              <th scope="col" data-sort="deal_name" class="data-table__th--sortable">Deal / Type</th>
+              <th scope="col" data-sort="nma" class="data-table__th--sortable data-table__th--num">NMA</th>
+              <th scope="col" data-sort="nra" class="data-table__th--sortable data-table__th--num">NRA</th>
+              <th scope="col" data-sort="royalty" class="data-table__th--sortable data-table__th--num">Royalty</th>
+              <th scope="col" data-sort="status_category" class="data-table__th--sortable">Status</th>
+              <th scope="col" data-sort="sales_revenue" class="data-table__th--sortable data-table__th--num">Asking</th>
+              <th scope="col" data-sort="lease_expiration" class="data-table__th--sortable">Lease exp.</th>
+            </tr>
+          </thead>
+          <tbody data-tract-rows></tbody>
+        </table>
+      </div>
+      <div class="empty-state" data-text="empty-state" hidden>
+        No tracts match the current filters.
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container site-footer__row">
+      <div class="site-footer__brand">
+        GBK International Group, Ltd &middot; TPC Minerals, LLC
+      </div>
+      <div class="site-footer__meta">
+        Data as of <span data-text="data-asof">—</span> &middot;
+        Inventory: <span data-text="inventory-file">—</span> &middot;
+        Oseberg: <span data-text="oseberg-folder">—</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="app.js?v=2026-05-22-6"></script>
+  <script>
+    if (window.wab) { window.wab.initTracts(); }
+  </script>
+</body>
+</html>

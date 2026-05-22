@@ -315,11 +315,251 @@
   }
 
   // -------------------------------------------------------------------------
-  // Tracts page bootstrap (placeholder — built in Phase 5 part 2)
+  // Tracts page bootstrap
   // -------------------------------------------------------------------------
 
+  // Sortable column keys -> getter that returns a comparable value.
+  // Numbers stay numeric; strings become lowercased strings; nulls sort last.
+  function _comparable(tract, key) {
+    let v;
+    if (key === "deal_name") {
+      v = tract.deal_name || (tract.type === "orri" ? "ORRI" : "");
+    } else if (key === "lease_expiration") {
+      // "HBP" should sort apart from real dates. Treat HBP as "9999-99-99".
+      v = tract.lease_expiration === "HBP" ? "9999-99-99" : (tract.lease_expiration || "");
+    } else {
+      v = tract[key];
+    }
+    if (v === null || v === undefined) return null;
+    return v;
+  }
+
+  function _compareTracts(a, b, key, dir) {
+    const av = _comparable(a, key);
+    const bv = _comparable(b, key);
+    // Nulls always sort last regardless of direction
+    if (av === null && bv === null) return 0;
+    if (av === null) return 1;
+    if (bv === null) return -1;
+    if (typeof av === "number" && typeof bv === "number") {
+      return dir === "asc" ? av - bv : bv - av;
+    }
+    const cmp = String(av).toLowerCase().localeCompare(String(bv).toLowerCase());
+    return dir === "asc" ? cmp : -cmp;
+  }
+
+  function _pillClassFor(category) {
+    const c = String(category || "").toLowerCase().replace(/_/g, "-");
+    return "pill pill--" + c;
+  }
+
+  function _td(textOrNode, opts = {}) {
+    const cell = document.createElement("td");
+    if (opts.cls) cell.className = opts.cls;
+    if (textOrNode instanceof Node) {
+      cell.appendChild(textOrNode);
+    } else {
+      cell.textContent = (textOrNode === null || textOrNode === undefined) ? "—" : String(textOrNode);
+    }
+    return cell;
+  }
+
+  function _renderTractRow(t) {
+    const tr = document.createElement("tr");
+
+    // ID — link to tract.html (target may 404 until Phase 6 ships)
+    const idCell = document.createElement("td");
+    idCell.className = "data-table__cell--id";
+    const idLink = document.createElement("a");
+    idLink.href = "tract.html?id=" + encodeURIComponent(t.tract_id);
+    idLink.textContent = t.tract_id;
+    idCell.appendChild(idLink);
+    tr.appendChild(idCell);
+
+    // County
+    tr.appendChild(_td(t.county));
+
+    // STR
+    tr.appendChild(_td(t.str, { cls: "data-table__cell--str" }));
+
+    // Deal / Type
+    if (t.type === "mineral") {
+      tr.appendChild(_td(t.deal_name || "—"));
+    } else {
+      const span = document.createElement("span");
+      span.className = "data-table__cell--muted";
+      span.textContent = "ORRI";
+      tr.appendChild(_td(span));
+    }
+
+    // NMA (mineral only)
+    if (t.type === "mineral") {
+      tr.appendChild(_td(formatNumber(t.nma, { decimals: 2 }), { cls: "data-table__cell--num" }));
+    } else {
+      tr.appendChild(_td("—", { cls: "data-table__cell--num data-table__cell--muted" }));
+    }
+
+    // NRA (both)
+    tr.appendChild(_td(formatNumber(t.nra, { decimals: 2 }), { cls: "data-table__cell--num" }));
+
+    // Royalty (mineral only)
+    if (t.type === "mineral") {
+      tr.appendChild(_td(formatPercent(t.royalty), { cls: "data-table__cell--num" }));
+    } else {
+      tr.appendChild(_td("—", { cls: "data-table__cell--num data-table__cell--muted" }));
+    }
+
+    // Status pill
+    const pill = document.createElement("span");
+    pill.className = _pillClassFor(t.status_category);
+    pill.textContent = formatStatus(t.status_category);
+    pill.title = t.status_raw || formatStatus(t.status_category);
+    tr.appendChild(_td(pill));
+
+    // Asking (mineral only)
+    if (t.type === "mineral" && t.sales_revenue !== null && t.sales_revenue !== undefined) {
+      tr.appendChild(_td(formatCurrency(t.sales_revenue), { cls: "data-table__cell--num" }));
+    } else {
+      tr.appendChild(_td("—", { cls: "data-table__cell--num data-table__cell--muted" }));
+    }
+
+    // Lease expiration
+    if (t.lease_expiration === "HBP") {
+      const span = document.createElement("span");
+      span.className = "pill pill--hbp";
+      span.textContent = "HBP";
+      tr.appendChild(_td(span));
+    } else if (t.lease_expiration) {
+      tr.appendChild(_td(formatDate(t.lease_expiration)));
+    } else {
+      tr.appendChild(_td("—", { cls: "data-table__cell--muted" }));
+    }
+
+    return tr;
+  }
+
   async function initTracts() {
-    // Implemented when tracts.html is built.
+    const root = document.querySelector("[data-page='tracts']");
+    if (!root) return;
+
+    try {
+      const [tractsDoc, metaDoc] = await Promise.all([
+        loadJSON("data/tracts.json"),
+        loadJSON("data/meta.json").catch(() => null),
+      ]);
+      const allTracts = tractsDoc.tracts || [];
+
+      // Populate the county filter
+      const counties = Array.from(new Set(allTracts.map((t) => t.county))).sort();
+      const countySel = root.querySelector("select[data-filter='county']");
+      counties.forEach((c) => {
+        const opt = document.createElement("option");
+        opt.value = c;
+        opt.textContent = c;
+        countySel.appendChild(opt);
+      });
+
+      // Populate the status filter
+      const statuses = Array.from(
+        new Set(allTracts.map((t) => t.status_category).filter(Boolean))
+      ).sort();
+      const statusSel = root.querySelector("select[data-filter='status']");
+      statuses.forEach((s) => {
+        const opt = document.createElement("option");
+        opt.value = s;
+        opt.textContent = formatStatus(s);
+        statusSel.appendChild(opt);
+      });
+
+      const state = {
+        filters: { type: "", county: "", status: "", search: "" },
+        sort: { key: "tract_id", dir: "asc" },
+      };
+
+      const filterInputs = root.querySelectorAll("[data-filter]");
+      filterInputs.forEach((el) => {
+        el.addEventListener("input", () => {
+          state.filters[el.dataset.filter] = el.value;
+          render();
+        });
+      });
+
+      root.querySelectorAll("[data-sort]").forEach((th) => {
+        th.addEventListener("click", () => {
+          const key = th.dataset.sort;
+          if (state.sort.key === key) {
+            state.sort.dir = state.sort.dir === "asc" ? "desc" : "asc";
+          } else {
+            state.sort.key = key;
+            state.sort.dir = "asc";
+          }
+          render();
+        });
+      });
+
+      root.querySelector("[data-action='reset-filters']").addEventListener("click", () => {
+        state.filters = { type: "", county: "", status: "", search: "" };
+        filterInputs.forEach((el) => { el.value = ""; });
+        render();
+      });
+
+      function render() {
+        // Apply filters
+        const f = state.filters;
+        const q = (f.search || "").trim().toLowerCase();
+        const rows = allTracts.filter((t) => {
+          if (f.type && t.type !== f.type) return false;
+          if (f.county && t.county !== f.county) return false;
+          if (f.status && t.status_category !== f.status) return false;
+          if (q) {
+            const haystack = [t.tract_id, t.county, t.str, t.deal_name, t.status_raw]
+              .filter(Boolean).join(" ").toLowerCase();
+            if (!haystack.includes(q)) return false;
+          }
+          return true;
+        });
+
+        // Sort
+        rows.sort((a, b) => _compareTracts(a, b, state.sort.key, state.sort.dir));
+
+        // Render tbody
+        const tbody = root.querySelector("[data-tract-rows]");
+        while (tbody.firstChild) tbody.removeChild(tbody.firstChild);
+        rows.forEach((t) => tbody.appendChild(_renderTractRow(t)));
+
+        // Result count
+        _setText(root, "result-count",
+          rows.length === allTracts.length
+            ? formatNumber(allTracts.length)
+            : `${formatNumber(rows.length)} of ${formatNumber(allTracts.length)}`
+        );
+
+        // Sort indicators
+        root.querySelectorAll("[data-sort]").forEach((th) => {
+          th.classList.remove("is-sorted-asc", "is-sorted-desc");
+          if (th.dataset.sort === state.sort.key) {
+            th.classList.add(state.sort.dir === "asc" ? "is-sorted-asc" : "is-sorted-desc");
+          }
+        });
+
+        // Empty state
+        const empty = root.querySelector("[data-text='empty-state']");
+        if (empty) {
+          empty.hidden = rows.length !== 0;
+        }
+      }
+
+      render();
+
+      // Footer metadata
+      if (metaDoc) {
+        _setText(root, "data-asof", formatDate(metaDoc.generated_at || ""));
+        _setText(root, "inventory-file", metaDoc.inventory_file || "—");
+        _setText(root, "oseberg-folder", metaDoc.oseberg_folder || "—");
+      }
+    } catch (err) {
+      renderError(root, err);
+    }
   }
 
   // -------------------------------------------------------------------------
