@@ -153,20 +153,46 @@
       const mineralNRA = sumOf(minerals, "nra");
       const hbpNRA = sumOf(hbpOrris, "nra");
       const nonHbpNRA = sumOf(nonHbpOrris, "nra");
-      const totalAsk = sumOf(minerals, "sales_revenue");
+
+      // Asking-price components.
+      //
+      // Mineral ask comes from the tract-level sales_revenue fields (sum
+      // across all mineral rows in the inventory).
+      //
+      // ORRI ask comes from Gib's spreadsheet-level valuation cells which
+      // the inventory ingest captures into meta.json under
+      // matching_report.aggregate_cells_skipped (per spec §13.1). The two
+      // cells we want are I48 (non-HBP projected ask = total NRA x $/acre)
+      // and I93 (HBP projected ask). Cell labels are positional — if Gib
+      // reorganizes the inventory those positions could shift. Spec §13.1
+      // documents this and the ingest reports the cells in meta.json, so a
+      // mismatch would be visible in the matching report.
+      const mineralAsk = sumOf(minerals, "sales_revenue");
+      const aggregateCells = (metaDoc && metaDoc.matching_report
+                              && metaDoc.matching_report.aggregate_cells_skipped) || [];
+      const cellValue = (cellName) => {
+        const c = aggregateCells.find((x) => x.cell === cellName);
+        return c && typeof c.value === "number" ? c.value : 0;
+      };
+      const orriNonHbpAsk = Math.round(cellValue("I48"));
+      const orriHbpAsk = Math.round(cellValue("I93"));
+      const orriAsk = orriNonHbpAsk + orriHbpAsk;
+      const packageAsk = mineralAsk + orriAsk;
 
       // Big-number values
       _setMetric(root, "total-sections", formatNumber(totalSections));
       _setMetric(root, "mineral-sections", formatNumber(mineralSections));
       _setMetric(root, "hbp-orri-sections", formatNumber(hbpOrriSections));
       _setMetric(root, "nonhbp-orri-sections", formatNumber(nonHbpOrriSections));
-      _setMetric(root, "total-ask", formatCurrency(totalAsk, { compact: true }));
+      _setMetric(root, "package-ask", formatCurrency(packageAsk, { compact: true }));
 
       // Sub-number values (label/value pairs inside each card)
       _setText(root, "mineral-nma", formatNumber(mineralNMA, { decimals: 1 }));
       _setText(root, "mineral-nra", formatNumber(mineralNRA, { decimals: 1 }));
       _setText(root, "hbp-orri-nra", formatNumber(hbpNRA, { decimals: 1 }));
       _setText(root, "nonhbp-orri-nra", formatNumber(nonHbpNRA, { decimals: 1 }));
+      _setText(root, "mineral-ask", formatCurrency(mineralAsk));
+      _setText(root, "orri-ask", formatCurrency(orriAsk));
 
       // Hero subtitle counties — dynamic from data
       const counties = Array.from(new Set(tracts.map((t) => t.county))).sort();
