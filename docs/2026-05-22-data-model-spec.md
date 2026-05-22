@@ -14,6 +14,14 @@
 - §5.5 — new section documenting the actual `wells_wab.xlsx` columns observed at first ingestion.
 - §12 — added `wells_long_laterals_flagged` to `meta.json.matching_report` for the long-horizontal hit-list.
 
+**In-place additions (Phase 4 prep, same 2026-05-22 date):**
+- §6 — clarified that `well_id` may be `null` for permits with no API number assigned yet.
+- §7 — renamed `ip_oil_bbl`/`ip_gas_mcf`/`ip_water_bbl` → `ip_oil_bopd`/`ip_gas_mcfpd`/`ip_water_bwpd` to reflect Oseberg gives daily rates not totals.
+- §8 — **major rewrite.** Production is now lease-level lifetime summaries (one record per active lease), not monthly well-records. Reflects the actual shape of Oseberg's `production_wab.xlsx`. Front-end roll-up logic in §8.3 simplified to cumulative + recent-month per lease touching the tract.
+- §9.3 — new section. Two output files: `leasing.json` carries owned-tract-affecting leases (small, default-loaded); `leasing_market.json` carries the full WAB market set (loaded on demand).
+- §10 — added `POOLING_APPLICATION` and `SPACING_APPLICATION` to the type enum; documented that `oseberg_url` is currently `null` for OCC regulatory records (no URL field in the Oseberg exports).
+- §12 — added `permits_affecting_owned_tracts`, `completions_affecting_owned_tracts`, `production_affecting_owned_tracts`, and `leasing_market_count` to `matching_report`.
+
 ---
 
 ## 1. Conventions
@@ -428,10 +436,10 @@ Drilling permits (OCC Form 1000 / W-1 equivalents).
 
 | Field | Type | Notes |
 |---|---|---|
-| `permit_id` | string | Stable, from Oseberg if available |
-| `permit_number` | string | OCC permit number |
-| `well_id` | string | Foreign key to `wells.json` |
-| `permit_date` | string | ISO |
+| `permit_id` | string | Stable, from Oseberg if available; derived `permit-{permit_number}` or `permit-{county}-{filed_date}-{idx}` fallback |
+| `permit_number` | string \| null | OCC / BLM permit number (Oseberg's `Drilling Permit Num`) |
+| `well_id` | string \| null | Foreign key to `wells.json`. **May be `null`** for permits with no API number assigned yet (e.g., permit filed but well not yet spudded). |
+| `permit_date` | string | ISO. Oseberg's `Filed Date`. |
 | `permit_type` | string | New drill, recompletion, etc. (Oseberg's category) |
 | `operator` | string | At time of permit |
 | `county` | string | Canonical |
@@ -457,10 +465,10 @@ Completion reports (OCC 1002A).
 | `completion_date` | string | ISO |
 | `completion_type` | string | Initial, recomplete, refrac, etc. |
 | `formation` | string \| null | Producing formation reported |
-| `ip_oil_bbl` | number \| null | Initial production, oil |
-| `ip_gas_mcf` | number \| null | Initial production, gas |
-| `ip_water_bbl` | number \| null | |
-| `lateral_length_ft` | number \| null | For horizontals |
+| `ip_oil_bopd` | number \| null | Initial production, oil — **daily rate** (barrels of oil per day), not total |
+| `ip_gas_mcfpd` | number \| null | Initial production, gas — **daily rate** (Mcf of gas per day), not total |
+| `ip_water_bwpd` | number \| null | Initial production, water — **daily rate** (barrels of water per day) |
+| `lateral_length_ft` | number \| null | For horizontals — from Oseberg's `Bottom Hole Total Length` |
 | `proppant_lbs` | number \| null | |
 | `fluid_bbl` | number \| null | |
 | `county` | string | |
@@ -473,39 +481,86 @@ Completion reports (OCC 1002A).
 
 ## 8. `production.json`
 
-**Well-level monthly production.** Tract-level rollups are computed in the front-end (`app.js` exposes a `productionByTract(tract_id)` helper) rather than precomputed and stored — this avoids stale data drift and keeps the file size predictable.
+**Lease-level lifetime summaries.** Each record represents one producing lease unit's lifetime production stats (cumulative volumes, recent-month rates, IP figures, decline rate). This reflects the shape of Oseberg's `production_wab.xlsx` export, which delivers aggregated summary data per lease rather than per-well-per-month time series.
+
+This is the **single most important file for demonstrating HBP (Held By Production) status** — any lease with a recent `last_prod_date` and meaningful `cumulative_oil_bbl + cumulative_gas_mcf` is currently producing and therefore holding its underlying lease.
 
 ### 8.1 File structure
-Production can be a large file. Structure it as one array of well-month records:
-
 ```json
 {
-  "generated_at": "2026-05-19T14:32:00Z",
-  "earliest_month": "2018-01",
-  "latest_month": "2026-04",
-  "records": [
-    {
-      "well_id": "ok-3504520123",
-      "month": "2026-04",
-      "oil_bbl": 1245.0,
-      "gas_mcf": 8420.0,
-      "water_bbl": 312.0,
-      "days_on": 30
-    }
+  "generated_at": "2026-05-22T14:32:00Z",
+  "source": "oseberg-2026-05-22",
+  "production": [
+    { ...lease production object... },
+    { ...lease production object... }
   ]
 }
 ```
 
-### 8.2 Size guidance
-At ~50 wells × 12 months × 8 years ≈ 5,000 records, file size is small (< 1 MB). If production scope expands to all wells in the six counties (likely thousands), revisit with possible per-well file splitting. **Flag to Gib at Phase 3 if the file exceeds 5 MB.**
+### 8.2 Lease production object
+
+| Field | Type | Notes |
+|---|---|---|
+| `production_id` | string | Stable internal ID. `lease-{lease_number}` if `lease_number` present, otherwise `lease-{county}-{legal_canonical}-{operator_slug}` |
+| `lease_name` | string \| null | Oseberg `Lease Name` |
+| `lease_number` | string \| null | Oseberg `Lease Number` (also stored as `lease_unit_id`) |
+| `api_numbers` | array of strings | All API numbers associated with this lease. Oseberg stores these as a semicolon-separated string in one cell; the ingest script splits on `;` and trims. |
+| `well_ids` | array of strings | Same as `api_numbers` — kept for compatibility with the spec §5 `well_id` foreign-key pattern. |
+| `operator` | string \| null | Current operator |
+| `county` | string | Canonical |
+| `legal_raw` | string \| null | The Oseberg `Legal` field verbatim (e.g., `22-10N-11W-IM`) |
+| `sections` | array of strings | Canonical STRs derived from `legal_raw` (with meridian suffix stripped, normalized via `normalize_str()`). Single section per lease in this export. |
+| `reservoir_name` | string \| null | |
+| `field_name` | string \| null | |
+| `active_date` | string \| null | ISO. Oseberg `Active Date` — when the lease unit became active. |
+| `first_prod_date` | string \| null | ISO. Oseberg `First Prod Date`. |
+| `last_prod_date` | string \| null | ISO. **Most important freshness signal** — recent date here means the lease is actively producing today. |
+| `latest_completion_date` | string \| null | ISO |
+| `number_of_months_producing` | number \| null | Total months with production reported |
+| `number_of_completions` | number \| null | |
+| `cumulative_oil_bbl` | number \| null | Lifetime cumulative oil, barrels |
+| `cumulative_gas_mcf` | number \| null | Lifetime cumulative gas, Mcf |
+| `last_month_oil_bopm` | number \| null | Most recent month's oil production (barrels of oil per month) |
+| `last_month_gas_mcfpm` | number \| null | Most recent month's gas production (Mcf per month) |
+| `month_over_month_oil` | number \| null | Delta vs prior month (BOPM) |
+| `month_over_month_gas` | number \| null | Delta vs prior month (MCFPM) |
+| `year_over_year_oil` | number \| null | Delta vs same month prior year (BOPM) |
+| `year_over_year_gas` | number \| null | |
+| `avg_last_12_month_oil_bopm` | number \| null | Average over the last 12 months |
+| `avg_last_12_month_gas_mcfpm` | number \| null | |
+| `sum_last_12_month_oil_bopm` | number \| null | Sum over the last 12 months (barrels) |
+| `sum_last_12_month_gas_mcfpm` | number \| null | Sum over the last 12 months (Mcf) |
+| `best_30_oil_bopm` | number \| null | Best single-30-day window (oil) |
+| `best_30_gas_mcfpm` | number \| null | Best single-30-day window (gas) |
+| `ip30_oil_bopd` / `ip30_gas_mcfpd` | number \| null | 30-day initial production, daily rate |
+| `ip60_oil_bopd` / `ip60_gas_mcfpd` | number \| null | 60-day IP |
+| `ip90_oil_bopd` / `ip90_gas_mcfpd` | number \| null | 90-day IP |
+| `first_completion_ip_oil` / `_gas` / `_water` | number \| null | Reported IP at first completion |
+| `latest_completion_ip_oil` / `_gas` / `_water` | number \| null | Reported IP at most recent completion |
+| `decline_rate_oil` | number \| null | Annual decline rate, decimal (e.g., 0.45 = 45%/yr) |
+| `decline_rate_gas` | number \| null | |
+| `lateral_length_sum_ft` | number \| null | Sum of all wells' lateral lengths on this lease |
+| `gross_acres` | number \| null | Lease acreage |
+| `is_active` | boolean | Derived: `last_prod_date` within 12 months of `generated_at` |
+| `matched_tract_ids` | array | Tract IDs whose STR appears in `sections` |
+| `affects_owned_tracts` | boolean | Derived |
+| `raw` | object | Unmapped Oseberg columns (decline rate detail, tax rate, split percentage, etc.) |
 
 ### 8.3 Tract roll-up logic (front-end)
-For a given tract, the front-end:
-1. Looks up `wells` where `matched_tract_ids` includes the tract.
-2. For each matched well, pulls its production records.
-3. Sums by month. **Note:** this is a gross production sum across wells; the front-end labels charts as "gross production from wells touching this tract" — not "net production attributable to this tract", which would require decimal interest math the portal does not attempt.
 
-This distinction matters and must be clearly labeled on the UI to avoid misleading buyers.
+For a given tract, the front-end:
+1. Looks up `production` records where `matched_tract_ids` includes the tract OR where the tract's STR appears in `sections`.
+2. For each matched lease, displays: lease name, operator, cumulative oil/gas, last-month production, last-12-month average, decline rate, lateral length.
+3. **Aggregate header (optional):** sums cumulative oil + gas across all leases touching this tract for a single-number "production touching this section" headline.
+
+**Important labeling.** As with the prior wells-based design, this is **gross production from leases touching the section**, not net to the tract owner. The UI must say so. Decimal interest math is out of scope per Hard Rule #5.
+
+### 8.4 Source-format note (forward-protection)
+
+The `production_wab.xlsx` export observed at first ingestion is **lease-level aggregate**, not month-level. If a future Oseberg refresh delivers true month-level production data (separate file or schema change), it would be added as a sibling `production_monthly.json` rather than replacing this schema. Spec §8 would extend at that point.
+
+### 8.5 Size guidance
+At ~8,000 lease records × ~30 fields ≈ 5 MB. **Flag to Gib if production.json exceeds 10 MB.** If size becomes a concern, filtering to `affects_owned_tracts == true` is the obvious lever — though the buyer story benefits from showing nearby market activity, not just owned-section production.
 
 ---
 
@@ -537,6 +592,17 @@ Every lease recorded in the six counties, with overlap flagging.
 ### 9.2 Privacy / source note
 Leasing records come from public county recordings via Oseberg. No editorial filtering — the portal shows the market activity as recorded. Lessor names are public information.
 
+### 9.3 Dual-file output (size management)
+
+The Oseberg `leasing_wab.xlsx` export is large (43,704 rows at first ingestion). Loading the full dataset into a static page on every visit is wasteful. The ingest produces two files:
+
+- **`data/leasing.json`** — leases where `affects_owned_tracts == true`. Loaded by default on all portal pages. Typically a few hundred rows.
+- **`data/leasing_market.json`** — the full WAB market set, including leases that don't touch owned tracts. Loaded on demand when a buyer clicks "show all market leasing activity" on the Activity page.
+
+Both files use the same lease object schema (§9.1). The `meta.json.counts.leases` counts the owned-affecting set; `meta.json.matching_report.leasing_market_count` counts the full market set.
+
+This pattern (default-small + on-demand-full) is the size-management lever for any other future activity stream that grows past comfortable load.
+
 ---
 
 ## 10. `regulatory.json`
@@ -544,7 +610,12 @@ Leasing records come from public county recordings via Oseberg. No editorial fil
 Unified OCC actions stream. All types in one file with a `type` discriminator.
 
 ### 10.1 Action types
-`POOLING_ORDER`, `SPACING_APPLICATION`, `SPACING_ORDER`, `LOCATION_EXCEPTION`, `HEARING_NOTICE`, `COMPLETION_REPORT`, `DRILLING_PERMIT`, `TOO_FILING`, `OTHER`.
+`POOLING_APPLICATION`, `POOLING_ORDER`, `SPACING_APPLICATION`, `SPACING_ORDER`, `LOCATION_EXCEPTION`, `HEARING_NOTICE`, `COMPLETION_REPORT`, `DRILLING_PERMIT`, `TOO_FILING`, `OTHER`.
+
+**Source mapping** (Phase 4 ingest):
+- `pooling_wab.xlsx` → `POOLING_APPLICATION` when `App or Order = "App"`; `POOLING_ORDER` when `App or Order = "Order"`.
+- `spacing_wab.xlsx` → `SPACING_APPLICATION` / `SPACING_ORDER` analogous.
+- `le_wab.xlsx` (location exceptions) → `LOCATION_EXCEPTION` (with sub-distinction in `raw.app_or_order` for applications vs orders).
 
 ### 10.2 Common action object
 
@@ -561,9 +632,9 @@ Unified OCC actions stream. All types in one file with a `type` discriminator.
 | `sections` | array of strings | |
 | `matched_tract_ids` | array | |
 | `affects_owned_tracts` | boolean | Derived |
-| `oseberg_url` | string \| null | **Deep link to the underlying application/order document** |
-| `oseberg_url_requires_login` | boolean | Default true; the UI displays a "login required" cue |
-| `raw` | object | |
+| `oseberg_url` | string \| null | **Deep link to the underlying application/order document.** Currently `null` for all records — the Oseberg `pooling_wab.xlsx`, `spacing_wab.xlsx`, and `le_wab.xlsx` exports do not carry a URL column. To be populated when the URL construction pattern (from cause number) is confirmed. |
+| `oseberg_url_requires_login` | boolean | Default `true`; the UI displays a "login required" cue when URL is present. |
+| `raw` | object | Includes `app_or_order` for pooling/spacing distinction; all unmapped source columns. |
 
 ### 10.3 Front-end treatment
 The Activity page sorts by `filing_date` desc. Filters: type, county, affects-owned-tracts toggle. Each row links out to `oseberg_url` with a small lock icon when `oseberg_url_requires_login` is true.
@@ -621,7 +692,11 @@ Refresh bookkeeping and the matching report.
     "wells_dropped_out_of_scope": 128,
     "wells_long_laterals_flagged": [],
     "permits_with_owned_tract": 5,
+    "permits_affecting_owned_tracts": 5,
+    "completions_affecting_owned_tracts": 3,
+    "production_affecting_owned_tracts": 12,
     "leases_affecting_owned_tracts": 28,
+    "leasing_market_count": 43704,
     "regulatory_affecting_owned_tracts": 14,
     "ingestion_errors": [],
     "aggregate_cells_skipped": []

@@ -1,15 +1,15 @@
 {
   "counts": {
-    "completions": 0,
-    "leases": 0,
-    "permits": 0,
-    "production_records": 0,
-    "regulatory_actions": 0,
+    "completions": 265,
+    "leases": 585,
+    "permits": 513,
+    "production_records": 6770,
+    "regulatory_actions": 9197,
     "tracts_mineral": 35,
     "tracts_orri": 52,
     "wells": 444
   },
-  "generated_at": "2026-05-22T15:33:13Z",
+  "generated_at": "2026-05-22T17:52:55Z",
   "id_registry": {
     "minerals_assigned": 35,
     "minerals_retired": 0,
@@ -59,10 +59,19 @@
         "value": 84273.96922111997
       }
     ],
+    "completions_affecting_owned_tracts": 1,
+    "completions_dropped_out_of_scope": 92,
     "ingestion_errors": [],
-    "leases_affecting_owned_tracts": 0,
-    "permits_with_owned_tract": 0,
-    "regulatory_affecting_owned_tracts": 0,
+    "leases_affecting_owned_tracts": 585,
+    "leasing_dropped_out_of_scope": 2070,
+    "leasing_market_count": 41633,
+    "permits_affecting_owned_tracts": 5,
+    "permits_dropped_out_of_scope": 112,
+    "permits_with_owned_tract": 5,
+    "production_affecting_owned_tracts": 64,
+    "production_dropped_out_of_scope": 1488,
+    "regulatory_affecting_owned_tracts": 79,
+    "regulatory_dropped_out_of_scope": 2478,
     "wells_dropped_out_of_scope": 128,
     "wells_long_laterals_flagged": [
       {
