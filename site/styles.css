@@ -611,6 +611,58 @@ ul, ol {
   transition: color 120ms ease-out, border-color 120ms ease-out;
 }
 
+.filter-bar__field--toggle {
+  align-self: flex-end;
+}
+
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: 13px;
+  color: var(--color-text);
+  border: 1px solid var(--color-hairline-strong);
+  padding: 8px 12px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.toggle input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 14px;
+  height: 14px;
+  border: 1px solid var(--color-hairline-strong);
+  background: var(--color-bg);
+  cursor: pointer;
+  flex-shrink: 0;
+  position: relative;
+}
+
+.toggle input[type="checkbox"]:checked {
+  background: var(--color-maroon);
+  border-color: var(--color-maroon);
+}
+
+.toggle input[type="checkbox"]:checked::after {
+  content: "";
+  position: absolute;
+  left: 3px;
+  top: 0;
+  width: 4px;
+  height: 8px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.loading-note {
+  margin: var(--space-3) 0 0;
+  font-size: 12px;
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
 .filter-bar__reset:hover {
   color: var(--color-maroon);
   border-color: var(--color-maroon);

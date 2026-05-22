@@ -1135,6 +1135,306 @@
   }
 
   // -------------------------------------------------------------------------
+  // Activity page bootstrap
+  // -------------------------------------------------------------------------
+
+  // Convert a lease record into a unified activity row
+  function _leaseToActivity(l) {
+    return {
+      activity_id: l.lease_id,
+      activity_date: l.recording_date || l.instrument_date || "",
+      type: "LEASE",
+      type_display: "Lease",
+      county: l.county,
+      sections: l.sections || [],
+      sections_str: (l.sections || []).join(", "),
+      parties: [l.lessor, l.lessee].filter(Boolean).join(" → ") || "—",
+      summary: l.instrument_type || l.classification || "Lease",
+      matched_tract_ids: l.matched_tract_ids || [],
+      affects_owned: !!l.affects_owned_tracts,
+      url: l.oseberg_url,
+      url_label: "OK County Records",
+      requires_login: false,
+    };
+  }
+
+  // Convert a regulatory record into a unified activity row
+  function _regToActivity(a) {
+    return {
+      activity_id: a.action_id,
+      activity_date: a.filing_date || a.effective_date || "",
+      type: a.type,
+      type_display: formatRegulatoryType(a.type),
+      county: a.county,
+      sections: a.sections || [],
+      sections_str: (a.sections || []).join(", "),
+      parties: a.applicant || "—",
+      summary: a.summary || "—",
+      matched_tract_ids: a.matched_tract_ids || [],
+      affects_owned: !!a.affects_owned_tracts,
+      url: a.oseberg_url,
+      url_label: a.cause_number || "view",
+      requires_login: !!a.oseberg_url_requires_login,
+    };
+  }
+
+  function _activityTypePillClass(type) {
+    switch (type) {
+      case "LEASE":
+        return "pill pill--open";  // neutral gray
+      case "POOLING_APPLICATION":
+      case "SPACING_APPLICATION":
+        return "pill pill--pending";  // maroon
+      case "POOLING_ORDER":
+      case "SPACING_ORDER":
+        return "pill pill--hbp";  // green
+      case "LOCATION_EXCEPTION":
+        return "pill pill--non-producing";  // maroon
+      default:
+        return "pill pill--other";
+    }
+  }
+
+  function _activityRow(item) {
+    const tr = document.createElement("tr");
+
+    tr.appendChild(_td(formatDate(item.activity_date)));
+
+    const typeCell = document.createElement("td");
+    const pill = document.createElement("span");
+    pill.className = _activityTypePillClass(item.type);
+    pill.textContent = item.type_display;
+    typeCell.appendChild(pill);
+    tr.appendChild(typeCell);
+
+    tr.appendChild(_td(item.county));
+    tr.appendChild(_td(item.sections_str || "—", { cls: "data-table__cell--str" }));
+    tr.appendChild(_td(item.parties));
+    tr.appendChild(_td(item.summary));
+
+    // Tracts affected
+    if (item.matched_tract_ids && item.matched_tract_ids.length > 0) {
+      const td = document.createElement("td");
+      item.matched_tract_ids.forEach((tid, idx) => {
+        if (idx > 0) td.appendChild(document.createTextNode(", "));
+        const a = document.createElement("a");
+        a.href = "tract.html?id=" + encodeURIComponent(tid);
+        a.textContent = tid;
+        a.className = "tract-link";
+        td.appendChild(a);
+      });
+      tr.appendChild(td);
+    } else {
+      tr.appendChild(_td("—", { cls: "data-table__cell--muted" }));
+    }
+
+    // Source link
+    if (item.url) {
+      const sourceCell = document.createElement("td");
+      sourceCell.appendChild(
+        _link(item.url_label, item.url, {
+          external: true,
+          requiresLogin: item.requires_login,
+        })
+      );
+      tr.appendChild(sourceCell);
+    } else {
+      tr.appendChild(_td("—", { cls: "data-table__cell--muted" }));
+    }
+
+    return tr;
+  }
+
+  function _compareActivity(a, b, key, dir) {
+    const av = a[key];
+    const bv = b[key];
+    if (av == null && bv == null) return 0;
+    if (av == null) return 1;
+    if (bv == null) return -1;
+    const cmp = String(av).toLowerCase().localeCompare(String(bv).toLowerCase());
+    return dir === "asc" ? cmp : -cmp;
+  }
+
+  async function initActivity() {
+    const root = document.querySelector("[data-page='activity']");
+    if (!root) return;
+
+    try {
+      const [leasingDoc, regDoc, metaDoc] = await Promise.all([
+        loadJSON("data/leasing.json"),
+        loadJSON("data/regulatory.json"),
+        loadJSON("data/meta.json").catch(() => null),
+      ]);
+
+      // Owned-affecting items only by default. (leasing.json IS already
+      // owned-affecting; regulatory.json contains all WAB regulatory and
+      // we filter by affects_owned_tracts.)
+      const ownedLeases = (leasingDoc.leases || []).map(_leaseToActivity);
+      const ownedReg = (regDoc.actions || [])
+        .filter((a) => a.affects_owned_tracts)
+        .map(_regToActivity);
+      const ownedItems = ownedLeases.concat(ownedReg);
+
+      // Market items get lazy-loaded only when the user toggles them on.
+      let marketLeases = null;          // null = not yet loaded
+      let marketReg = null;
+      const marketReg_unfiltered = (regDoc.actions || [])
+        .filter((a) => !a.affects_owned_tracts)
+        .map(_regToActivity);
+
+      const state = {
+        filters: { type: "", county: "", search: "", market: false },
+        sort: { key: "activity_date", dir: "desc" },
+      };
+
+      // Build the union of counties present (across all loaded data)
+      const populateCounties = () => {
+        const sel = root.querySelector("select[data-filter='county']");
+        // Clear existing (keep "All")
+        Array.from(sel.querySelectorAll("option")).forEach((opt, idx) => {
+          if (idx > 0) sel.removeChild(opt);
+        });
+        const collect = [];
+        ownedItems.forEach((i) => collect.push(i.county));
+        if (marketLeases) marketLeases.forEach((i) => collect.push(i.county));
+        if (marketReg_unfiltered.length && state.filters.market) {
+          marketReg_unfiltered.forEach((i) => collect.push(i.county));
+        }
+        const counties = Array.from(new Set(collect.filter(Boolean))).sort();
+        counties.forEach((c) => {
+          const opt = document.createElement("option");
+          opt.value = c;
+          opt.textContent = c;
+          sel.appendChild(opt);
+        });
+      };
+      populateCounties();
+
+      const filterInputs = root.querySelectorAll("[data-filter]");
+      filterInputs.forEach((el) => {
+        const ev = el.type === "checkbox" ? "change" : "input";
+        el.addEventListener(ev, async () => {
+          if (el.dataset.filter === "market") {
+            state.filters.market = el.checked;
+            if (state.filters.market && !marketLeases) {
+              const note = root.querySelector("[data-loading-note]");
+              note.hidden = false;
+              try {
+                const marketDoc = await loadJSON("data/leasing_market.json");
+                marketLeases = (marketDoc.leases || [])
+                  .filter((l) => !l.affects_owned_tracts)   // owned ones are already in ownedItems
+                  .map(_leaseToActivity);
+                marketReg = marketReg_unfiltered;
+                populateCounties();
+              } catch (err) {
+                renderError(root, err);
+                return;
+              } finally {
+                note.hidden = true;
+              }
+            }
+          } else {
+            state.filters[el.dataset.filter] = el.value;
+          }
+          render();
+        });
+      });
+
+      root.querySelectorAll("[data-sort]").forEach((th) => {
+        th.addEventListener("click", () => {
+          const key = th.dataset.sort;
+          if (state.sort.key === key) {
+            state.sort.dir = state.sort.dir === "asc" ? "desc" : "asc";
+          } else {
+            state.sort.key = key;
+            state.sort.dir = key === "activity_date" ? "desc" : "asc";
+          }
+          render();
+        });
+      });
+
+      root.querySelector("[data-action='reset-filters']").addEventListener("click", () => {
+        state.filters = { type: "", county: "", search: "", market: false };
+        filterInputs.forEach((el) => {
+          if (el.type === "checkbox") el.checked = false;
+          else el.value = "";
+        });
+        render();
+      });
+
+      function render() {
+        // Assemble the active dataset
+        let items = ownedItems.slice();
+        if (state.filters.market) {
+          if (marketLeases) items = items.concat(marketLeases);
+          if (marketReg) items = items.concat(marketReg);
+        }
+
+        // Apply filters
+        const f = state.filters;
+        const q = (f.search || "").trim().toLowerCase();
+        const rows = items.filter((it) => {
+          if (f.type && it.type !== f.type) return false;
+          if (f.county && it.county !== f.county) return false;
+          if (q) {
+            const haystack = [
+              it.activity_date, it.type_display, it.county, it.sections_str,
+              it.parties, it.summary, (it.matched_tract_ids || []).join(" "),
+            ].filter(Boolean).join(" ").toLowerCase();
+            if (!haystack.includes(q)) return false;
+          }
+          return true;
+        });
+
+        // Sort
+        rows.sort((a, b) => _compareActivity(a, b, state.sort.key, state.sort.dir));
+
+        // Render tbody
+        const tbody = root.querySelector("[data-activity-rows]");
+        while (tbody.firstChild) tbody.removeChild(tbody.firstChild);
+        rows.forEach((it) => tbody.appendChild(_activityRow(it)));
+
+        // Count
+        const total = items.length;
+        _setText(
+          root,
+          "result-count",
+          rows.length === total
+            ? formatNumber(rows.length)
+            : `${formatNumber(rows.length)} of ${formatNumber(total)}`
+        );
+
+        // Sort indicators
+        root.querySelectorAll("[data-sort]").forEach((th) => {
+          th.classList.remove("is-sorted-asc", "is-sorted-desc");
+          if (th.dataset.sort === state.sort.key) {
+            th.classList.add(state.sort.dir === "asc" ? "is-sorted-asc" : "is-sorted-desc");
+          }
+        });
+
+        // Empty state
+        const empty = root.querySelector("[data-text='empty-state']");
+        if (empty) empty.hidden = rows.length !== 0;
+      }
+
+      // Set default sort indicator (date desc)
+      const dateTh = root.querySelector("[data-sort='activity_date']");
+      if (dateTh) dateTh.classList.add("is-sorted-desc");
+
+      render();
+
+      // Footer
+      if (metaDoc) {
+        _setText(root, "data-asof", formatDate(metaDoc.generated_at || ""));
+        _setText(root, "inventory-file", metaDoc.inventory_file || "—");
+        _setText(root, "oseberg-folder", metaDoc.oseberg_folder || "—");
+      }
+    } catch (err) {
+      renderError(root, err);
+    }
+  }
+
+  // -------------------------------------------------------------------------
   // Export
   // -------------------------------------------------------------------------
 
@@ -1148,5 +1448,6 @@
     initIndex,
     initTracts,
     initTract,
+    initActivity,
   };
 })();

@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Tracts — WAB Package 1.0</title>
+  <title>Activity — WAB Package 1.0</title>
   <meta name="robots" content="noindex,nofollow" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -13,7 +13,7 @@
   <link rel="stylesheet" href="styles.css?v=2026-05-22-8" />
 </head>
 
-<body data-page="tracts">
+<body data-page="activity">
 
   <header class="site-header">
     <div class="container site-header__inner">
@@ -23,29 +23,34 @@
       </div>
       <nav class="site-nav" aria-label="Primary">
         <a href="index.html">Overview</a>
-        <a href="tracts.html" class="is-current">Tracts</a>
-        <a href="activity.html">Activity</a>
+        <a href="tracts.html">Tracts</a>
+        <a href="activity.html" class="is-current">Activity</a>
       </nav>
     </div>
   </header>
 
   <main>
     <section class="container hero hero--compact">
-      <div class="hero__eyebrow">Tract list</div>
-      <h1 class="hero__title hero__title--compact">All tracts in the package</h1>
+      <div class="hero__eyebrow">Activity feed</div>
+      <h1 class="hero__title hero__title--compact">Recent leasing and OCC regulatory activity</h1>
       <p class="hero__subtitle">
-        <span data-text="result-count">—</span> tracts. Click any row to open its detail page. Use the filters to narrow by type, county, or status; sort any column by clicking its header.
+        <span data-text="result-count">—</span> items.
+        By default, only activity touching an owned tract is shown. Toggle <em>Include WAB market</em> to also see leasing and regulatory activity from across the broader market (large dataset; ~30 MB).
       </p>
     </section>
 
     <section class="container section--tight">
-      <div class="filter-bar" role="group" aria-label="Tract filters">
+      <div class="filter-bar" role="group" aria-label="Activity filters">
         <label class="filter-bar__field">
           <span class="filter-bar__label">Type</span>
           <select data-filter="type">
             <option value="">All</option>
-            <option value="mineral">Mineral</option>
-            <option value="orri">ORRI</option>
+            <option value="LEASE">Leasing</option>
+            <option value="POOLING_APPLICATION">Pooling application</option>
+            <option value="POOLING_ORDER">Pooling order</option>
+            <option value="SPACING_APPLICATION">Spacing application</option>
+            <option value="SPACING_ORDER">Spacing order</option>
+            <option value="LOCATION_EXCEPTION">Location exception</option>
           </select>
         </label>
         <label class="filter-bar__field">
@@ -54,42 +59,42 @@
             <option value="">All</option>
           </select>
         </label>
-        <label class="filter-bar__field">
-          <span class="filter-bar__label">Status</span>
-          <select data-filter="status">
-            <option value="">All</option>
-          </select>
-        </label>
         <label class="filter-bar__field filter-bar__field--search">
           <span class="filter-bar__label">Search</span>
-          <input type="search" data-filter="search" placeholder="Tract ID, deal, STR, status…" />
+          <input type="search" data-filter="search" placeholder="Cause #, lessor, applicant, tract id…" />
+        </label>
+        <label class="filter-bar__field filter-bar__field--toggle">
+          <span class="filter-bar__label">Scope</span>
+          <label class="toggle">
+            <input type="checkbox" data-filter="market" />
+            <span>Include WAB market</span>
+          </label>
         </label>
         <button type="button" class="filter-bar__reset" data-action="reset-filters">Reset</button>
       </div>
+      <p class="loading-note" data-loading-note hidden>Loading WAB market dataset (~30 MB)…</p>
     </section>
 
     <section class="container section--tight tracts-section">
       <div class="table-wrap">
-        <table class="data-table" id="tracts-table">
+        <table class="data-table" id="activity-table">
           <thead>
             <tr>
-              <th scope="col" data-sort="tract_id" class="data-table__th--sortable">ID</th>
+              <th scope="col" data-sort="activity_date" class="data-table__th--sortable">Date</th>
+              <th scope="col" data-sort="type" class="data-table__th--sortable">Type</th>
               <th scope="col" data-sort="county" class="data-table__th--sortable">County</th>
-              <th scope="col" data-sort="str" class="data-table__th--sortable">STR</th>
-              <th scope="col" data-sort="deal_name" class="data-table__th--sortable">Deal / Type</th>
-              <th scope="col" data-sort="nma" class="data-table__th--sortable data-table__th--num">NMA</th>
-              <th scope="col" data-sort="nra" class="data-table__th--sortable data-table__th--num">NRA</th>
-              <th scope="col" data-sort="royalty" class="data-table__th--sortable data-table__th--num">Royalty</th>
-              <th scope="col" data-sort="status_category" class="data-table__th--sortable">Status</th>
-              <th scope="col" data-sort="sales_revenue" class="data-table__th--sortable data-table__th--num">Asking</th>
-              <th scope="col" data-sort="lease_expiration" class="data-table__th--sortable">Lease exp.</th>
+              <th scope="col" data-sort="sections_str" class="data-table__th--sortable">Sections</th>
+              <th scope="col" data-sort="parties" class="data-table__th--sortable">Parties</th>
+              <th scope="col">Summary</th>
+              <th scope="col">Tract(s) affected</th>
+              <th scope="col">Source</th>
             </tr>
           </thead>
-          <tbody data-tract-rows></tbody>
+          <tbody data-activity-rows></tbody>
         </table>
       </div>
       <div class="empty-state" data-text="empty-state" hidden>
-        No tracts match the current filters.
+        No activity matches the current filters.
       </div>
     </section>
   </main>
@@ -109,7 +114,7 @@
 
   <script src="app.js?v=2026-05-22-8"></script>
   <script>
-    if (window.wab) { window.wab.initTracts(); }
+    if (window.wab) { window.wab.initActivity(); }
   </script>
 </body>
 </html>
