@@ -1,0 +1,529 @@
+{
+  "minerals": {
+    "Min001": {
+      "county": "Caddo",
+      "deal_slug": "moore",
+      "first_seen": "2026-05-22",
+      "str": "16-11N-11W"
+    },
+    "Min002": {
+      "county": "Caddo",
+      "deal_slug": "opitz",
+      "first_seen": "2026-05-22",
+      "str": "25-11N-11W"
+    },
+    "Min003": {
+      "county": "Custer",
+      "deal_slug": "rivers",
+      "first_seen": "2026-05-22",
+      "str": "05-12N-16W"
+    },
+    "Min004": {
+      "county": "Custer",
+      "deal_slug": "gilmore",
+      "first_seen": "2026-05-22",
+      "str": "17-12N-18W"
+    },
+    "Min005": {
+      "county": "Custer",
+      "deal_slug": "tackitt",
+      "first_seen": "2026-05-22",
+      "str": "17-12N-18W"
+    },
+    "Min006": {
+      "county": "Custer",
+      "deal_slug": "napier-mcclung",
+      "first_seen": "2026-05-22",
+      "str": "32-12N-17W"
+    },
+    "Min007": {
+      "county": "Custer",
+      "deal_slug": "bg",
+      "first_seen": "2026-05-22",
+      "str": "35-12N-19W"
+    },
+    "Min008": {
+      "county": "Roger Mills",
+      "deal_slug": "allen-family",
+      "first_seen": "2026-05-22",
+      "str": "01-12N-15W"
+    },
+    "Min009": {
+      "county": "Roger Mills",
+      "deal_slug": "bg",
+      "first_seen": "2026-05-22",
+      "str": "06-13N-23W"
+    },
+    "Min010": {
+      "county": "Roger Mills",
+      "deal_slug": "j-and-a-deal",
+      "first_seen": "2026-05-22",
+      "str": "07-12N-23W"
+    },
+    "Min011": {
+      "county": "Roger Mills",
+      "deal_slug": "bg",
+      "first_seen": "2026-05-22",
+      "str": "07-13N-23W"
+    },
+    "Min012": {
+      "county": "Roger Mills",
+      "deal_slug": "j-and-a-deal",
+      "first_seen": "2026-05-22",
+      "str": "08-12N-23W"
+    },
+    "Min013": {
+      "county": "Roger Mills",
+      "deal_slug": "muirhead-et-al",
+      "first_seen": "2026-05-22",
+      "str": "08-12N-23W"
+    },
+    "Min014": {
+      "county": "Roger Mills",
+      "deal_slug": "berlin",
+      "first_seen": "2026-05-22",
+      "str": "11-12N-23W"
+    },
+    "Min015": {
+      "county": "Roger Mills",
+      "deal_slug": "rogers-et-al",
+      "first_seen": "2026-05-22",
+      "str": "13-12N-23W"
+    },
+    "Min016": {
+      "county": "Roger Mills",
+      "deal_slug": "j-and-a-deal",
+      "first_seen": "2026-05-22",
+      "str": "16-12N-23W"
+    },
+    "Min017": {
+      "county": "Roger Mills",
+      "deal_slug": "muirhead-et-al",
+      "first_seen": "2026-05-22",
+      "str": "16-12N-23W"
+    },
+    "Min018": {
+      "county": "Roger Mills",
+      "deal_slug": "j-and-a-deal",
+      "first_seen": "2026-05-22",
+      "str": "17-12N-23W"
+    },
+    "Min019": {
+      "county": "Roger Mills",
+      "deal_slug": "muirhead-et-al",
+      "first_seen": "2026-05-22",
+      "str": "17-12N-23W"
+    },
+    "Min020": {
+      "county": "Roger Mills",
+      "deal_slug": "bg",
+      "first_seen": "2026-05-22",
+      "str": "17-13N-23W"
+    },
+    "Min021": {
+      "county": "Roger Mills",
+      "deal_slug": "j-and-a-deal",
+      "first_seen": "2026-05-22",
+      "str": "18-12N-23W"
+    },
+    "Min022": {
+      "county": "Washita",
+      "deal_slug": "weston-pass",
+      "first_seen": "2026-05-22",
+      "str": "08-11N-20W"
+    },
+    "Min023": {
+      "county": "Washita",
+      "deal_slug": "weston-pass",
+      "first_seen": "2026-05-22",
+      "str": "13-11N-17W"
+    },
+    "Min024": {
+      "county": "Washita",
+      "deal_slug": "weston-pass",
+      "first_seen": "2026-05-22",
+      "str": "13-11N-18W"
+    },
+    "Min025": {
+      "county": "Washita",
+      "deal_slug": "weston-pass",
+      "first_seen": "2026-05-22",
+      "str": "14-11N-20W"
+    },
+    "Min026": {
+      "county": "Washita",
+      "deal_slug": "weston-pass",
+      "first_seen": "2026-05-22",
+      "str": "15-11N-20W"
+    },
+    "Min027": {
+      "county": "Washita",
+      "deal_slug": "weston-pass",
+      "first_seen": "2026-05-22",
+      "str": "17-11N-18W"
+    },
+    "Min028": {
+      "county": "Washita",
+      "deal_slug": "weston-pass",
+      "first_seen": "2026-05-22",
+      "str": "19-11N-18W"
+    },
+    "Min029": {
+      "county": "Washita",
+      "deal_slug": "weston-pass",
+      "first_seen": "2026-05-22",
+      "str": "23-11N-18W"
+    },
+    "Min030": {
+      "county": "Washita",
+      "deal_slug": "weston-pass",
+      "first_seen": "2026-05-22",
+      "str": "23-11N-19W"
+    },
+    "Min031": {
+      "county": "Washita",
+      "deal_slug": "weston-pass",
+      "first_seen": "2026-05-22",
+      "str": "24-11N-17W"
+    },
+    "Min032": {
+      "county": "Washita",
+      "deal_slug": "weston-pass",
+      "first_seen": "2026-05-22",
+      "str": "25-11N-18W"
+    },
+    "Min033": {
+      "county": "Washita",
+      "deal_slug": "weston-pass",
+      "first_seen": "2026-05-22",
+      "str": "26-11N-18W"
+    },
+    "Min034": {
+      "county": "Washita",
+      "deal_slug": "weston-pass",
+      "first_seen": "2026-05-22",
+      "str": "32-11N-18W"
+    },
+    "Min035": {
+      "county": "Washita",
+      "deal_slug": "weston-pass",
+      "first_seen": "2026-05-22",
+      "str": "33-11N-17W"
+    }
+  },
+  "orri": {
+    "OR001": {
+      "county": "Custer",
+      "first_seen": "2026-05-22",
+      "row_hash": "8f8afe69",
+      "str": "14-15N-20W"
+    },
+    "OR002": {
+      "county": "Custer",
+      "first_seen": "2026-05-22",
+      "row_hash": "7ac5bb5f",
+      "str": "17-14N-19W"
+    },
+    "OR003": {
+      "county": "Custer",
+      "first_seen": "2026-05-22",
+      "row_hash": "62c30616",
+      "str": "19-14N-19W"
+    },
+    "OR004": {
+      "county": "Custer",
+      "first_seen": "2026-05-22",
+      "row_hash": "c20f0030",
+      "str": "25-15N-20W"
+    },
+    "OR005": {
+      "county": "Custer",
+      "first_seen": "2026-05-22",
+      "row_hash": "48adf6cd",
+      "str": "26-14N-20W"
+    },
+    "OR006": {
+      "county": "Custer",
+      "first_seen": "2026-05-22",
+      "row_hash": "eac86cec",
+      "str": "26-15N-20W"
+    },
+    "OR007": {
+      "county": "Custer",
+      "first_seen": "2026-05-22",
+      "row_hash": "da9e574d",
+      "str": "28-14N-20W"
+    },
+    "OR008": {
+      "county": "Custer",
+      "first_seen": "2026-05-22",
+      "row_hash": "b98cbffe",
+      "str": "30-14N-19W"
+    },
+    "OR009": {
+      "county": "Custer",
+      "first_seen": "2026-05-22",
+      "row_hash": "a48ff3bb",
+      "str": "30-14N-20W"
+    },
+    "OR010": {
+      "county": "Roger Mills",
+      "first_seen": "2026-05-22",
+      "row_hash": "0dd186fe",
+      "str": "07-12N-23W"
+    },
+    "OR011": {
+      "county": "Roger Mills",
+      "first_seen": "2026-05-22",
+      "row_hash": "6cbfec23",
+      "str": "07-12N-23W"
+    },
+    "OR012": {
+      "county": "Roger Mills",
+      "first_seen": "2026-05-22",
+      "row_hash": "8386c180",
+      "str": "07-12N-23W"
+    },
+    "OR013": {
+      "county": "Roger Mills",
+      "first_seen": "2026-05-22",
+      "row_hash": "852bba7c",
+      "str": "07-12N-23W"
+    },
+    "OR014": {
+      "county": "Roger Mills",
+      "first_seen": "2026-05-22",
+      "row_hash": "e0c532db",
+      "str": "07-12N-23W"
+    },
+    "OR015": {
+      "county": "Roger Mills",
+      "first_seen": "2026-05-22",
+      "row_hash": "e0c532db",
+      "str": "07-12N-23W"
+    },
+    "OR016": {
+      "county": "Roger Mills",
+      "first_seen": "2026-05-22",
+      "row_hash": "e0c532db",
+      "str": "07-12N-23W"
+    },
+    "OR017": {
+      "county": "Roger Mills",
+      "first_seen": "2026-05-22",
+      "row_hash": "e0c532db",
+      "str": "07-12N-23W"
+    },
+    "OR018": {
+      "county": "Roger Mills",
+      "first_seen": "2026-05-22",
+      "row_hash": "37f7f8c6",
+      "str": "12-12N-23W"
+    },
+    "OR019": {
+      "county": "Roger Mills",
+      "first_seen": "2026-05-22",
+      "row_hash": "8212c0a7",
+      "str": "12-12N-23W"
+    },
+    "OR020": {
+      "county": "Roger Mills",
+      "first_seen": "2026-05-22",
+      "row_hash": "8212c0a7",
+      "str": "12-12N-23W"
+    },
+    "OR021": {
+      "county": "Roger Mills",
+      "first_seen": "2026-05-22",
+      "row_hash": "e3063c33",
+      "str": "12-12N-23W"
+    },
+    "OR022": {
+      "county": "Roger Mills",
+      "first_seen": "2026-05-22",
+      "row_hash": "e3063c33",
+      "str": "12-12N-23W"
+    },
+    "OR023": {
+      "county": "Roger Mills",
+      "first_seen": "2026-05-22",
+      "row_hash": "e3063c33",
+      "str": "12-12N-23W"
+    },
+    "OR024": {
+      "county": "Roger Mills",
+      "first_seen": "2026-05-22",
+      "row_hash": "e3063c33",
+      "str": "12-12N-23W"
+    },
+    "OR025": {
+      "county": "Roger Mills",
+      "first_seen": "2026-05-22",
+      "row_hash": "9b2d5067",
+      "str": "14-13N-23W"
+    },
+    "OR026": {
+      "county": "Roger Mills",
+      "first_seen": "2026-05-22",
+      "row_hash": "18c04040",
+      "str": "16-12N-23W"
+    },
+    "OR027": {
+      "county": "Roger Mills",
+      "first_seen": "2026-05-22",
+      "row_hash": "18c04040",
+      "str": "16-12N-23W"
+    },
+    "OR028": {
+      "county": "Roger Mills",
+      "first_seen": "2026-05-22",
+      "row_hash": "18c04040",
+      "str": "16-12N-23W"
+    },
+    "OR029": {
+      "county": "Roger Mills",
+      "first_seen": "2026-05-22",
+      "row_hash": "18c04040",
+      "str": "16-12N-23W"
+    },
+    "OR030": {
+      "county": "Roger Mills",
+      "first_seen": "2026-05-22",
+      "row_hash": "59f2edb4",
+      "str": "16-12N-23W"
+    },
+    "OR031": {
+      "county": "Roger Mills",
+      "first_seen": "2026-05-22",
+      "row_hash": "7311be6c",
+      "str": "16-12N-23W"
+    },
+    "OR032": {
+      "county": "Roger Mills",
+      "first_seen": "2026-05-22",
+      "row_hash": "7486239e",
+      "str": "16-12N-23W"
+    },
+    "OR033": {
+      "county": "Roger Mills",
+      "first_seen": "2026-05-22",
+      "row_hash": "7486239e",
+      "str": "16-12N-23W"
+    },
+    "OR034": {
+      "county": "Roger Mills",
+      "first_seen": "2026-05-22",
+      "row_hash": "7486239e",
+      "str": "16-12N-23W"
+    },
+    "OR035": {
+      "county": "Roger Mills",
+      "first_seen": "2026-05-22",
+      "row_hash": "7ab87f10",
+      "str": "16-12N-23W"
+    },
+    "OR036": {
+      "county": "Roger Mills",
+      "first_seen": "2026-05-22",
+      "row_hash": "7b7bec9f",
+      "str": "16-12N-23W"
+    },
+    "OR037": {
+      "county": "Roger Mills",
+      "first_seen": "2026-05-22",
+      "row_hash": "b7ff36f6",
+      "str": "16-12N-23W"
+    },
+    "OR038": {
+      "county": "Roger Mills",
+      "first_seen": "2026-05-22",
+      "row_hash": "11968199",
+      "str": "17-12N-23W"
+    },
+    "OR039": {
+      "county": "Roger Mills",
+      "first_seen": "2026-05-22",
+      "row_hash": "11968199",
+      "str": "17-12N-23W"
+    },
+    "OR040": {
+      "county": "Roger Mills",
+      "first_seen": "2026-05-22",
+      "row_hash": "1c388562",
+      "str": "17-12N-23W"
+    },
+    "OR041": {
+      "county": "Roger Mills",
+      "first_seen": "2026-05-22",
+      "row_hash": "2c27f269",
+      "str": "17-12N-23W"
+    },
+    "OR042": {
+      "county": "Roger Mills",
+      "first_seen": "2026-05-22",
+      "row_hash": "3a1793b0",
+      "str": "17-12N-23W"
+    },
+    "OR043": {
+      "county": "Roger Mills",
+      "first_seen": "2026-05-22",
+      "row_hash": "3a1793b0",
+      "str": "17-12N-23W"
+    },
+    "OR044": {
+      "county": "Roger Mills",
+      "first_seen": "2026-05-22",
+      "row_hash": "3a1793b0",
+      "str": "17-12N-23W"
+    },
+    "OR045": {
+      "county": "Roger Mills",
+      "first_seen": "2026-05-22",
+      "row_hash": "512f6ae0",
+      "str": "17-12N-23W"
+    },
+    "OR046": {
+      "county": "Roger Mills",
+      "first_seen": "2026-05-22",
+      "row_hash": "512f6ae0",
+      "str": "17-12N-23W"
+    },
+    "OR047": {
+      "county": "Roger Mills",
+      "first_seen": "2026-05-22",
+      "row_hash": "512f6ae0",
+      "str": "17-12N-23W"
+    },
+    "OR048": {
+      "county": "Roger Mills",
+      "first_seen": "2026-05-22",
+      "row_hash": "512f6ae0",
+      "str": "17-12N-23W"
+    },
+    "OR049": {
+      "county": "Roger Mills",
+      "first_seen": "2026-05-22",
+      "row_hash": "847c97a8",
+      "str": "17-12N-23W"
+    },
+    "OR050": {
+      "county": "Roger Mills",
+      "first_seen": "2026-05-22",
+      "row_hash": "a849d12a",
+      "str": "17-12N-23W"
+    },
+    "OR051": {
+      "county": "Roger Mills",
+      "first_seen": "2026-05-22",
+      "row_hash": "4f61bedd",
+      "str": "27-12N-23W"
+    },
+    "OR052": {
+      "county": "Roger Mills",
+      "first_seen": "2026-05-22",
+      "row_hash": "b30d1991",
+      "str": "27-12N-23W"
+    }
+  },
+  "retired": []
+}

@@ -1,0 +1,70 @@
+{
+  "counts": {
+    "completions": 0,
+    "leases": 0,
+    "permits": 0,
+    "production_records": 0,
+    "regulatory_actions": 0,
+    "tracts_mineral": 35,
+    "tracts_orri": 52,
+    "wells": 0
+  },
+  "generated_at": "2026-05-22T14:58:44Z",
+  "id_registry": {
+    "minerals_assigned": 35,
+    "minerals_retired": 0,
+    "new_this_refresh": [],
+    "orri_assigned": 52,
+    "orri_retired": 0,
+    "retired_this_refresh": []
+  },
+  "inventory_archived_as": "2026-05-22-inventory.xlsx",
+  "inventory_file": "inventory-current.xlsx",
+  "matching_report": {
+    "aggregate_cells_skipped": [
+      {
+        "cell": "I46",
+        "interpretation": "ORRI section column-I aggregate calculation",
+        "sheet": "Inventory 4 Sale",
+        "value": 58.66067000000001
+      },
+      {
+        "cell": "I47",
+        "interpretation": "ORRI section column-I aggregate calculation",
+        "sheet": "Inventory 4 Sale",
+        "value": 1500
+      },
+      {
+        "cell": "I48",
+        "interpretation": "ORRI section column-I aggregate calculation",
+        "sheet": "Inventory 4 Sale",
+        "value": 87991.00500000002
+      },
+      {
+        "cell": "I91",
+        "interpretation": "ORRI section column-I aggregate calculation",
+        "sheet": "Inventory 4 Sale",
+        "value": 24.078276920319993
+      },
+      {
+        "cell": "I92",
+        "interpretation": "ORRI section column-I aggregate calculation",
+        "sheet": "Inventory 4 Sale",
+        "value": 3500
+      },
+      {
+        "cell": "I93",
+        "interpretation": "ORRI section column-I aggregate calculation",
+        "sheet": "Inventory 4 Sale",
+        "value": 84273.96922111997
+      }
+    ],
+    "ingestion_errors": [],
+    "leases_affecting_owned_tracts": 0,
+    "permits_with_owned_tract": 0,
+    "regulatory_affecting_owned_tracts": 0,
+    "wells_with_owned_tract": 0,
+    "wells_without_owned_tract": 0
+  },
+  "oseberg_folder": null
+}

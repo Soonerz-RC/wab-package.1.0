@@ -96,7 +96,8 @@ wab-package.1.0/
 ├── requirements.txt             ← pinned Python deps
 │
 ├── docs/                        ← foundation documents and notes
-│   ├── 2026-05-19-data-model-spec.md
+│   ├── 2026-05-19-data-model-spec.md   ← historical; superseded by 2026-05-22
+│   ├── 2026-05-22-data-model-spec.md   ← CURRENT spec
 │   ├── 2026-05-21-build-roadmap.md
 │   └── 2026-05-21-starter-prompt.md
 │
@@ -147,13 +148,13 @@ wab-package.1.0/
 
 ## 7. Data model summary
 
-The full specification lives in `docs/2026-05-19-data-model-spec.md`. Key points only here:
+The full specification lives in `docs/2026-05-22-data-model-spec.md` (supersedes 2026-05-19). Key points only here:
 
 - **Two asset types:** `mineral` and `orri`. They share a common identity model but carry different fields.
 - **Public tract IDs:** `Min001…Min{n}` for minerals, `OR001…OR{n}` for ORRI. Separate ID spaces. **Frozen once assigned** — removed tracts leave gaps; new tracts receive the next unused number. The mapping is persisted in `data-raw/inventory/id-registry.json`.
 - **Initial sort order:** county (alphabetical) → STR (lexicographic on the canonical padded form) → deal slug (alphabetical) for minerals; same minus deal for ORRI, which uses an 8-char `row_hash` to disambiguate multiple grants on the same STR.
 - **Internal match key for activity records:** normalized `STR + county`. A record can attach to multiple tracts when several deals share a section (e.g., Min004 GILMORE and Min005 TACKITT both sit on `17-12N-18W`). Deal-level uniqueness applies to identity assignment, not to activity matching.
-- **Status normalization:** raw status preserved verbatim in `status_raw`; a normalized `status_category` (`LEASED | HBP | OPEN | PENDING | OTHER`) is added for filtering. "Reign Reg", "Crawley Reg", and any value containing "Reg" map to `PENDING`.
+- **Status normalization:** raw status preserved verbatim in `status_raw`; a normalized `status_category` (`LEASED | HBP | OPEN | PENDING | OTHER | NON_PRODUCING`) is added for filtering. For minerals: "Reign Reg", "Crawley Reg", and any value containing "Reg" map to `PENDING`. For ORRI: `status_raw` is always null (no STATUS column in the Inventory); `status_category` is derived from the lease fields — `HBP` if DOL/EXP are both "HBP", `NON_PRODUCING` if both are real dates.
 - **Inventory Excel is a living document.** Status and lease expirations change between refreshes. The refresh script archives the prior `inventory-current.xlsx` before replacement, per the carve-out in Hard Rule #1.
 - **Wells are a first-class entity.** Permits, completions, and production reference `well_id`. Tracts join to wells via STR overlap (`tract.str ∈ well.sections`). Horizontal wells crossing multiple sections carry all sections in `sections[]`.
 - **Coordinate fields reserved on every tract from day one** (`lat`, `lon`, `section_polygon` — null until Phase 8 populates them). This prevents a schema migration when the map is added.
