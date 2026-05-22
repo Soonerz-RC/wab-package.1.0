@@ -246,16 +246,23 @@ ul, ol {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
   gap: var(--space-5) var(--space-4);
+  align-items: start;
+}
+
+.metrics--five {
+  grid-template-columns: repeat(5, 1fr);
 }
 
 @media (max-width: 900px) {
-  .metrics {
+  .metrics,
+  .metrics--five {
     grid-template-columns: repeat(3, 1fr);
   }
 }
 
 @media (max-width: 540px) {
-  .metrics {
+  .metrics,
+  .metrics--five {
     grid-template-columns: repeat(2, 1fr);
   }
 }
@@ -263,6 +270,9 @@ ul, ol {
 .metric {
   padding-top: var(--space-3);
   border-top: 1px solid var(--color-maroon);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
 }
 
 .metric__value {
@@ -272,7 +282,6 @@ ul, ol {
   line-height: 1;
   color: var(--color-text);
   display: block;
-  margin-bottom: var(--space-2);
 }
 
 .metric__label {
@@ -281,6 +290,38 @@ ul, ol {
   letter-spacing: 0.14em;
   color: var(--color-text-secondary);
   font-weight: 500;
+}
+
+.metric__sub {
+  margin: var(--space-2) 0 0;
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--color-hairline);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+}
+
+.metric__sub-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.metric__sub dt {
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 10.5px;
+  color: var(--color-text-secondary);
+  font-weight: 500;
+  margin: 0;
+}
+
+.metric__sub dd {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+  color: var(--color-text);
 }
 
 /* ------------------------------------------------------------------------- */

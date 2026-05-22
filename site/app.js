@@ -131,22 +131,47 @@
 
       const tracts = tractsDoc.tracts || [];
 
-      // Headline metrics
+      // Headline metrics — sections (deduplicated) rather than tract counts.
       const minerals = tracts.filter((t) => t.type === "mineral");
       const orris = tracts.filter((t) => t.type === "orri");
-      const totalNMA = minerals.reduce((s, t) => s + (t.nma || 0), 0);
-      const totalNRA = tracts.reduce((s, t) => s + (t.nra || 0), 0);
-      const totalAsk = minerals.reduce(
-        (s, t) => s + (t.sales_revenue || 0),
-        0
+      const hbpOrris = orris.filter((t) => t.status_category === "HBP");
+      const nonHbpOrris = orris.filter(
+        (t) => t.status_category === "NON_PRODUCING"
       );
 
-      _setMetric(root, "total-tracts", formatNumber(tracts.length));
-      _setMetric(root, "mineral-tracts", formatNumber(minerals.length));
-      _setMetric(root, "orri-tracts", formatNumber(orris.length));
-      _setMetric(root, "total-nma", formatNumber(totalNMA, { decimals: 1 }));
-      _setMetric(root, "total-nra", formatNumber(totalNRA, { decimals: 1 }));
-      _setMetric(root, "total-ask", formatCurrency(totalAsk));
+      const uniqStr = (rows) =>
+        Array.from(new Set(rows.map((t) => t.str))).length;
+
+      const totalSections = uniqStr(tracts);
+      const mineralSections = uniqStr(minerals);
+      const hbpOrriSections = uniqStr(hbpOrris);
+      const nonHbpOrriSections = uniqStr(nonHbpOrris);
+
+      const sumOf = (rows, key) =>
+        rows.reduce((s, t) => s + (t[key] || 0), 0);
+      const mineralNMA = sumOf(minerals, "nma");
+      const mineralNRA = sumOf(minerals, "nra");
+      const hbpNRA = sumOf(hbpOrris, "nra");
+      const nonHbpNRA = sumOf(nonHbpOrris, "nra");
+      const totalAsk = sumOf(minerals, "sales_revenue");
+
+      // Big-number values
+      _setMetric(root, "total-sections", formatNumber(totalSections));
+      _setMetric(root, "mineral-sections", formatNumber(mineralSections));
+      _setMetric(root, "hbp-orri-sections", formatNumber(hbpOrriSections));
+      _setMetric(root, "nonhbp-orri-sections", formatNumber(nonHbpOrriSections));
+      _setMetric(root, "total-ask", formatCurrency(totalAsk, { compact: true }));
+
+      // Sub-number values (label/value pairs inside each card)
+      _setText(root, "mineral-nma", formatNumber(mineralNMA, { decimals: 1 }));
+      _setText(root, "mineral-nra", formatNumber(mineralNRA, { decimals: 1 }));
+      _setText(root, "hbp-orri-nra", formatNumber(hbpNRA, { decimals: 1 }));
+      _setText(root, "nonhbp-orri-nra", formatNumber(nonHbpNRA, { decimals: 1 }));
+
+      // Hero subtitle counties — dynamic from data
+      const counties = Array.from(new Set(tracts.map((t) => t.county))).sort();
+      _setText(root, "county-count-word", _countWord(counties.length));
+      _setText(root, "county-list", _formatList(counties));
 
       // Price block
       if (pricesDoc) {
@@ -230,6 +255,20 @@
     if (changeUsd > 0) el.classList.add("delta-up");
     else if (changeUsd < 0) el.classList.add("delta-down");
     else el.classList.add("delta-flat");
+  }
+
+  function _countWord(n) {
+    const words = ["zero", "one", "two", "three", "four", "five", "six",
+                   "seven", "eight", "nine", "ten"];
+    return words[n] || String(n);
+  }
+
+  function _formatList(items) {
+    // Oxford comma: "A and B", "A, B, and C", "A, B, C, and D"
+    if (!items || items.length === 0) return "";
+    if (items.length === 1) return items[0];
+    if (items.length === 2) return items[0] + " and " + items[1];
+    return items.slice(0, -1).join(", ") + ", and " + items[items.length - 1];
   }
 
   function _deltaLabel(changeUsd, changePct) {

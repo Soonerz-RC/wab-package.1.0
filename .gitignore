@@ -22,3 +22,7 @@ site/data/
 .idea/
 *.swp
 *.swo
+
+# Excel lock files (created when a file is open in Excel)
+~$*.xlsx
+~$*.xls
