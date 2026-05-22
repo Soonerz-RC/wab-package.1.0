@@ -1,0 +1,493 @@
+/*
+ * WAB Package 1.0 — front-end styles
+ *
+ * Plain CSS, no preprocessor, no compile step.
+ * Palette: maroon accent (mirrors live oklahomaminerals.com brand thread)
+ *          executed with restrained McKinsey-publication aesthetic.
+ * See CLAUDE.md §8 for the design system.
+ */
+
+/* ------------------------------------------------------------------------- */
+/* Design tokens                                                              */
+/* ------------------------------------------------------------------------- */
+
+:root {
+  /* Palette */
+  --color-maroon: #9b2c31;
+  --color-maroon-dark: #7a2126;
+  --color-bg: #ffffff;
+  --color-bg-alt: #fafaf8;
+  --color-text: #222222;
+  --color-text-secondary: #54595f;
+  --color-text-muted: #7a7a7a;
+  --color-hairline: #e5e5e0;
+  --color-hairline-strong: #c7c7c0;
+  --color-up: #2f6e3f;
+  --color-down: #9b2c31;
+  --color-flat: #7a7a7a;
+
+  /* Typography */
+  --font-serif: "Roboto Slab", Georgia, "Times New Roman", serif;
+  --font-sans: "Roboto", -apple-system, BlinkMacSystemFont, "Helvetica Neue",
+    Arial, sans-serif;
+
+  /* Spacing scale (8 px base, doubled) */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 16px;
+  --space-4: 24px;
+  --space-5: 32px;
+  --space-6: 48px;
+  --space-7: 64px;
+  --space-8: 96px;
+
+  /* Layout */
+  --content-max: 1100px;
+  --content-pad: var(--space-5);
+}
+
+/* ------------------------------------------------------------------------- */
+/* Reset                                                                      */
+/* ------------------------------------------------------------------------- */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--color-text);
+  background: var(--color-bg);
+  font-variant-numeric: tabular-nums;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-weight: 500;
+  line-height: 1.2;
+  color: var(--color-text);
+}
+
+p {
+  margin: 0;
+}
+
+a {
+  color: var(--color-maroon);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color 120ms ease-out;
+}
+
+a:hover {
+  border-bottom-color: var(--color-maroon);
+}
+
+a:focus-visible {
+  outline: 2px solid var(--color-maroon);
+  outline-offset: 2px;
+  border-radius: 1px;
+}
+
+button {
+  font: inherit;
+  cursor: pointer;
+}
+
+ul, ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* ------------------------------------------------------------------------- */
+/* Layout primitives                                                          */
+/* ------------------------------------------------------------------------- */
+
+.container {
+  max-width: var(--content-max);
+  margin: 0 auto;
+  padding-left: var(--content-pad);
+  padding-right: var(--content-pad);
+}
+
+.section {
+  padding-top: var(--space-7);
+  padding-bottom: var(--space-7);
+}
+
+.section--tight {
+  padding-top: var(--space-5);
+  padding-bottom: var(--space-5);
+}
+
+.section--alt {
+  background: var(--color-bg-alt);
+  border-top: 1px solid var(--color-hairline);
+  border-bottom: 1px solid var(--color-hairline);
+}
+
+/* ------------------------------------------------------------------------- */
+/* Header / nav                                                               */
+/* ------------------------------------------------------------------------- */
+
+.site-header {
+  border-bottom: 1px solid var(--color-maroon);
+  background: var(--color-bg);
+}
+
+.site-header__inner {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding-top: var(--space-4);
+  padding-bottom: var(--space-4);
+  gap: var(--space-5);
+  flex-wrap: wrap;
+}
+
+.wordmark {
+  font-family: var(--font-serif);
+  font-weight: 500;
+  font-size: 18px;
+  line-height: 1.1;
+  letter-spacing: 0.02em;
+  color: var(--color-text);
+}
+
+.wordmark__primary {
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  display: block;
+  font-weight: 400;
+}
+
+.wordmark__secondary {
+  display: block;
+  margin-top: 2px;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--color-maroon);
+  letter-spacing: 0.02em;
+}
+
+.site-nav {
+  display: flex;
+  gap: var(--space-5);
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.site-nav a {
+  color: var(--color-text-secondary);
+  font-weight: 500;
+}
+
+.site-nav a.is-current {
+  color: var(--color-maroon);
+  border-bottom: 1px solid var(--color-maroon);
+}
+
+/* ------------------------------------------------------------------------- */
+/* Hero                                                                       */
+/* ------------------------------------------------------------------------- */
+
+.hero {
+  padding-top: var(--space-7);
+  padding-bottom: var(--space-6);
+}
+
+.hero__eyebrow {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--color-maroon);
+  font-weight: 500;
+  margin-bottom: var(--space-3);
+}
+
+.hero__title {
+  font-size: 44px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  line-height: 1.1;
+  margin-bottom: var(--space-3);
+}
+
+.hero__subtitle {
+  font-family: var(--font-sans);
+  font-size: 17px;
+  color: var(--color-text-secondary);
+  max-width: 760px;
+  line-height: 1.6;
+}
+
+/* ------------------------------------------------------------------------- */
+/* Big-number metrics                                                         */
+/* ------------------------------------------------------------------------- */
+
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: var(--space-5) var(--space-4);
+}
+
+@media (max-width: 900px) {
+  .metrics {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 540px) {
+  .metrics {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.metric {
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--color-maroon);
+}
+
+.metric__value {
+  font-family: var(--font-serif);
+  font-size: 40px;
+  font-weight: 500;
+  line-height: 1;
+  color: var(--color-text);
+  display: block;
+  margin-bottom: var(--space-2);
+}
+
+.metric__label {
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--color-text-secondary);
+  font-weight: 500;
+}
+
+/* ------------------------------------------------------------------------- */
+/* Section heading                                                            */
+/* ------------------------------------------------------------------------- */
+
+.section-heading {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--color-text-secondary);
+  font-weight: 500;
+  margin-bottom: var(--space-4);
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid var(--color-hairline);
+}
+
+/* ------------------------------------------------------------------------- */
+/* Price block                                                                */
+/* ------------------------------------------------------------------------- */
+
+.price-block {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-5);
+}
+
+@media (max-width: 540px) {
+  .price-block {
+    grid-template-columns: 1fr;
+  }
+}
+
+.price {
+  border-top: 1px solid var(--color-maroon);
+  padding-top: var(--space-3);
+}
+
+.price__commodity {
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--color-text-secondary);
+  font-weight: 500;
+  margin-bottom: var(--space-2);
+}
+
+.price__close {
+  font-family: var(--font-serif);
+  font-size: 32px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  line-height: 1;
+  margin-bottom: var(--space-2);
+}
+
+.price__unit {
+  font-size: 12px;
+  color: var(--color-text-muted);
+  font-weight: 400;
+  letter-spacing: 0;
+  margin-left: var(--space-1);
+}
+
+.price__delta {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.price__delta.delta-up { color: var(--color-up); }
+.price__delta.delta-down { color: var(--color-down); }
+.price__delta.delta-flat { color: var(--color-flat); }
+
+.price__asof {
+  margin-top: var(--space-2);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--color-text-muted);
+}
+
+/* ------------------------------------------------------------------------- */
+/* Activity summary                                                           */
+/* ------------------------------------------------------------------------- */
+
+.activity-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-5) var(--space-4);
+}
+
+@media (max-width: 900px) {
+  .activity-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.activity-card {
+  border-top: 1px solid var(--color-hairline-strong);
+  padding-top: var(--space-3);
+}
+
+.activity-card__value {
+  font-family: var(--font-serif);
+  font-size: 32px;
+  font-weight: 500;
+  display: block;
+  margin-bottom: var(--space-1);
+}
+
+.activity-card__label {
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--color-text-secondary);
+  font-weight: 500;
+}
+
+/* ------------------------------------------------------------------------- */
+/* Process narrative                                                          */
+/* ------------------------------------------------------------------------- */
+
+.narrative {
+  max-width: 760px;
+  font-size: 16px;
+  line-height: 1.7;
+  color: var(--color-text);
+}
+
+.narrative p + p {
+  margin-top: var(--space-3);
+}
+
+.cta-row {
+  margin-top: var(--space-5);
+  display: flex;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.cta {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-weight: 500;
+  color: var(--color-maroon);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-maroon);
+  background: var(--color-bg);
+  transition: background 120ms ease-out, color 120ms ease-out;
+}
+
+.cta:hover {
+  background: var(--color-maroon);
+  color: var(--color-bg);
+  border-bottom-color: var(--color-maroon);
+}
+
+/* ------------------------------------------------------------------------- */
+/* Footer                                                                     */
+/* ------------------------------------------------------------------------- */
+
+.site-footer {
+  margin-top: var(--space-8);
+  padding-top: var(--space-5);
+  padding-bottom: var(--space-5);
+  border-top: 1px solid var(--color-hairline);
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+.site-footer__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-5);
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.site-footer__brand {
+  font-family: var(--font-serif);
+  font-weight: 500;
+  color: var(--color-text-secondary);
+}
+
+.site-footer__meta {
+  font-variant-numeric: tabular-nums;
+}
+
+.site-footer__meta span {
+  color: var(--color-text);
+  font-weight: 500;
+}
+
+/* ------------------------------------------------------------------------- */
+/* Error box                                                                  */
+/* ------------------------------------------------------------------------- */
+
+.error-box {
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-down);
+  background: #fff5f5;
+  color: var(--color-down);
+  font-size: 13px;
+  margin: var(--space-5) 0;
+}

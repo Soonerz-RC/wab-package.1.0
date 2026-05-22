@@ -1,0 +1,36 @@
+# Netlify config for WAB Package 1.0 data room.
+#
+# The site/ folder is the static publish root. Generated JSON data lives in
+# the repo's data/ folder. The build step below copies data/ into the
+# publish folder (site/data/) so the HTML can fetch data/tracts.json etc.
+# via relative paths.
+#
+# CLAUDE.md §6 keeps data/ at the repo root as the canonical location; this
+# build step is an ephemeral copy that exists only inside Netlify's build
+# sandbox.
+
+[build]
+  publish = "site"
+  command = "mkdir -p site/data && cp data/*.json site/data/"
+
+# Sensible cache headers: the JSON data is regenerated every refresh
+# (every 14-30 days during the sale process). HTML/CSS/JS rarely change.
+[[headers]]
+  for = "/data/*.json"
+  [headers.values]
+    Cache-Control = "public, max-age=300"
+
+[[headers]]
+  for = "/*.html"
+  [headers.values]
+    Cache-Control = "public, max-age=600"
+
+[[headers]]
+  for = "/*.css"
+  [headers.values]
+    Cache-Control = "public, max-age=3600"
+
+[[headers]]
+  for = "/*.js"
+  [headers.values]
+    Cache-Control = "public, max-age=3600"

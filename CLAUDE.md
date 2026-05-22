@@ -165,10 +165,24 @@ The full specification lives in `docs/2026-05-22-data-model-spec.md` (supersedes
 
 ## 8. Branding
 
-- **Primary navy and accent gold** matching oklahomaminerals.com. Exact hex values to be confirmed by inspecting the live site during Phase 5.
-- **Typography:** clean serif for headlines acceptable; sans-serif body. Match the existing Oklahoma Minerals feel.
-- **Logo:** Oklahoma Minerals wordmark in header. Ask Gib for the current asset if not present in `site/assets/`.
-- **Tone:** professional, factual, investor-grade. No marketing hype. Buyers should feel they are reading a data room, not a brochure.
+**Confirmed at Phase 5 by inspecting the live oklahomaminerals.com (2026-05-22):** the live site is maroon + peach, not navy + gold as originally anticipated. The data-room portal mirrors the live site's brand color thread but executes with a more restrained, McKinsey-publication aesthetic to fit the B2B sale-process context.
+
+**Palette:**
+- **Primary accent:** `#9B2C31` maroon — used for header underline, link color, status-pill outlines, table header underlines, key-metric underlines. Never as a filled background.
+- **Background:** `#FFFFFF` white (primary), `#FAFAF8` warm off-white (sectional differentiation).
+- **Body text:** `#222222` near-black for primary content; `#54595F` mid-gray for labels/metadata.
+- **Hairlines / dividers:** `#E5E5E0` warm light gray (1 px borders).
+- **Peach `#FFBC7D`** is intentionally NOT used in the portal palette — too soft for the McKinsey-publication feel.
+
+**Typography:**
+- **Headlines / wordmark:** `Roboto Slab` (matches the live site's slab-serif authoritative feel). Weights 400, 500, 700.
+- **Body / tables / navigation:** `Roboto`. Weights 400, 500, 700.
+- **Tabular figures** enabled on all numeric content (`font-variant-numeric: tabular-nums`).
+- Both loaded from Google Fonts via `<link>` (no font self-hosting in v1).
+
+**Wordmark:** text-only, no image. Header reads `OKLAHOMA MINERALS / WAB PACKAGE 1.0` in Roboto Slab. No logo file required.
+
+**Tone:** professional, factual, investor-grade. No marketing hype. Buyers should feel they are reading a data room, not a brochure. **Lots of white space.** Big-number-with-uppercase-label treatment for headline metrics (McKinsey publication style).
 
 ---
 

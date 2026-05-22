@@ -10,6 +10,10 @@ __pycache__/
 # Node (forbidden per CLAUDE.md §5 but ignore preemptively)
 node_modules/
 
+# Netlify build artifact — site/data/ is created at deploy time only
+# (see netlify.toml). The canonical data/ lives at the repo root.
+site/data/
+
 # macOS
 .DS_Store
 
