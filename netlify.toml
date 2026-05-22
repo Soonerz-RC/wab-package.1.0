@@ -13,24 +13,31 @@
   publish = "site"
   command = "mkdir -p site/data && cp data/*.json site/data/"
 
-# Sensible cache headers: the JSON data is regenerated every refresh
-# (every 14-30 days during the sale process). HTML/CSS/JS rarely change.
+# Cache strategy:
+# - HTML files: minimal cache + must-revalidate. The HTML carries
+#   ?v=YYYY-MM-DD-N query strings on its asset references, so a fresh
+#   HTML fetch is what invalidates a stale JS/CSS cache. Keeping HTML
+#   on a short revalidation interval means asset version bumps reach
+#   buyers' browsers within ~60 seconds of deploy.
+# - JSON data: short cache so refresh cycles propagate to buyers quickly.
+# - CSS / JS: long cache is safe because the HTML's ?v= query bumps the
+#   URL each time the file changes (separate URL = separate cache entry).
+[[headers]]
+  for = "/*.html"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
 [[headers]]
   for = "/data/*.json"
   [headers.values]
     Cache-Control = "public, max-age=300"
 
 [[headers]]
-  for = "/*.html"
-  [headers.values]
-    Cache-Control = "public, max-age=600"
-
-[[headers]]
   for = "/*.css"
   [headers.values]
-    Cache-Control = "public, max-age=3600"
+    Cache-Control = "public, max-age=86400"
 
 [[headers]]
   for = "/*.js"
   [headers.values]
-    Cache-Control = "public, max-age=3600"
+    Cache-Control = "public, max-age=86400"
