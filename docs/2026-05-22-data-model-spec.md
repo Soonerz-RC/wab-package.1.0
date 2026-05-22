@@ -9,6 +9,11 @@
 - §12 — added `aggregate_cells_skipped` to `meta.json.matching_report`.
 - §13.1 — new section documenting the actual Inventory workbook layout for forward-protection of refresh scripts.
 
+**In-place additions (Phase 3 prep, same 2026-05-22 date):**
+- §5.4 — new section documenting how `sections[]` is derived from `Surface Hole Legal` and `Bottom Hole Legal` in the Oseberg wells export, the known long-horizontal limitation, and the long-lateral flagging convention.
+- §5.5 — new section documenting the actual `wells_wab.xlsx` columns observed at first ingestion.
+- §12 — added `wells_long_laterals_flagged` to `meta.json.matching_report` for the long-horizontal hit-list.
+
 ---
 
 ## 1. Conventions
@@ -360,6 +365,59 @@ Every well in the six Anadarko counties, regardless of whether it touches an own
 ### 5.3 The horizontal-well join
 For horizontal wells, `sections[]` carries every section the bore touches per Oseberg's records. A tract joins to a well if `tract.str ∈ well.sections`. The same well can match multiple tracts; the same tract can match multiple wells. The front-end displays this fairly.
 
+### 5.4 How `sections[]` is computed from the Oseberg wells export
+
+The Oseberg `wells_wab.xlsx` export **does not contain an explicit "sections-touched" column.** No `Spacing Unit`, `Section Footages`, `Survey Footages`, or `Completion Sections` field is present. The only section-bearing fields are two endpoints:
+
+- `Surface Hole Legal` — the section where the wellbore enters the ground.
+- `Bottom Hole Legal` — the section where the wellbore terminates.
+
+Both values come in the form `SS-TTd-RRd-IM` (the `-IM` suffix is the Indian Meridian — Oklahoma's principal meridian). The ingest script strips the meridian suffix and normalizes the remainder via `normalize_str()`.
+
+**`sections[]` is computed as:**
+
+```
+sections = sorted(unique({ normalize_str(strip_meridian(SHL)),
+                            normalize_str(strip_meridian(BHL)) }) - {None})
+```
+
+For vertical wells (or wells with unknown profile where SHL == BHL), `sections[]` has 1 entry. For horizontals where the lateral starts and ends in different sections, `sections[]` has 2 entries.
+
+**Known limitation — long horizontals miss intermediate sections.** A long lateral (e.g., 10,000+ ft / ~2 miles) can physically cross 3 or more sections, but only the two endpoint sections will appear in `sections[]`. A tract sitting in a middle section that the lateral physically crosses will **not** match such a well via the endpoint-based logic.
+
+This is acceptable for v1 because:
+- The vast majority (>95%) of horizontals in the WAB have laterals ≤ 10,560 ft and fit within 2 sections.
+- The proper fix requires PLSS section polygons + the actual lateral line geometry, which is deferred to Phase 8 (map).
+
+**Long-lateral flagging.** During Phase 3 ingestion, any well with `Lateral Length (Ft) ≥ 5,280` (one mile — the length at which a lateral can cross more than 2 sections) is appended to `meta.json.matching_report.wells_long_laterals_flagged` as a hit-list to revisit at Phase 8. Each entry records the `well_id`, `lateral_length_ft`, `surface_section`, `bottom_hole_section`, and `operator` so the gap can be diagnosed when the map phase lands.
+
+**Data quality fallback.** If `Surface Hole Legal` is missing or unparseable (e.g., one well in the 2026-05-22 export has the literal string `L. LANDAUER` in the meridian slot — clearly a data entry error), the well is still included in `wells.json` with `sections[]` containing whatever endpoint(s) did parse cleanly. The unparseable value is captured in `meta.json.matching_report.ingestion_errors`. A well with both SHL and BHL unparseable gets `sections: []` and cannot match any owned tract.
+
+### 5.5 Wells export layout — forward-protection
+
+The 2026-05-22 Oseberg `wells_wab.xlsx` has one sheet (`Sheet 1`) with 67 columns. The columns the ingest uses, by name:
+
+| Spec field | Oseberg column |
+|---|---|
+| `well_id` | `API Number` (10-digit, hyphens already absent) |
+| `api_number` | `API Number 12 Digit` |
+| `well_name` | `Well Name` |
+| `operator` | `Operator` |
+| `operator_history` | `[{operator: Operator, effective_date: null}, {operator: Original Operator, effective_date: null}]` (deduped if same; no full history dates in this export) |
+| `county` | `County` (normalized via `normalize_county()`) |
+| `well_status` | `Well Status` |
+| `well_type` | `Well Type` |
+| `spud_date` | `Spud Date` |
+| `completion_date` | `Latest Completion Date` |
+| `lat` | `Surface Latitude` |
+| `lon` | `Surface Longitude` |
+| `sections` | derived from `Surface Hole Legal` + `Bottom Hole Legal` per §5.4 |
+| `oseberg_url` | `State URL` (deep link to OCC well record) |
+
+Additional Oseberg columns that carry summary data already joined in from permits/completions/production (`Latest Permit Date`, `Earliest Completion Date`, `Latest Completion IP Oil`, `Cumulative Oil`, `First Production Date`, etc.) are **deliberately ignored** in `wells.json` — those line items belong in their dedicated JSON files (`permits.json`, `completions.json`, `production.json`) built from the dedicated Oseberg exports.
+
+**County filtering.** The Oseberg export may include wells outside the six WAB counties (the 2026-05-22 export carries 128 wells across Blaine, Canadian, Major, Beckham, Wheeler). Per CLAUDE.md §2 (Oklahoma-only WAB scope), the ingest filters to the six canonical counties and reports the dropped count in `meta.json.matching_report.wells_dropped_out_of_scope`.
+
 ---
 
 ## 6. `permits.json`
@@ -560,6 +618,8 @@ Refresh bookkeeping and the matching report.
   "matching_report": {
     "wells_with_owned_tract": 41,
     "wells_without_owned_tract": 446,
+    "wells_dropped_out_of_scope": 128,
+    "wells_long_laterals_flagged": [],
     "permits_with_owned_tract": 5,
     "leases_affecting_owned_tracts": 28,
     "regulatory_affecting_owned_tracts": 14,
@@ -590,6 +650,22 @@ Refresh bookkeeping and the matching report.
 ```
 
 This protects against accidentally surfacing aggregate values as tract-level data, while preserving a paper trail.
+
+`wells_dropped_out_of_scope` counts wells in the Oseberg export that were filtered out because their county is not in the canonical six-county WAB list. The dropped wells are not preserved individually; the count alone is enough for sanity-checking.
+
+`wells_long_laterals_flagged` carries the hit-list of horizontals long enough (≥ 5,280 ft) to potentially cross more than 2 sections — i.e., wells where the endpoint-based `sections[]` may undercount actual coverage. Each entry has the form:
+
+```json
+{
+  "well_id": "3512900014",
+  "lateral_length_ft": 10149,
+  "surface_section": "03-13N-22W",
+  "bottom_hole_section": "34-14N-22W",
+  "operator": "..."
+}
+```
+
+This is the diagnostic list to revisit when Phase 8 (map) adds true lateral-line-vs-section-polygon intersection.
 
 ---
 
