@@ -563,6 +563,578 @@
   }
 
   // -------------------------------------------------------------------------
+  // Tract detail page bootstrap
+  // -------------------------------------------------------------------------
+
+  function _lockIcon() {
+    // Tiny lock svg for "requires login" badges next to Oseberg URLs
+    const NS = "http://www.w3.org/2000/svg";
+    const svg = document.createElementNS(NS, "svg");
+    svg.setAttribute("class", "lock-icon");
+    svg.setAttribute("viewBox", "0 0 10 12");
+    svg.setAttribute("aria-label", "Login required");
+    const path = document.createElementNS(NS, "path");
+    path.setAttribute(
+      "d",
+      "M2 5V3.5a3 3 0 0 1 6 0V5h1v7H1V5h1Zm1 0h4V3.5a2 2 0 1 0-4 0V5Z"
+    );
+    svg.appendChild(path);
+    return svg;
+  }
+
+  function _extArrow() {
+    const span = document.createElement("span");
+    span.className = "ext-arrow";
+    span.textContent = "↗";
+    return span;
+  }
+
+  function _link(text, href, opts = {}) {
+    if (!href) {
+      const span = document.createElement("span");
+      span.textContent = text;
+      return span;
+    }
+    const a = document.createElement("a");
+    a.href = href;
+    a.textContent = text;
+    if (opts.external) {
+      a.target = "_blank";
+      a.rel = "noopener noreferrer";
+      a.appendChild(_extArrow());
+    }
+    if (opts.requiresLogin) {
+      a.appendChild(_lockIcon());
+    }
+    return a;
+  }
+
+  function _makeMetric(value, label) {
+    const wrap = document.createElement("div");
+    wrap.className = "metric";
+    const v = document.createElement("span");
+    v.className = "metric__value";
+    if (value instanceof Node) {
+      v.appendChild(value);
+    } else {
+      v.textContent = value;
+    }
+    wrap.appendChild(v);
+    const l = document.createElement("span");
+    l.className = "metric__label";
+    l.textContent = label;
+    wrap.appendChild(l);
+    return wrap;
+  }
+
+  function _statusPill(category, rawTitle) {
+    const span = document.createElement("span");
+    span.className = "pill pill--" + String(category || "").toLowerCase().replace(/_/g, "-");
+    span.textContent = formatStatus(category);
+    if (rawTitle) span.title = rawTitle;
+    return span;
+  }
+
+  // Build a generic table given headers + rows of cells
+  function _buildTable(headers, rowDataList) {
+    const wrap = document.createElement("div");
+    wrap.className = "table-wrap";
+    const table = document.createElement("table");
+    table.className = "data-table";
+    const thead = document.createElement("thead");
+    const trH = document.createElement("tr");
+    headers.forEach((h) => {
+      const th = document.createElement("th");
+      th.scope = "col";
+      th.textContent = h.label;
+      if (h.numeric) th.classList.add("data-table__th--num");
+      trH.appendChild(th);
+    });
+    thead.appendChild(trH);
+    table.appendChild(thead);
+    const tbody = document.createElement("tbody");
+    rowDataList.forEach((cells) => {
+      const tr = document.createElement("tr");
+      cells.forEach((cell) => {
+        const td = document.createElement("td");
+        if (cell && cell.cls) td.className = cell.cls;
+        const content = cell && cell.content !== undefined ? cell.content : cell;
+        if (content instanceof Node) {
+          td.appendChild(content);
+        } else {
+          td.textContent = content === null || content === undefined ? "—" : String(content);
+        }
+        tr.appendChild(td);
+      });
+      tbody.appendChild(tr);
+    });
+    table.appendChild(tbody);
+    wrap.appendChild(table);
+    return wrap;
+  }
+
+  // Replace contents of an element safely
+  function _replaceContent(host, nodeOrNodes) {
+    while (host.firstChild) host.removeChild(host.firstChild);
+    if (Array.isArray(nodeOrNodes)) {
+      nodeOrNodes.forEach((n) => host.appendChild(n));
+    } else if (nodeOrNodes) {
+      host.appendChild(nodeOrNodes);
+    }
+  }
+
+  function _emptyMessage(text) {
+    const p = document.createElement("p");
+    p.className = "activity-section__empty";
+    p.textContent = text;
+    return p;
+  }
+
+  function _setCount(root, key, count) {
+    const el = root.querySelector(`[data-count='${key}']`);
+    if (el) el.textContent = formatNumber(count);
+  }
+
+  function _renderTractHeader(root, tract) {
+    const isMineral = tract.type === "mineral";
+    const eyebrow = `Tract · ${tract.tract_id}`;
+    const title = isMineral
+      ? `${tract.deal_name} · ${tract.str}`
+      : `ORRI Grant · ${tract.str}`;
+    _setText(root, "tract-eyebrow", eyebrow);
+    _setText(root, "tract-title", title);
+    _setText(
+      root,
+      "tract-subtitle",
+      `${tract.county} County, Township-Range ${tract.township_range}`
+    );
+    document.title = `${tract.tract_id} · ${title} — WAB Package 1.0`;
+  }
+
+  function _renderTractSummary(root, tract) {
+    const host = root.querySelector("[data-tract-summary]");
+    if (!host) return;
+    _replaceContent(host, []);
+
+    const metrics = [];
+    metrics.push(_makeMetric(tract.county, "County"));
+    metrics.push(_makeMetric(tract.str, "STR"));
+
+    if (tract.type === "mineral") {
+      metrics.push(
+        _makeMetric(formatNumber(tract.nma, { decimals: 2 }), "NMA")
+      );
+      metrics.push(
+        _makeMetric(formatNumber(tract.nra, { decimals: 2 }), "NRA")
+      );
+      metrics.push(
+        _makeMetric(formatPercent(tract.royalty), "Royalty")
+      );
+      metrics.push(_makeMetric(_statusPill(tract.status_category, tract.status_raw), "Status"));
+      if (tract.lease_expiration) {
+        metrics.push(
+          _makeMetric(
+            tract.lease_expiration === "HBP"
+              ? _statusPill("HBP", "HBP")
+              : formatDate(tract.lease_expiration),
+            "Lease exp."
+          )
+        );
+      }
+      if (tract.sales_revenue) {
+        metrics.push(
+          _makeMetric(formatCurrency(tract.sales_revenue), "Asking")
+        );
+      }
+    } else {
+      metrics.push(_makeMetric(formatNumber(tract.nra, { decimals: 2 }), "NRA"));
+      metrics.push(_makeMetric(_statusPill(tract.status_category, tract.status_raw), "Status"));
+      const dolDisplay =
+        tract.date_of_lease === "HBP"
+          ? _statusPill("HBP", "HBP")
+          : tract.date_of_lease
+          ? formatDate(tract.date_of_lease)
+          : "—";
+      metrics.push(_makeMetric(dolDisplay, "Date of lease"));
+      const expDisplay =
+        tract.lease_expiration === "HBP"
+          ? _statusPill("HBP", "HBP")
+          : tract.lease_expiration
+          ? formatDate(tract.lease_expiration)
+          : "—";
+      metrics.push(_makeMetric(expDisplay, "Lease expiration"));
+    }
+
+    metrics.forEach((m) => host.appendChild(m));
+  }
+
+  function _renderCrossLinks(root, currentTract, allTracts) {
+    const section = root.querySelector("[data-cross-links-section]");
+    const list = root.querySelector("[data-cross-link-list]");
+    if (!section || !list) return;
+
+    const sameSection = allTracts.filter(
+      (t) => t.str === currentTract.str && t.tract_id !== currentTract.tract_id
+    );
+
+    if (sameSection.length === 0) {
+      section.hidden = true;
+      return;
+    }
+    section.hidden = false;
+    _replaceContent(list, []);
+    sameSection.forEach((t) => {
+      const li = document.createElement("li");
+      const idCell = document.createElement("span");
+      idCell.className = "cross-link-list__id";
+      const a = document.createElement("a");
+      a.href = "tract.html?id=" + encodeURIComponent(t.tract_id);
+      a.textContent = t.tract_id;
+      idCell.appendChild(a);
+      li.appendChild(idCell);
+
+      const detail = document.createElement("span");
+      detail.className = "cross-link-list__detail";
+      if (t.type === "mineral") {
+        detail.textContent = `${t.deal_name} · Mineral · ${formatStatus(t.status_category)}`;
+      } else {
+        detail.textContent = `ORRI · ${formatStatus(t.status_category)}`;
+      }
+      li.appendChild(detail);
+      list.appendChild(li);
+    });
+  }
+
+  // ---- Activity renderers ----
+
+  function _renderWells(root, wells) {
+    const host = root.querySelector("[data-activity='wells']");
+    _setCount(root, "wells", wells.length);
+    if (!wells.length) {
+      _replaceContent(host, _emptyMessage("No wells in this section in the current Oseberg export."));
+      return;
+    }
+    const headers = [
+      { label: "API" }, { label: "Well name" }, { label: "Operator" },
+      { label: "Profile" }, { label: "Status" }, { label: "Sections" },
+      { label: "Spud date" },
+    ];
+    const rows = wells.map((w) => {
+      const apiCell = _link(w.well_id, w.oseberg_url, { external: !!w.oseberg_url });
+      return [
+        { content: apiCell, cls: "data-table__cell--id" },
+        w.well_name || "—",
+        w.operator || "—",
+        w.wellbore_profile || "—",
+        w.well_status || "—",
+        (w.sections || []).join(", ") || "—",
+        formatDate(w.spud_date),
+      ];
+    });
+    _replaceContent(host, _buildTable(headers, rows));
+  }
+
+  function _renderPermits(root, permits) {
+    const host = root.querySelector("[data-activity='permits']");
+    _setCount(root, "permits", permits.length);
+    if (!permits.length) {
+      _replaceContent(host, _emptyMessage("No permits in this section in the current Oseberg export."));
+      return;
+    }
+    const headers = [
+      { label: "Permit #" }, { label: "Filed" }, { label: "Type" },
+      { label: "Operator" }, { label: "Status" }, { label: "Source" },
+    ];
+    const rows = permits.map((p) => [
+      p.permit_number || "—",
+      formatDate(p.permit_date),
+      p.permit_type || "—",
+      p.operator || "—",
+      p.approval_status || "—",
+      p.source || "—",
+    ]);
+    _replaceContent(host, _buildTable(headers, rows));
+  }
+
+  function _renderCompletions(root, completions) {
+    const host = root.querySelector("[data-activity='completions']");
+    _setCount(root, "completions", completions.length);
+    if (!completions.length) {
+      _replaceContent(host, _emptyMessage("No completions in this section in the current Oseberg export."));
+      return;
+    }
+    const headers = [
+      { label: "API" }, { label: "Completion date" }, { label: "Type" },
+      { label: "Formation" }, { label: "IP oil (BOPD)", numeric: true },
+      { label: "IP gas (MCFPD)", numeric: true }, { label: "Lateral (ft)", numeric: true },
+      { label: "Operator" },
+    ];
+    const rows = completions.map((c) => {
+      const apiCell = _link(c.well_id || "—", c.oseberg_url, { external: !!c.oseberg_url });
+      return [
+        { content: apiCell, cls: "data-table__cell--id" },
+        formatDate(c.completion_date || c.effective_date),
+        c.completion_type || "—",
+        c.formation || "—",
+        { content: formatNumber(c.ip_oil_bopd, { decimals: 0 }), cls: "data-table__cell--num" },
+        { content: formatNumber(c.ip_gas_mcfpd, { decimals: 0 }), cls: "data-table__cell--num" },
+        { content: formatNumber(c.lateral_length_ft, { decimals: 0 }), cls: "data-table__cell--num" },
+        c.operator || "—",
+      ];
+    });
+    _replaceContent(host, _buildTable(headers, rows));
+  }
+
+  function _renderProductionCard(rec) {
+    const card = document.createElement("div");
+    card.className = "production-card";
+
+    const header = document.createElement("div");
+    header.className = "production-card__header";
+    const titleWrap = document.createElement("div");
+    const title = document.createElement("h3");
+    title.className = "production-card__title";
+    title.textContent = rec.lease_name || rec.production_id || "(Unnamed lease)";
+    titleWrap.appendChild(title);
+    const op = document.createElement("div");
+    op.className = "production-card__operator";
+    op.textContent = rec.operator || "—";
+    titleWrap.appendChild(op);
+    header.appendChild(titleWrap);
+    if (rec.is_active) {
+      header.appendChild(_statusPill("HBP", "Active producer"));
+    } else {
+      header.appendChild(_statusPill("OTHER", "Inactive / stale"));
+    }
+    card.appendChild(header);
+
+    // Big-number block: cumulative oil and cumulative gas
+    const big = document.createElement("div");
+    big.className = "production-card__big";
+    const _makeBig = (val, label) => {
+      const w = document.createElement("div");
+      const v = document.createElement("span");
+      v.className = "production-card__big-value";
+      v.textContent = val;
+      w.appendChild(v);
+      const l = document.createElement("span");
+      l.className = "production-card__big-label";
+      l.textContent = label;
+      w.appendChild(l);
+      return w;
+    };
+    big.appendChild(_makeBig(formatNumber(rec.cumulative_oil_bbl, { decimals: 0 }), "Cumulative oil (bbl)"));
+    big.appendChild(_makeBig(formatNumber(rec.cumulative_gas_mcf, { decimals: 0 }), "Cumulative gas (Mcf)"));
+    card.appendChild(big);
+
+    // Supporting rows
+    const rows = document.createElement("dl");
+    rows.className = "production-card__rows";
+    const _row = (label, value) => {
+      const r = document.createElement("div");
+      r.className = "production-card__row";
+      const dt = document.createElement("dt");
+      dt.textContent = label;
+      const dd = document.createElement("dd");
+      if (value instanceof Node) dd.appendChild(value);
+      else dd.textContent = value;
+      r.appendChild(dt);
+      r.appendChild(dd);
+      return r;
+    };
+    rows.appendChild(_row("Last month oil / gas",
+      `${formatNumber(rec.last_month_oil_bopm, { decimals: 0 })} BOPM · ${formatNumber(rec.last_month_gas_mcfpm, { decimals: 0 })} MCFPM`));
+    rows.appendChild(_row("12-mo avg oil / gas",
+      `${formatNumber(rec.avg_last_12_month_oil_bopm, { decimals: 0 })} BOPM · ${formatNumber(rec.avg_last_12_month_gas_mcfpm, { decimals: 0 })} MCFPM`));
+    rows.appendChild(_row("Producing since",
+      `${formatDate(rec.first_prod_date)} · ${rec.number_of_months_producing || "—"} months`));
+    rows.appendChild(_row("Last production", formatDate(rec.last_prod_date)));
+    if (rec.decline_rate_oil !== null && rec.decline_rate_oil !== undefined) {
+      rows.appendChild(_row("Decline rate (oil)", formatPercent(rec.decline_rate_oil)));
+    }
+    if (rec.lateral_length_sum_ft) {
+      rows.appendChild(_row("Lateral length (sum)",
+        `${formatNumber(rec.lateral_length_sum_ft, { decimals: 0 })} ft`));
+    }
+    if (rec.gross_acres) {
+      rows.appendChild(_row("Gross acres", formatNumber(rec.gross_acres, { decimals: 1 })));
+    }
+    if (rec.reservoir_name) {
+      rows.appendChild(_row("Reservoir", rec.reservoir_name));
+    }
+    card.appendChild(rows);
+    return card;
+  }
+
+  function _renderProduction(root, production) {
+    const host = root.querySelector("[data-activity='production']");
+    _setCount(root, "production", production.length);
+    if (!production.length) {
+      _replaceContent(host, _emptyMessage("No production records touching this section in the current Oseberg export."));
+      return;
+    }
+    const grid = document.createElement("div");
+    grid.className = "production-cards";
+    production.forEach((rec) => grid.appendChild(_renderProductionCard(rec)));
+    _replaceContent(host, grid);
+  }
+
+  function _renderLeasing(root, leases) {
+    const host = root.querySelector("[data-activity='leasing']");
+    _setCount(root, "leasing", leases.length);
+    if (!leases.length) {
+      _replaceContent(host, _emptyMessage("No recent recorded leases touching this section."));
+      return;
+    }
+    const SHOW_INITIAL = 10;
+    let expanded = false;
+
+    const buildTable = () => {
+      const visible = expanded ? leases : leases.slice(0, SHOW_INITIAL);
+      const headers = [
+        { label: "Recorded" }, { label: "Lessor" }, { label: "Lessee" },
+        { label: "Royalty", numeric: true }, { label: "Term (yrs)", numeric: true },
+        { label: "Source" },
+      ];
+      const rows = visible.map((l) => {
+        const sourceCell = l.oseberg_url
+          ? _link("OK Co. Records", l.oseberg_url, { external: true })
+          : "—";
+        return [
+          formatDate(l.recording_date),
+          l.lessor || "—",
+          l.lessee || "—",
+          { content: formatPercent(l.royalty), cls: "data-table__cell--num" },
+          { content: formatNumber(l.term_years, { decimals: 1 }), cls: "data-table__cell--num" },
+          sourceCell,
+        ];
+      });
+      return _buildTable(headers, rows);
+    };
+
+    const render = () => {
+      const nodes = [buildTable()];
+      if (leases.length > SHOW_INITIAL) {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "activity-section__show-all";
+        btn.textContent = expanded
+          ? `Show first ${SHOW_INITIAL} only`
+          : `Show all ${leases.length} →`;
+        btn.addEventListener("click", () => {
+          expanded = !expanded;
+          render();
+        });
+        nodes.push(btn);
+      }
+      _replaceContent(host, nodes);
+    };
+    render();
+  }
+
+  function _renderRegulatory(root, actions) {
+    const host = root.querySelector("[data-activity='regulatory']");
+    _setCount(root, "regulatory", actions.length);
+    if (!actions.length) {
+      _replaceContent(host, _emptyMessage("No regulatory activity touching this section."));
+      return;
+    }
+    const headers = [
+      { label: "Type" }, { label: "Filed" }, { label: "Cause #" },
+      { label: "Applicant" }, { label: "Summary" },
+    ];
+    const rows = actions.map((a) => {
+      const typePill = document.createElement("span");
+      typePill.className = "pill pill--" + (
+        a.type === "POOLING_ORDER" || a.type === "SPACING_ORDER" ? "hbp" :
+        a.type === "POOLING_APPLICATION" || a.type === "SPACING_APPLICATION" ? "pending" :
+        a.type === "LOCATION_EXCEPTION" ? "non-producing" :
+        "other"
+      );
+      typePill.textContent = formatRegulatoryType(a.type);
+      let causeContent = a.cause_number || "—";
+      if (a.oseberg_url) {
+        causeContent = _link(a.cause_number || "link",
+          a.oseberg_url, { external: true, requiresLogin: !!a.oseberg_url_requires_login });
+      }
+      return [
+        typePill,
+        formatDate(a.filing_date),
+        causeContent,
+        a.applicant || "—",
+        a.summary || "—",
+      ];
+    });
+    _replaceContent(host, _buildTable(headers, rows));
+  }
+
+  function formatRegulatoryType(t) {
+    if (!t) return "—";
+    return t.replace(/_/g, " ")
+            .toLowerCase()
+            .replace(/\b\w/g, (c) => c.toUpperCase());
+  }
+
+  async function initTract() {
+    const root = document.querySelector("[data-page='tract']");
+    if (!root) return;
+
+    const tractId = new URLSearchParams(window.location.search).get("id");
+    if (!tractId) {
+      renderError(root, new Error("No tract ID in URL. Use tract.html?id=Min001 (for example)."));
+      return;
+    }
+
+    try {
+      const [
+        tractsDoc, wellsDoc, permitsDoc, completionsDoc,
+        productionDoc, leasingDoc, regulatoryDoc, metaDoc,
+      ] = await Promise.all([
+        loadJSON("data/tracts.json"),
+        loadJSON("data/wells.json"),
+        loadJSON("data/permits.json"),
+        loadJSON("data/completions.json"),
+        loadJSON("data/production.json"),
+        loadJSON("data/leasing.json"),
+        loadJSON("data/regulatory.json"),
+        loadJSON("data/meta.json").catch(() => null),
+      ]);
+
+      const allTracts = tractsDoc.tracts || [];
+      const tract = allTracts.find((t) => t.tract_id === tractId);
+      if (!tract) {
+        renderError(root, new Error(`Tract ${tractId} not found in the data.`));
+        return;
+      }
+
+      _renderTractHeader(root, tract);
+      _renderTractSummary(root, tract);
+      _renderCrossLinks(root, tract, allTracts);
+
+      // Filter each activity stream to this tract
+      const matchTo = (xs) => xs.filter((x) =>
+        Array.isArray(x.matched_tract_ids) && x.matched_tract_ids.includes(tractId)
+      );
+
+      _renderWells(root, matchTo(wellsDoc.wells || []));
+      _renderPermits(root, matchTo(permitsDoc.permits || []));
+      _renderCompletions(root, matchTo(completionsDoc.completions || []));
+      _renderProduction(root, matchTo(productionDoc.production || []));
+      _renderLeasing(root, matchTo(leasingDoc.leases || []));
+      _renderRegulatory(root, matchTo(regulatoryDoc.actions || []));
+
+      // Footer metadata
+      if (metaDoc) {
+        _setText(root, "data-asof", formatDate(metaDoc.generated_at || ""));
+        _setText(root, "inventory-file", metaDoc.inventory_file || "—");
+        _setText(root, "oseberg-folder", metaDoc.oseberg_folder || "—");
+      }
+    } catch (err) {
+      renderError(root, err);
+    }
+  }
+
+  // -------------------------------------------------------------------------
   // Export
   // -------------------------------------------------------------------------
 
@@ -575,5 +1147,6 @@
     formatStatus,
     initIndex,
     initTracts,
+    initTract,
   };
 })();

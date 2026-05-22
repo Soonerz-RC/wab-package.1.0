@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Tract — WAB Package 1.0</title>
+  <meta name="robots" content="noindex,nofollow" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@400;500;700&family=Roboto:wght@400;500;700&display=swap" />
+
+  <link rel="stylesheet" href="styles.css?v=2026-05-22-7" />
+</head>
+
+<body data-page="tract">
+
+  <header class="site-header">
+    <div class="container site-header__inner">
+      <div class="wordmark">
+        <span class="wordmark__primary">Oklahoma Minerals</span>
+        <span class="wordmark__secondary">WAB Package 1.0</span>
+      </div>
+      <nav class="site-nav" aria-label="Primary">
+        <a href="index.html">Overview</a>
+        <a href="tracts.html">Tracts</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <!-- Tract header -->
+    <section class="container hero hero--compact">
+      <div class="hero__eyebrow" data-text="tract-eyebrow">Tract</div>
+      <h1 class="hero__title hero__title--compact" data-text="tract-title">—</h1>
+      <p class="hero__subtitle" data-text="tract-subtitle">—</p>
+    </section>
+
+    <!-- Tract summary metrics -->
+    <section class="container section--tight">
+      <div class="metrics tract-summary" data-tract-summary>
+        <!-- populated by JS based on tract type -->
+      </div>
+    </section>
+
+    <!-- Cross-links: other tracts in same section -->
+    <section class="container section--tight" data-cross-links-section hidden>
+      <div class="section-heading">Other tracts in this section</div>
+      <ul class="cross-link-list" data-cross-link-list></ul>
+    </section>
+
+    <!-- Activity: Wells -->
+    <section class="container section--tight">
+      <article class="activity-section">
+        <div class="activity-section__header">
+          <h2 class="activity-section__title">Wells <span class="activity-section__count" data-count="wells">0</span></h2>
+        </div>
+        <div class="activity-section__body" data-activity="wells">
+          <p class="activity-section__empty">Loading…</p>
+        </div>
+      </article>
+    </section>
+
+    <!-- Activity: Permits -->
+    <section class="container section--tight">
+      <article class="activity-section">
+        <div class="activity-section__header">
+          <h2 class="activity-section__title">OCC / BLM permits <span class="activity-section__count" data-count="permits">0</span></h2>
+        </div>
+        <div class="activity-section__body" data-activity="permits">
+          <p class="activity-section__empty">Loading…</p>
+        </div>
+      </article>
+    </section>
+
+    <!-- Activity: Completions -->
+    <section class="container section--tight">
+      <article class="activity-section">
+        <div class="activity-section__header">
+          <h2 class="activity-section__title">Completions <span class="activity-section__count" data-count="completions">0</span></h2>
+        </div>
+        <div class="activity-section__body" data-activity="completions">
+          <p class="activity-section__empty">Loading…</p>
+        </div>
+      </article>
+    </section>
+
+    <!-- Activity: Production -->
+    <section class="container section--tight">
+      <article class="activity-section">
+        <div class="activity-section__header">
+          <h2 class="activity-section__title">Producing leases touching this section <span class="activity-section__count" data-count="production">0</span></h2>
+        </div>
+        <p class="activity-section__disclaimer">
+          <em>Gross production from leases touching this section, not net to the tract owner. Decimal-interest math is out of scope for this data room.</em>
+        </p>
+        <div class="activity-section__body" data-activity="production">
+          <p class="activity-section__empty">Loading…</p>
+        </div>
+      </article>
+    </section>
+
+    <!-- Activity: Leasing -->
+    <section class="container section--tight">
+      <article class="activity-section">
+        <div class="activity-section__header">
+          <h2 class="activity-section__title">Recent leasing activity <span class="activity-section__count" data-count="leasing">0</span></h2>
+        </div>
+        <div class="activity-section__body" data-activity="leasing">
+          <p class="activity-section__empty">Loading…</p>
+        </div>
+      </article>
+    </section>
+
+    <!-- Activity: Regulatory -->
+    <section class="container section--tight">
+      <article class="activity-section">
+        <div class="activity-section__header">
+          <h2 class="activity-section__title">OCC regulatory activity <span class="activity-section__count" data-count="regulatory">0</span></h2>
+        </div>
+        <div class="activity-section__body" data-activity="regulatory">
+          <p class="activity-section__empty">Loading…</p>
+        </div>
+      </article>
+    </section>
+
+    <!-- Back link -->
+    <section class="container section--tight">
+      <div class="cta-row">
+        <a href="tracts.html" class="cta">&larr; Back to tract list</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container site-footer__row">
+      <div class="site-footer__brand">
+        GBK International Group, Ltd &middot; TPC Minerals, LLC
+      </div>
+      <div class="site-footer__meta">
+        Data as of <span data-text="data-asof">—</span> &middot;
+        Inventory: <span data-text="inventory-file">—</span> &middot;
+        Oseberg: <span data-text="oseberg-folder">—</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="app.js?v=2026-05-22-7"></script>
+  <script>
+    if (window.wab) { window.wab.initTract(); }
+  </script>
+</body>
+</html>

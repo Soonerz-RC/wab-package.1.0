@@ -778,6 +778,237 @@ ul, ol {
 }
 
 /* ------------------------------------------------------------------------- */
+/* Tract detail page                                                          */
+/* ------------------------------------------------------------------------- */
+
+.tract-summary {
+  /* Same as .metrics, but auto-flowing — number of fields varies by type */
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: var(--space-5) var(--space-4);
+  align-items: start;
+}
+
+.cross-link-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  font-size: 14px;
+}
+
+.cross-link-list li {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid var(--color-hairline);
+}
+
+.cross-link-list li:last-child {
+  border-bottom: none;
+}
+
+.cross-link-list__id {
+  font-weight: 500;
+  color: var(--color-maroon);
+  min-width: 70px;
+}
+
+.cross-link-list__id a {
+  color: var(--color-maroon);
+  border-bottom: 1px solid transparent;
+}
+
+.cross-link-list__id a:hover {
+  border-bottom-color: var(--color-maroon);
+}
+
+.cross-link-list__detail {
+  color: var(--color-text-secondary);
+  font-size: 13px;
+}
+
+/* Activity sections */
+
+.activity-section {
+  margin-top: var(--space-6);
+}
+
+.activity-section__header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--color-maroon);
+  padding-bottom: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+
+.activity-section__title {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--color-text);
+  font-weight: 500;
+  margin: 0;
+}
+
+.activity-section__count {
+  display: inline-block;
+  margin-left: var(--space-2);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-maroon);
+  font-weight: 500;
+}
+
+.activity-section__empty {
+  margin: 0;
+  padding: var(--space-3) 0;
+  color: var(--color-text-muted);
+  font-size: 14px;
+  font-style: italic;
+}
+
+.activity-section__disclaimer {
+  margin: 0 0 var(--space-4) 0;
+  color: var(--color-text-muted);
+  font-size: 12px;
+}
+
+.activity-section__show-all {
+  margin-top: var(--space-3);
+  background: transparent;
+  border: none;
+  padding: var(--space-2) 0;
+  font-family: var(--font-sans);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-weight: 500;
+  color: var(--color-maroon);
+  cursor: pointer;
+}
+
+.activity-section__show-all:hover {
+  border-bottom: 1px solid var(--color-maroon);
+}
+
+/* Lock icon for "requires login" Oseberg URLs */
+.lock-icon {
+  display: inline-block;
+  width: 10px;
+  height: 12px;
+  margin-left: 4px;
+  vertical-align: -1px;
+  fill: var(--color-text-muted);
+}
+
+/* Outgoing-link arrow */
+.ext-arrow {
+  display: inline-block;
+  margin-left: 3px;
+  color: var(--color-maroon);
+}
+
+/* Production summary cards */
+
+.production-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: var(--space-4);
+}
+
+.production-card {
+  border: 1px solid var(--color-hairline);
+  border-top: 2px solid var(--color-maroon);
+  padding: var(--space-4);
+  background: var(--color-bg);
+}
+
+.production-card__header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+}
+
+.production-card__title {
+  font-family: var(--font-serif);
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 1.2;
+  margin: 0;
+}
+
+.production-card__operator {
+  margin-top: 2px;
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  font-weight: 400;
+}
+
+.production-card__big {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3) var(--space-4);
+  padding: var(--space-3) 0;
+  border-top: 1px solid var(--color-hairline);
+}
+
+.production-card__big-value {
+  font-family: var(--font-serif);
+  font-size: 22px;
+  font-weight: 500;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+  display: block;
+  margin-bottom: 2px;
+}
+
+.production-card__big-label {
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--color-text-secondary);
+  font-weight: 500;
+}
+
+.production-card__rows {
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--color-hairline);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 13px;
+}
+
+.production-card__row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.production-card__row dt {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 10.5px;
+  color: var(--color-text-secondary);
+  font-weight: 500;
+  margin: 0;
+}
+
+.production-card__row dd {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text);
+  font-weight: 500;
+}
+
+/* ------------------------------------------------------------------------- */
 /* Error box                                                                  */
 /* ------------------------------------------------------------------------- */
 
