@@ -9,7 +9,7 @@
     "tracts_orri": 52,
     "wells": 444
   },
-  "generated_at": "2026-05-22T17:52:55Z",
+  "generated_at": "2026-05-22T19:02:46Z",
   "id_registry": {
     "minerals_assigned": 35,
     "minerals_retired": 0,
@@ -18,7 +18,7 @@
     "orri_retired": 0,
     "retired_this_refresh": []
   },
-  "inventory_archived_as": "2026-05-22-inventory.xlsx",
+  "inventory_archived_as": "2026-05-22-inventory-2.xlsx",
   "inventory_file": "inventory-current.xlsx",
   "matching_report": {
     "aggregate_cells_skipped": [

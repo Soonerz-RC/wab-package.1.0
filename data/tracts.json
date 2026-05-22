@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-05-22T17:52:49Z",
+  "generated_at": "2026-05-22T19:02:39Z",
   "source_inventory": "inventory-current.xlsx",
-  "source_inventory_archived_as": "2026-05-22-inventory.xlsx",
+  "source_inventory_archived_as": "2026-05-22-inventory-2.xlsx",
   "tracts": [
     {
       "county": "Caddo",
@@ -143,12 +143,12 @@
       "lat": null,
       "lease_expiration": null,
       "lon": null,
-      "nma": 90.0,
-      "nra": 144.0,
+      "nma": 45.0,
+      "nra": 72.0,
       "royalty": 0.2,
       "sales_per_nma": 6400,
       "sales_per_nra": 4000,
-      "sales_revenue": 576000,
+      "sales_revenue": 288000,
       "section_polygon": null,
       "status_category": "PENDING",
       "status_raw": "Crawley Reg",
