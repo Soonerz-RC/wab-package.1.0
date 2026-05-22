@@ -46,6 +46,14 @@ Python 3.11+ required.
 5. Commit and push. Netlify auto-deploys.
 
 For daily price updates only:
+
+**Automatic (recommended):** pulls WTI and Henry Hub from the EIA Open Data API.
+```bash
+python scripts/update_prices.py --fetch
+```
+This reads `EIA_API_KEY` from `.env` at the repo root. Copy `.env.example` to `.env` and paste your key in. Register for a free key at https://www.eia.gov/opendata/register.php. `.env` is gitignored.
+
+**Manual fallback** (e.g., if EIA is unavailable, or for backfills):
 ```bash
 python scripts/update_prices.py --wti 78.42 --henry-hub 3.18 --date 2026-05-21
 ```

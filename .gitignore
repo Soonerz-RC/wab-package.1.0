@@ -7,6 +7,11 @@ __pycache__/
 .Python
 *.egg-info/
 
+# Secrets — API keys, etc. Never commit.
+.env
+.env.*
+!.env.example
+
 # Node (forbidden per CLAUDE.md §5 but ignore preemptively)
 node_modules/
 

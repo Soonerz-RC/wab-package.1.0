@@ -1,15 +1,15 @@
 {
-  "as_of": "2026-05-22",
+  "as_of": "2026-05-18",
   "henry_hub": {
-    "change_pct": 0.015974,
-    "change_usd": 0.05,
-    "close_usd_mmbtu": 3.18
+    "change_pct": -0.034591,
+    "change_usd": -0.11,
+    "close_usd_mmbtu": 3.07
   },
-  "source": "EIA daily spot",
-  "updated_by": "scripts/update_prices.py",
+  "source": "EIA Open Data v2 (RWTC + RNGWHHD spot)",
+  "updated_by": "scripts/update_prices.py --fetch",
   "wti": {
-    "change_pct": -0.003938,
-    "change_usd": -0.31,
-    "close_usd": 78.42
+    "change_pct": 0.431395,
+    "change_usd": 33.83,
+    "close_usd": 112.25
   }
 }
