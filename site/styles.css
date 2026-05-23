@@ -124,6 +124,16 @@ ul, ol {
   padding-right: var(--content-pad);
 }
 
+/* Pages with wide data tables get a wider content area so the table can
+   breathe without horizontal scroll. The hero subtitle has its own
+   narrower max-width (760px) so the prose at the top of the page doesn't
+   sprawl awkwardly when the container widens. */
+[data-page="tracts"] .container,
+[data-page="wells"] .container,
+[data-page="activity"] .container {
+  max-width: min(1400px, calc(100vw - 32px));
+}
+
 .section {
   padding-top: var(--space-7);
   padding-bottom: var(--space-7);
