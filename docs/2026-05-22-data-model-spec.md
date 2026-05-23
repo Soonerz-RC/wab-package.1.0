@@ -261,6 +261,10 @@ The spine. Both asset types in one file, distinguished by `type`.
 |---|---|---|
 | `date_of_lease` | string \| null | ISO date or `"HBP"` |
 | `row_hash` | string | The 8-char hash used in the registry |
+| `sales_per_nra` | number \| null | Owner-assigned valuation rate, $/NRA. Per Gib's pricing: `3500` for HBP ORRIs (producing today), `1500` for NON_PRODUCING ORRIs (non-producing; held by underlying OGL). `null` for any ORRI with a non-standard status_category. |
+| `sales_revenue` | number \| null | `nra × sales_per_nra`, rounded to whole dollars. `null` if either input is missing. |
+
+The ORRI `sales_per_nra` and `sales_revenue` fields are the line-item complement to the aggregate valuation cells (I47/I48 for non-HBP totals; I92/I93 for HBP totals) the inventory carries in column I. The aggregate cells are still captured in `meta.json.matching_report.aggregate_cells_skipped` as Gib's documented per-acre assumptions; the tract-level fields make per-tract asking visible to buyers in the tract list, tract detail pages, and package-level rollups. If Gib later updates either per-acre rate, the canonical place to change it is the constants in `scripts/ingest_inventory.py` (one location, two values).
 
 **ORRI status handling clarification.** ORRI rows in the Inventory have no `STATUS` column — only `COUNTY, STR, NRA, DOL, EXP`. Therefore:
 

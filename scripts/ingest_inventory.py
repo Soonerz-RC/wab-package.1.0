@@ -60,6 +60,15 @@ SHEET_NAME = "Inventory 4 Sale"
 # spec §13.1 and must be reported in meta.matching_report.aggregate_cells_skipped.
 ORRI_AGGREGATE_COL_IDX = 8  # column I in 1-indexed terms
 
+# Per-NRA valuation rates for ORRI tracts. These are Gib's documented pricing
+# assumptions and match the aggregate cells I47 (non-HBP) and I92 (HBP) in
+# the inventory workbook. Per spec §4.4, ORRIs of any other status_category
+# get null asking fields. To change rates, edit here once.
+ORRI_SALES_PER_NRA = {
+    "HBP": 3500,
+    "NON_PRODUCING": 1500,
+}
+
 
 # ---------------------------------------------------------------------------
 # Inventory archive
@@ -461,6 +470,11 @@ def build_mineral_tract_obj(row: dict) -> dict:
 
 def build_orri_tract_obj(row: dict) -> dict:
     """Per spec §4.2 + §4.4. Keys sorted for git-diff stability (§1.4)."""
+    sales_per_nra = ORRI_SALES_PER_NRA.get(row["status_category"])
+    if sales_per_nra is not None and row.get("nra") is not None:
+        sales_revenue = int(round(row["nra"] * sales_per_nra))
+    else:
+        sales_revenue = None
     return {
         "county": row["county"],
         "date_of_lease": row["date_of_lease"],
@@ -470,6 +484,8 @@ def build_orri_tract_obj(row: dict) -> dict:
         "lon": None,
         "nra": row["nra"],
         "row_hash": row["row_hash"],
+        "sales_per_nra": sales_per_nra,
+        "sales_revenue": sales_revenue,
         "section_polygon": None,
         "status_category": row["status_category"],
         "status_raw": None,

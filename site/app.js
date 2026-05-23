@@ -154,29 +154,12 @@
       const hbpNRA = sumOf(hbpOrris, "nra");
       const nonHbpNRA = sumOf(nonHbpOrris, "nra");
 
-      // Asking-price components.
-      //
-      // Mineral ask comes from the tract-level sales_revenue fields (sum
-      // across all mineral rows in the inventory).
-      //
-      // ORRI ask comes from Gib's spreadsheet-level valuation cells which
-      // the inventory ingest captures into meta.json under
-      // matching_report.aggregate_cells_skipped (per spec §13.1). The two
-      // cells we want are I48 (non-HBP projected ask = total NRA x $/acre)
-      // and I93 (HBP projected ask). Cell labels are positional — if Gib
-      // reorganizes the inventory those positions could shift. Spec §13.1
-      // documents this and the ingest reports the cells in meta.json, so a
-      // mismatch would be visible in the matching report.
+      // Asking-price components. Both mineral and ORRI tracts now carry
+      // a sales_revenue field, so the package ask is a simple sum across
+      // both types. (ORRI sales_revenue is computed at ingest time per
+      // spec §4.4: NRA × $3500/NRA for HBP, NRA × $1500/NRA for non-HBP.)
       const mineralAsk = sumOf(minerals, "sales_revenue");
-      const aggregateCells = (metaDoc && metaDoc.matching_report
-                              && metaDoc.matching_report.aggregate_cells_skipped) || [];
-      const cellValue = (cellName) => {
-        const c = aggregateCells.find((x) => x.cell === cellName);
-        return c && typeof c.value === "number" ? c.value : 0;
-      };
-      const orriNonHbpAsk = Math.round(cellValue("I48"));
-      const orriHbpAsk = Math.round(cellValue("I93"));
-      const orriAsk = orriNonHbpAsk + orriHbpAsk;
+      const orriAsk = sumOf(orris, "sales_revenue");
       const packageAsk = mineralAsk + orriAsk;
 
       // Big-number values
@@ -416,8 +399,8 @@
     pill.title = t.status_raw || formatStatus(t.status_category);
     tr.appendChild(_td(pill));
 
-    // Asking (mineral only)
-    if (t.type === "mineral" && t.sales_revenue !== null && t.sales_revenue !== undefined) {
+    // Asking (mineral + ORRI both carry sales_revenue per spec §4.3, §4.4)
+    if (t.sales_revenue !== null && t.sales_revenue !== undefined) {
       tr.appendChild(_td(formatCurrency(t.sales_revenue), { cls: "data-table__cell--num" }));
     } else {
       tr.appendChild(_td("—", { cls: "data-table__cell--num data-table__cell--muted" }));
@@ -668,19 +651,14 @@
         }
 
         // --- Asking by type: stacked horizontal bar (Mineral vs ORRI) ---
+        // Both types now carry sales_revenue per spec §4.3, §4.4, so the
+        // sums are straightforward and stay correct under any filter.
         const mineralAsk = rows
           .filter((t) => t.type === "mineral")
           .reduce((s, t) => s + (t.sales_revenue || 0), 0);
-        // ORRI ask comes from meta.json aggregate cells (I48 + I93). The
-        // tracts list charts are tract-scoped, so we approximate from the
-        // filtered ORRIs using the per-acre assumptions ($1500 non-HBP,
-        // $3500 HBP) that Gib documented in those cells.
         const orriAsk = rows
           .filter((t) => t.type === "orri")
-          .reduce((s, t) => {
-            const ratePerAcre = t.status_category === "HBP" ? 3500 : 1500;
-            return s + (t.nra || 0) * ratePerAcre;
-          }, 0);
+          .reduce((s, t) => s + (t.sales_revenue || 0), 0);
 
         const askingCanvas = root.querySelector("#chart-asking");
         if (askingCanvas) {
@@ -1014,6 +992,9 @@
           ? formatDate(tract.lease_expiration)
           : "—";
       metrics.push(_makeMetric(expDisplay, "Lease expiration"));
+      if (tract.sales_revenue) {
+        metrics.push(_makeMetric(formatCurrency(tract.sales_revenue), "Asking"));
+      }
     }
 
     metrics.forEach((m) => host.appendChild(m));
