@@ -1,15 +1,15 @@
 {
-  "as_of": "2026-05-18",
+  "as_of": "2026-05-22",
   "henry_hub": {
-    "change_pct": -0.034591,
-    "change_usd": -0.11,
-    "close_usd_mmbtu": 3.07
+    "change_pct": -0.011726,
+    "change_usd": -0.036,
+    "close_usd_mmbtu": 3.034
   },
-  "source": "EIA Open Data v2 (RWTC + RNGWHHD spot)",
-  "updated_by": "scripts/update_prices.py --fetch",
+  "source": "Yahoo Finance (NYMEX front-month: CL=F + NG=F)",
+  "updated_by": "scripts/update_prices.py --fetch (yahoo)",
   "wti": {
-    "change_pct": 0.431395,
-    "change_usd": 33.83,
-    "close_usd": 112.25
+    "change_pct": -0.135857,
+    "change_usd": -15.25,
+    "close_usd": 97.0
   }
 }

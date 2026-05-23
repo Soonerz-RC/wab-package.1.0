@@ -45,15 +45,22 @@ Python 3.11+ required.
 4. Review `data/meta.json` — the matching report tells you whether the refresh was clean.
 5. Commit and push. Netlify auto-deploys.
 
-For daily price updates only:
+For price updates:
 
-**Automatic (recommended):** pulls WTI and Henry Hub from the EIA Open Data API.
+**Default — Yahoo Finance (NYMEX front-month closes), no API key:**
 ```bash
 python scripts/update_prices.py --fetch
+git add data/prices.json && git commit -m "prices: refresh" && git push
 ```
-This reads `EIA_API_KEY` from `.env` at the repo root. Copy `.env.example` to `.env` and paste your key in. Register for a free key at https://www.eia.gov/opendata/register.php. `.env` is gitignored.
+Pulls `CL=F` (WTI front-month) and `NG=F` (Henry Hub front-month) via the `yfinance` library. Same-day data when the futures market is open. No registration or API key required. Run this whenever you want the homepage price block to refresh.
 
-**Manual fallback** (e.g., if EIA is unavailable, or for backfills):
+**Alternative — EIA Open Data API (1-day-lagged spot prices):**
+```bash
+python scripts/update_prices.py --fetch --source eia
+```
+Reads `EIA_API_KEY` from `.env` at the repo root. Copy `.env.example` to `.env` and paste your key in. Register for a free key at https://www.eia.gov/opendata/register.php. `.env` is gitignored.
+
+**Manual override** (e.g., if both sources are unavailable):
 ```bash
 python scripts/update_prices.py --wti 78.42 --henry-hub 3.18 --date 2026-05-21
 ```
