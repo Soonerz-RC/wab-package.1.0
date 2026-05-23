@@ -1,15 +1,15 @@
 {
   "counts": {
-    "completions": 0,
-    "leases": 0,
-    "permits": 0,
-    "production_records": 0,
-    "regulatory_actions": 0,
+    "completions": 265,
+    "leases": 585,
+    "permits": 513,
+    "production_records": 6770,
+    "regulatory_actions": 9197,
     "tracts_mineral": 35,
     "tracts_orri": 52,
-    "wells": 0
+    "wells": 444
   },
-  "generated_at": "2026-05-23T12:42:35Z",
+  "generated_at": "2026-05-23T15:15:55Z",
   "id_registry": {
     "minerals_assigned": 35,
     "minerals_retired": 0,
@@ -18,53 +18,1542 @@
     "orri_retired": 0,
     "retired_this_refresh": []
   },
-  "inventory_archived_as": "2026-05-22-inventory-2.xlsx",
+  "inventory_archived_as": "2026-05-23-inventory.xlsx",
   "inventory_file": "inventory-current.xlsx",
   "matching_report": {
     "aggregate_cells_skipped": [
       {
-        "cell": "I46",
-        "interpretation": "ORRI section column-I aggregate calculation",
+        "cell": "K46",
+        "interpretation": "ORRI section column-K aggregate calculation",
         "sheet": "Inventory 4 Sale",
         "value": 58.66067000000001
       },
       {
-        "cell": "I47",
-        "interpretation": "ORRI section column-I aggregate calculation",
+        "cell": "K47",
+        "interpretation": "ORRI section column-K aggregate calculation",
         "sheet": "Inventory 4 Sale",
         "value": 1500
       },
       {
-        "cell": "I48",
-        "interpretation": "ORRI section column-I aggregate calculation",
+        "cell": "K48",
+        "interpretation": "ORRI section column-K aggregate calculation",
         "sheet": "Inventory 4 Sale",
         "value": 87991.00500000002
       },
       {
-        "cell": "I91",
-        "interpretation": "ORRI section column-I aggregate calculation",
+        "cell": "K91",
+        "interpretation": "ORRI section column-K aggregate calculation",
         "sheet": "Inventory 4 Sale",
         "value": 24.078276920319993
       },
       {
-        "cell": "I92",
-        "interpretation": "ORRI section column-I aggregate calculation",
+        "cell": "K92",
+        "interpretation": "ORRI section column-K aggregate calculation",
         "sheet": "Inventory 4 Sale",
         "value": 3500
       },
       {
-        "cell": "I93",
-        "interpretation": "ORRI section column-I aggregate calculation",
+        "cell": "K93",
+        "interpretation": "ORRI section column-K aggregate calculation",
         "sheet": "Inventory 4 Sale",
         "value": 84273.96922111997
       }
     ],
+    "completions_affecting_owned_tracts": 1,
+    "completions_dropped_out_of_scope": 92,
     "ingestion_errors": [],
-    "leases_affecting_owned_tracts": 0,
-    "permits_with_owned_tract": 0,
-    "regulatory_affecting_owned_tracts": 0,
-    "wells_with_owned_tract": 0,
-    "wells_without_owned_tract": 0
+    "leases_affecting_owned_tracts": 585,
+    "leasing_dropped_out_of_scope": 2070,
+    "leasing_market_count": 41633,
+    "permits_affecting_owned_tracts": 5,
+    "permits_dropped_out_of_scope": 112,
+    "permits_with_owned_tract": 5,
+    "production_affecting_owned_tracts": 64,
+    "production_dropped_out_of_scope": 1488,
+    "regulatory_affecting_owned_tracts": 79,
+    "regulatory_dropped_out_of_scope": 2478,
+    "wells_dropped_out_of_scope": 128,
+    "wells_long_laterals_flagged": [
+      {
+        "bottom_hole_section": "06-17N-24W",
+        "lateral_length_ft": 9679,
+        "operator": "MEWBOURNE OIL COMPANY",
+        "surface_section": "18-17N-24W",
+        "well_id": "3504500008"
+      },
+      {
+        "bottom_hole_section": "19-17N-24W",
+        "lateral_length_ft": 10043,
+        "operator": "MEWBOURNE OIL COMPANY",
+        "surface_section": "18-17N-24W",
+        "well_id": "3504500062"
+      },
+      {
+        "bottom_hole_section": "10-13N-21W",
+        "lateral_length_ft": 10258,
+        "operator": "MEWBOURNE OIL COMPANY",
+        "surface_section": "34-14N-21W",
+        "well_id": "3512900035"
+      },
+      {
+        "bottom_hole_section": "29-14N-19W",
+        "lateral_length_ft": 10225,
+        "operator": "NADEL AND GUSSMAN LLC",
+        "surface_section": "05-13N-19W",
+        "well_id": "3503900039"
+      },
+      {
+        "bottom_hole_section": "21-15N-24W",
+        "lateral_length_ft": 9136,
+        "operator": "CRAWLEY PETROLEUM CORPORATION",
+        "surface_section": "16-15N-24W",
+        "well_id": "3512900010"
+      },
+      {
+        "bottom_hole_section": "12-15N-21W",
+        "lateral_length_ft": 9556,
+        "operator": "ADPARO LLC",
+        "surface_section": "01-15N-21W",
+        "well_id": "3512900032"
+      },
+      {
+        "bottom_hole_section": "34-14N-22W",
+        "lateral_length_ft": 10149,
+        "operator": "MEWBOURNE OIL COMPANY",
+        "surface_section": "03-13N-22W",
+        "well_id": "3512900014"
+      },
+      {
+        "bottom_hole_section": "12-17N-25W",
+        "lateral_length_ft": 10171,
+        "operator": "MEWBOURNE OIL COMPANY",
+        "surface_section": "24-17N-25W",
+        "well_id": "3512900024"
+      },
+      {
+        "bottom_hole_section": "16-16N-23W",
+        "lateral_length_ft": 13097,
+        "operator": "ROCKIES RESOURCES HOLDINGS LLC",
+        "surface_section": "34-17N-23W",
+        "well_id": "3504500002"
+      },
+      {
+        "bottom_hole_section": "36-17N-25W",
+        "lateral_length_ft": 13065,
+        "operator": "MEWBOURNE OIL COMPANY",
+        "surface_section": "24-17N-25W",
+        "well_id": "3512900015"
+      },
+      {
+        "bottom_hole_section": "31-15N-19W",
+        "lateral_length_ft": 10183,
+        "operator": "MEWBOURNE OIL COMPANY",
+        "surface_section": "30-15N-19W",
+        "well_id": "3503922686"
+      },
+      {
+        "bottom_hole_section": "18-15N-19W",
+        "lateral_length_ft": 10020,
+        "operator": "MEWBOURNE OIL COMPANY",
+        "surface_section": "30-15N-19W",
+        "well_id": "3503922685"
+      },
+      {
+        "bottom_hole_section": "08-15N-20W",
+        "lateral_length_ft": 10058,
+        "operator": "MEWBOURNE OIL COMPANY",
+        "surface_section": "21-15N-20W",
+        "well_id": "3503922683"
+      },
+      {
+        "bottom_hole_section": "09-15N-20W",
+        "lateral_length_ft": 10144,
+        "operator": "MEWBOURNE OIL COMPANY",
+        "surface_section": "21-15N-20W",
+        "well_id": "3503922682"
+      },
+      {
+        "bottom_hole_section": "28-15N-21W",
+        "lateral_length_ft": 9178,
+        "operator": "CRAWLEY PETROLEUM CORPORATION",
+        "surface_section": "33-15N-21W",
+        "well_id": "3512924201"
+      },
+      {
+        "bottom_hole_section": "32-16N-24W",
+        "lateral_length_ft": 9449,
+        "operator": "MEWBOURNE OIL COMPANY",
+        "surface_section": "06-16N-24W",
+        "well_id": "3512924190"
+      },
+      {
+        "bottom_hole_section": "24-15N-24W",
+        "lateral_length_ft": 7713,
+        "operator": "CITIZEN ENERGY VENTURES LLC",
+        "surface_section": "14-15N-24W",
+        "well_id": "3512924205"
+      },
+      {
+        "bottom_hole_section": "11-15N-24W",
+        "lateral_length_ft": 7577,
+        "operator": "CITIZEN ENERGY VENTURES LLC",
+        "surface_section": "14-15N-24W",
+        "well_id": "3512924204"
+      },
+      {
+        "bottom_hole_section": "12-15N-24W",
+        "lateral_length_ft": 7588,
+        "operator": "CITIZEN ENERGY VENTURES LLC",
+        "surface_section": "14-15N-24W",
+        "well_id": "3512924202"
+      },
+      {
+        "bottom_hole_section": "12-13N-23W",
+        "lateral_length_ft": 10033,
+        "operator": "MEWBOURNE OIL COMPANY",
+        "surface_section": "36-14N-23W",
+        "well_id": "3512924197"
+      },
+      {
+        "bottom_hole_section": "30-16N-24W",
+        "lateral_length_ft": 10225,
+        "operator": "MEWBOURNE OIL COMPANY",
+        "surface_section": "18-16N-24W",
+        "well_id": "3512924195"
+      },
+      {
+        "bottom_hole_section": "30-16N-24W",
+        "lateral_length_ft": 10195,
+        "operator": "MEWBOURNE OIL COMPANY",
+        "surface_section": "18-16N-24W",
+        "well_id": "3512924196"
+      },
+      {
+        "bottom_hole_section": "02-16N-24W",
+        "lateral_length_ft": 12723,
+        "operator": "MEWBOURNE OIL COMPANY",
+        "surface_section": "25-17N-24W",
+        "well_id": "3504523982"
+      },
+      {
+        "bottom_hole_section": "17-15N-24W",
+        "lateral_length_ft": 10225,
+        "operator": "SANDRIDGE EXPLORATION & PRODUCTION LLC",
+        "surface_section": "05-15N-24W",
+        "well_id": "3512924200"
+      },
+      {
+        "bottom_hole_section": "17-15N-24W",
+        "lateral_length_ft": 10250,
+        "operator": "SANDRIDGE EXPLORATION & PRODUCTION LLC",
+        "surface_section": "05-15N-24W",
+        "well_id": "3512924199"
+      },
+      {
+        "bottom_hole_section": "25-15N-25W",
+        "lateral_length_ft": 10441,
+        "operator": "UPLAND OPERATING LLC",
+        "surface_section": "02-14N-25W",
+        "well_id": "3512924198"
+      },
+      {
+        "bottom_hole_section": "26-15N-25W",
+        "lateral_length_ft": 10441,
+        "operator": "UPLAND OPERATING LLC",
+        "surface_section": "02-14N-25W",
+        "well_id": "3512924192"
+      },
+      {
+        "bottom_hole_section": "24-14N-16W",
+        "lateral_length_ft": 15000,
+        "operator": "VALIDUS ENERGY II MIDCON LLC",
+        "surface_section": "01-14N-16W",
+        "well_id": "3503922681"
+      },
+      {
+        "bottom_hole_section": "24-14N-16W",
+        "lateral_length_ft": 15000,
+        "operator": "VALIDUS ENERGY II MIDCON LLC",
+        "surface_section": "01-14N-16W",
+        "well_id": "3503922680"
+      },
+      {
+        "bottom_hole_section": "23-14N-17W",
+        "lateral_length_ft": 10000,
+        "operator": "ANTHEM ENERGY OPERATING (OKLAHOMA) LLC",
+        "surface_section": "26-14N-17W",
+        "well_id": "3503922677"
+      },
+      {
+        "bottom_hole_section": "11-14N-21W",
+        "lateral_length_ft": 10201,
+        "operator": "MEWBOURNE OIL COMPANY",
+        "surface_section": "23-14N-21W",
+        "well_id": "3512924189"
+      },
+      {
+        "bottom_hole_section": "28-16N-24W",
+        "lateral_length_ft": 9707,
+        "operator": "CRAWLEY PETROLEUM CORPORATION",
+        "surface_section": "33-16N-24W",
+        "well_id": "3512924172"
+      },
+      {
+        "bottom_hole_section": "32-16N-19W",
+        "lateral_length_ft": 10198,
+        "operator": "DUNCAN OIL PROPERTIES INC",
+        "surface_section": "08-15N-19W",
+        "well_id": "3503922658"
+      },
+      {
+        "bottom_hole_section": "36-10N-12W",
+        "lateral_length_ft": 8839,
+        "operator": "KAISER FRANCIS OIL COMPANY",
+        "surface_section": "07-09N-11W",
+        "well_id": "3501523349"
+      },
+      {
+        "bottom_hole_section": "19-14N-15W",
+        "lateral_length_ft": 10230,
+        "operator": "VALIDUS ENERGY II MIDCON LLC",
+        "surface_section": "18-14N-15W",
+        "well_id": "3503922675"
+      },
+      {
+        "bottom_hole_section": "34-14N-21W",
+        "lateral_length_ft": 10036,
+        "operator": "CRAWLEY PETROLEUM CORPORATION",
+        "surface_section": "22-14N-21W",
+        "well_id": "3512924179"
+      },
+      {
+        "bottom_hole_section": "16-14N-14W",
+        "lateral_length_ft": 13094,
+        "operator": "BCE MACH III LLC",
+        "surface_section": "28-14N-14W",
+        "well_id": "3503922615"
+      },
+      {
+        "bottom_hole_section": "07-17N-16W",
+        "lateral_length_ft": 9918,
+        "operator": "MEWBOURNE OIL COMPANY",
+        "surface_section": "31-18N-16W",
+        "well_id": "3504323806"
+      },
+      {
+        "bottom_hole_section": "07-17N-16W",
+        "lateral_length_ft": 9936,
+        "operator": "MEWBOURNE OIL COMPANY",
+        "surface_section": "31-18N-16W",
+        "well_id": "3504323805"
+      },
+      {
+        "bottom_hole_section": "33-15N-17W",
+        "lateral_length_ft": 7225,
+        "operator": "MEWBOURNE OIL COMPANY",
+        "surface_section": "28-15N-17W",
+        "well_id": "3503922671"
+      },
+      {
+        "bottom_hole_section": "16-14N-14W",
+        "lateral_length_ft": 15344,
+        "operator": "BCE MACH III LLC",
+        "surface_section": "28-14N-14W",
+        "well_id": "3503922616"
+      },
+      {
+        "bottom_hole_section": "35-16N-24W",
+        "lateral_length_ft": 10250,
+        "operator": "SANDRIDGE EXPLORATION & PRODUCTION LLC",
+        "surface_section": "02-15N-24W",
+        "well_id": "3512924186"
+      },
+      {
+        "bottom_hole_section": "35-16N-24W",
+        "lateral_length_ft": 10271,
+        "operator": "SANDRIDGE EXPLORATION & PRODUCTION LLC",
+        "surface_section": "02-15N-24W",
+        "well_id": "3512924185"
+      },
+      {
+        "bottom_hole_section": "17-16N-23W",
+        "lateral_length_ft": 13009,
+        "operator": "ROCKIES RESOURCES HOLDINGS LLC",
+        "surface_section": "32-17N-23W",
+        "well_id": "3504523978"
+      },
+      {
+        "bottom_hole_section": "10-14N-20W",
+        "lateral_length_ft": 9922,
+        "operator": "MEWBOURNE OIL COMPANY",
+        "surface_section": "03-14N-20W",
+        "well_id": "3503922670"
+      },
+      {
+        "bottom_hole_section": "17-14N-14W",
+        "lateral_length_ft": 9880,
+        "operator": "CONTINENTAL RESOURCES INC",
+        "surface_section": "08-14N-14W",
+        "well_id": "3503922661"
+      },
+      {
+        "bottom_hole_section": "27-15N-20W",
+        "lateral_length_ft": 9803,
+        "operator": "MEWBOURNE OIL COMPANY",
+        "surface_section": "03-14N-20W",
+        "well_id": "3503922667"
+      },
+      {
+        "bottom_hole_section": "13-13N-25W",
+        "lateral_length_ft": 9151,
+        "operator": "SANGUINE GAS EXPLORATION LLC",
+        "surface_section": "01-13N-25W",
+        "well_id": "3512924180"
+      },
+      {
+        "bottom_hole_section": "23-15N-21W",
+        "lateral_length_ft": 9840,
+        "operator": "MEWBOURNE OIL COMPANY",
+        "surface_section": "35-15N-21W",
+        "well_id": "3512924174"
+      },
+      {
+        "bottom_hole_section": "02-14N-21W",
+        "lateral_length_ft": 9718,
+        "operator": "MEWBOURNE OIL COMPANY",
+        "surface_section": "35-15N-21W",
+        "well_id": "3512924175"
+      },
+      {
+        "bottom_hole_section": "10-13N-17W",
+        "lateral_length_ft": 9864,
+        "operator": "MEWBOURNE OIL COMPANY",
+        "surface_section": "03-13N-17W",
+        "well_id": "3503922674"
+      },
+      {
+        "bottom_hole_section": "31-15N-24W",
+        "lateral_length_ft": 15750,
+        "operator": "UPLAND OPERATING LLC",
+        "surface_section": "18-15N-24W",
+        "well_id": "3512924182"
+      },
+      {
+        "bottom_hole_section": "27-16N-24W",
+        "lateral_length_ft": 9284,
+        "operator": "CRAWLEY PETROLEUM CORPORATION",
+        "surface_section": "03-15N-24W",
+        "well_id": "3512924171"
+      },
+      {
+        "bottom_hole_section": "32-19N-25W",
+        "lateral_length_ft": 9879,
+        "operator": "MEWBOURNE OIL COMPANY",
+        "surface_section": "08-18N-25W",
+        "well_id": "3504523976"
+      },
+      {
+        "bottom_hole_section": "04-18N-15W",
+        "lateral_length_ft": 5298,
+        "operator": "COMANCHE EXPLORATION CO LLC",
+        "surface_section": "09-18N-15W",
+        "well_id": "3504323809"
+      },
+      {
+        "bottom_hole_section": "14-13N-20W",
+        "lateral_length_ft": 10564,
+        "operator": "NADEL AND GUSSMAN LLC",
+        "surface_section": "26-13N-20W",
+        "well_id": "3503922663"
+      },
+      {
+        "bottom_hole_section": "27-17N-23W",
+        "lateral_length_ft": 14679,
+        "operator": "MEWBOURNE OIL COMPANY",
+        "surface_section": "15-17N-23W",
+        "well_id": "3504523973"
+      },
+      {
+        "bottom_hole_section": "24-14N-17W",
+        "lateral_length_ft": 9880,
+        "operator": "MEWBOURNE OIL COMPANY",
+        "surface_section": "25-14N-17W",
+        "well_id": "3503922672"
+      },
+      {
+        "bottom_hole_section": "21-15N-20W",
+        "lateral_length_ft": 9840,
+        "operator": "MEWBOURNE OIL COMPANY",
+        "surface_section": "28-15N-20W",
+        "well_id": "3503922669"
+      },
+      {
+        "bottom_hole_section": "15-14N-21W",
+        "lateral_length_ft": 9108,
+        "operator": "CRAWLEY PETROLEUM CORPORATION",
+        "surface_section": "22-14N-21W",
+        "well_id": "3512924173"
+      },
+      {
+        "bottom_hole_section": "04-15N-20W",
+        "lateral_length_ft": 9797,
+        "operator": "MEWBOURNE OIL COMPANY",
+        "surface_section": "28-15N-20W",
+        "well_id": "3503922668"
+      },
+      {
+        "bottom_hole_section": "17-14N-14W",
+        "lateral_length_ft": 9650,
+        "operator": "CONTINENTAL RESOURCES INC",
+        "surface_section": "08-14N-14W",
+        "well_id": "3503922662"
+      },
+      {
+        "bottom_hole_section": "17-14N-14W",
+        "lateral_length_ft": 9881,
+        "operator": "CONTINENTAL RESOURCES INC",
+        "surface_section": "08-14N-14W",
+        "well_id": "3503922660"
+      },
+      {
+        "bottom_hole_section": "04-15N-24W",
+        "lateral_length_ft": 10413,
+        "operator": "SANDRIDGE EXPLORATION & PRODUCTION LLC",
+        "surface_section": "16-15N-24W",
+        "well_id": "3512924177"
+      },
+      {
+        "bottom_hole_section": "04-15N-24W",
+        "lateral_length_ft": 10672,
+        "operator": "SANDRIDGE EXPLORATION & PRODUCTION LLC",
+        "surface_section": "16-15N-24W",
+        "well_id": "3512924176"
+      },
+      {
+        "bottom_hole_section": "24-18N-15W",
+        "lateral_length_ft": 7105,
+        "operator": "DERBY EXPLORATION LLC",
+        "surface_section": "25-18N-15W",
+        "well_id": "3504323807"
+      },
+      {
+        "bottom_hole_section": "36-18N-15W",
+        "lateral_length_ft": 6984,
+        "operator": "DERBY EXPLORATION LLC",
+        "surface_section": "25-18N-15W",
+        "well_id": "3504323808"
+      },
+      {
+        "bottom_hole_section": "34-13N-20W",
+        "lateral_length_ft": 10391,
+        "operator": "DEVON ENERGY PRODUCTION COMPANY LP",
+        "surface_section": "27-13N-20W",
+        "well_id": "3503922648"
+      },
+      {
+        "bottom_hole_section": "12-14N-19W",
+        "lateral_length_ft": 8778,
+        "operator": "DUNCAN OIL PROPERTIES INC",
+        "surface_section": "24-14N-19W",
+        "well_id": "3503922666"
+      },
+      {
+        "bottom_hole_section": "01-12N-21W",
+        "lateral_length_ft": 9183,
+        "operator": "MEWBOURNE OIL COMPANY",
+        "surface_section": "12-12N-21W",
+        "well_id": "3512924169"
+      },
+      {
+        "bottom_hole_section": "12-14N-19W",
+        "lateral_length_ft": 11456,
+        "operator": "DUNCAN OIL PROPERTIES INC",
+        "surface_section": "24-14N-19W",
+        "well_id": "3503922657"
+      },
+      {
+        "bottom_hole_section": "17-18N-15W",
+        "lateral_length_ft": 9830,
+        "operator": "MEWBOURNE OIL COMPANY",
+        "surface_section": "29-18N-15W",
+        "well_id": "3504323803"
+      },
+      {
+        "bottom_hole_section": "13-17N-24W",
+        "lateral_length_ft": 10239,
+        "operator": "MEWBOURNE OIL COMPANY",
+        "surface_section": "25-17N-23W",
+        "well_id": "3504523975"
+      },
+      {
+        "bottom_hole_section": "03-15N-24W",
+        "lateral_length_ft": 10441,
+        "operator": "UPLAND OPERATING LLC",
+        "surface_section": "15-15N-24W",
+        "well_id": "3512924159"
+      },
+      {
+        "bottom_hole_section": "16-18N-25W",
+        "lateral_length_ft": 10312,
+        "operator": "MEWBOURNE OIL COMPANY",
+        "surface_section": "21-18N-25W",
+        "well_id": "3504523974"
+      },
+      {
+        "bottom_hole_section": "36-16N-24W",
+        "lateral_length_ft": 8761,
+        "operator": "SANDRIDGE EXPLORATION & PRODUCTION LLC",
+        "surface_section": "01-15N-24W",
+        "well_id": "3512924170"
+      },
+      {
+        "bottom_hole_section": "05-14N-18W",
+        "lateral_length_ft": 10469,
+        "operator": "DUNCAN OIL PROPERTIES INC",
+        "surface_section": "17-14N-18W",
+        "well_id": "3503922659"
+      },
+      {
+        "bottom_hole_section": "18-16N-23W",
+        "lateral_length_ft": 14962,
+        "operator": "MEWBOURNE OIL COMPANY",
+        "surface_section": "31-17N-23W",
+        "well_id": "3504523969"
+      },
+      {
+        "bottom_hole_section": "17-14N-14W",
+        "lateral_length_ft": 9658,
+        "operator": "CONTINENTAL RESOURCES INC",
+        "surface_section": "08-14N-14W",
+        "well_id": "3503922637"
+      },
+      {
+        "bottom_hole_section": "17-14N-14W",
+        "lateral_length_ft": 9909,
+        "operator": "CONTINENTAL RESOURCES INC",
+        "surface_section": "08-14N-14W",
+        "well_id": "3503922636"
+      },
+      {
+        "bottom_hole_section": "08-17N-23W",
+        "lateral_length_ft": 12284,
+        "operator": "MEWBOURNE OIL COMPANY",
+        "surface_section": "20-17N-23W",
+        "well_id": "3504523971"
+      },
+      {
+        "bottom_hole_section": "32-17N-23W",
+        "lateral_length_ft": 12268,
+        "operator": "MEWBOURNE OIL COMPANY",
+        "surface_section": "20-17N-23W",
+        "well_id": "3504523972"
+      },
+      {
+        "bottom_hole_section": "07-13N-19W",
+        "lateral_length_ft": 10560,
+        "operator": "NADEL AND GUSSMAN LLC",
+        "surface_section": "31-14N-19W",
+        "well_id": "3503922656"
+      },
+      {
+        "bottom_hole_section": "01-13N-24W",
+        "lateral_length_ft": 9740,
+        "operator": "CRAWLEY PETROLEUM CORPORATION",
+        "surface_section": "36-14N-24W",
+        "well_id": "3512924167"
+      },
+      {
+        "bottom_hole_section": "02-12N-25W",
+        "lateral_length_ft": 21850,
+        "operator": "CHARTER OAK PRODUCTION CO LLC",
+        "surface_section": "11-12N-25W",
+        "well_id": "3512924165"
+      },
+      {
+        "bottom_hole_section": "27-19N-26W",
+        "lateral_length_ft": 10193,
+        "operator": "MEWBOURNE OIL COMPANY",
+        "surface_section": "03-18N-26W",
+        "well_id": "3504523970"
+      },
+      {
+        "bottom_hole_section": "22-16N-24W",
+        "lateral_length_ft": 12265,
+        "operator": "MEWBOURNE OIL COMPANY",
+        "surface_section": "10-16N-24W",
+        "well_id": "3504523968"
+      },
+      {
+        "bottom_hole_section": "34-13N-20W",
+        "lateral_length_ft": 10298,
+        "operator": "DEVON ENERGY PRODUCTION COMPANY LP",
+        "surface_section": "27-13N-20W",
+        "well_id": "3503922649"
+      },
+      {
+        "bottom_hole_section": "06-14N-20W",
+        "lateral_length_ft": 9865,
+        "operator": "MEWBOURNE OIL COMPANY",
+        "surface_section": "31-15N-20W",
+        "well_id": "3503922645"
+      },
+      {
+        "bottom_hole_section": "12-12N-21W",
+        "lateral_length_ft": 9909,
+        "operator": "MEWBOURNE OIL COMPANY",
+        "surface_section": "01-12N-21W",
+        "well_id": "3512924168"
+      },
+      {
+        "bottom_hole_section": "09-16N-24W",
+        "lateral_length_ft": 12466,
+        "operator": "MEWBOURNE OIL COMPANY",
+        "surface_section": "28-16N-24W",
+        "well_id": "3512924163"
+      },
+      {
+        "bottom_hole_section": "36-16N-24W",
+        "lateral_length_ft": 10169,
+        "operator": "UPLAND OPERATING LLC",
+        "surface_section": "01-15N-24W",
+        "well_id": "3512924164"
+      },
+      {
+        "bottom_hole_section": "05-15N-24W",
+        "lateral_length_ft": 10952,
+        "operator": "UPLAND OPERATING LLC",
+        "surface_section": "29-16N-24W",
+        "well_id": "3512924166"
+      },
+      {
+        "bottom_hole_section": "03-19N-25W",
+        "lateral_length_ft": 9954,
+        "operator": "MEWBOURNE OIL COMPANY",
+        "surface_section": "27-19N-25W",
+        "well_id": "3504523967"
+      },
+      {
+        "bottom_hole_section": "24-16N-24W",
+        "lateral_length_ft": 9037,
+        "operator": "CRAWLEY PETROLEUM CORPORATION",
+        "surface_section": "25-16N-24W",
+        "well_id": "3512924162"
+      },
+      {
+        "bottom_hole_section": "23-13N-14W",
+        "lateral_length_ft": 15010,
+        "operator": "VALIDUS ENERGY II MIDCON LLC",
+        "surface_section": "11-13N-14W",
+        "well_id": "3503922654"
+      },
+      {
+        "bottom_hole_section": "28-17N-23W",
+        "lateral_length_ft": 15017,
+        "operator": "MEWBOURNE OIL COMPANY",
+        "surface_section": "16-17N-23W",
+        "well_id": "3504523966"
+      },
+      {
+        "bottom_hole_section": "14-17N-23W",
+        "lateral_length_ft": 10106,
+        "operator": "MEWBOURNE OIL COMPANY",
+        "surface_section": "23-17N-23W",
+        "well_id": "3504523965"
+      },
+      {
+        "bottom_hole_section": "19-14N-14W",
+        "lateral_length_ft": 10700,
+        "operator": "BCE-MACH III LLC",
+        "surface_section": "18-14N-14W",
+        "well_id": "3503922650"
+      },
+      {
+        "bottom_hole_section": "08-18N-15W",
+        "lateral_length_ft": 5341,
+        "operator": "COMANCHE EXPLORATION CO LLC",
+        "surface_section": "05-18N-15W",
+        "well_id": "3504323801"
+      },
+      {
+        "bottom_hole_section": "34-13N-20W",
+        "lateral_length_ft": 10420,
+        "operator": "DEVON ENERGY PRODUCTION COMPANY LP",
+        "surface_section": "27-13N-20W",
+        "well_id": "3503922647"
+      },
+      {
+        "bottom_hole_section": "30-17N-24W",
+        "lateral_length_ft": 10275,
+        "operator": "MEWBOURNE OIL COMPANY",
+        "surface_section": "01-16N-25W",
+        "well_id": "3512924158"
+      },
+      {
+        "bottom_hole_section": "19-15N-20W",
+        "lateral_length_ft": 9745,
+        "operator": "MEWBOURNE OIL COMPANY",
+        "surface_section": "31-15N-20W",
+        "well_id": "3503922644"
+      },
+      {
+        "bottom_hole_section": "12-16N-25W",
+        "lateral_length_ft": 9912,
+        "operator": "MEWBOURNE OIL COMPANY",
+        "surface_section": "01-16N-25W",
+        "well_id": "3512924161"
+      },
+      {
+        "bottom_hole_section": "11-16N-24W",
+        "lateral_length_ft": 9408,
+        "operator": "MEWBOURNE OIL COMPANY",
+        "surface_section": "23-16N-24W",
+        "well_id": "3512924156"
+      },
+      {
+        "bottom_hole_section": "10-16N-24W",
+        "lateral_length_ft": 12726,
+        "operator": "MEWBOURNE OIL COMPANY",
+        "surface_section": "27-17N-24W",
+        "well_id": "3504523963"
+      },
+      {
+        "bottom_hole_section": "09-16N-24W",
+        "lateral_length_ft": 12414,
+        "operator": "MEWBOURNE OIL COMPANY",
+        "surface_section": "27-17N-24W",
+        "well_id": "3504523962"
+      },
+      {
+        "bottom_hole_section": "14-17N-24W",
+        "lateral_length_ft": 10104,
+        "operator": "MEWBOURNE OIL COMPANY",
+        "surface_section": "11-17N-24W",
+        "well_id": "3504523961"
+      },
+      {
+        "bottom_hole_section": "35-18N-24W",
+        "lateral_length_ft": 9947,
+        "operator": "MEWBOURNE OIL COMPANY",
+        "surface_section": "11-17N-24W",
+        "well_id": "3504523960"
+      },
+      {
+        "bottom_hole_section": "23-16N-24W",
+        "lateral_length_ft": 9781,
+        "operator": "CRAWLEY PETROLEUM CORPORATION",
+        "surface_section": "35-16N-24W",
+        "well_id": "3512924157"
+      },
+      {
+        "bottom_hole_section": "19-17N-24W",
+        "lateral_length_ft": 10142,
+        "operator": "MEWBOURNE OIL COMPANY",
+        "surface_section": "18-17N-24W",
+        "well_id": "3504523958"
+      },
+      {
+        "bottom_hole_section": "13-16N-24W",
+        "lateral_length_ft": 14734,
+        "operator": "MEWBOURNE OIL COMPANY",
+        "surface_section": "36-17N-24W",
+        "well_id": "3504523964"
+      },
+      {
+        "bottom_hole_section": "22-19N-20W",
+        "lateral_length_ft": 9983,
+        "operator": "MEWBOURNE OIL COMPANY",
+        "surface_section": "34-19N-20W",
+        "well_id": "3504323800"
+      },
+      {
+        "bottom_hole_section": "02-14N-20W",
+        "lateral_length_ft": 9908,
+        "operator": "MEWBOURNE OIL COMPANY",
+        "surface_section": "35-15N-20W",
+        "well_id": "3503922642"
+      },
+      {
+        "bottom_hole_section": "01-14N-20W",
+        "lateral_length_ft": 9900,
+        "operator": "MEWBOURNE OIL COMPANY",
+        "surface_section": "35-15N-20W",
+        "well_id": "3503922641"
+      },
+      {
+        "bottom_hole_section": "26-18N-25W",
+        "lateral_length_ft": 9829,
+        "operator": "MEWBOURNE OIL COMPANY",
+        "surface_section": "14-18N-25W",
+        "well_id": "3504523957"
+      },
+      {
+        "bottom_hole_section": "29-16N-24W",
+        "lateral_length_ft": 9781,
+        "operator": "MEWBOURNE OIL COMPANY",
+        "surface_section": "20-16N-24W",
+        "well_id": "3512924154"
+      },
+      {
+        "bottom_hole_section": "36-15N-17W",
+        "lateral_length_ft": 9915,
+        "operator": "MEWBOURNE OIL COMPANY",
+        "surface_section": "24-15N-18W",
+        "well_id": "3503922643"
+      },
+      {
+        "bottom_hole_section": "05-16N-24W",
+        "lateral_length_ft": 9845,
+        "operator": "MEWBOURNE OIL COMPANY",
+        "surface_section": "28-17N-24W",
+        "well_id": "3504523953"
+      },
+      {
+        "bottom_hole_section": "09-16N-24W",
+        "lateral_length_ft": 12618,
+        "operator": "MEWBOURNE OIL COMPANY",
+        "surface_section": "28-17N-24W",
+        "well_id": "3504523952"
+      },
+      {
+        "bottom_hole_section": "08-16N-24W",
+        "lateral_length_ft": 9662,
+        "operator": "MEWBOURNE OIL COMPANY",
+        "surface_section": "20-16N-24W",
+        "well_id": "3512924153"
+      },
+      {
+        "bottom_hole_section": "04-19N-16W",
+        "lateral_length_ft": 5360,
+        "operator": "COMANCHE EXPLORATION CO LLC",
+        "surface_section": "33-20N-16W",
+        "well_id": "3504323795"
+      },
+      {
+        "bottom_hole_section": "11-18N-25W",
+        "lateral_length_ft": 9929,
+        "operator": "MEWBOURNE OIL COMPANY",
+        "surface_section": "14-18N-25W",
+        "well_id": "3504523955"
+      },
+      {
+        "bottom_hole_section": "26-19N-26W",
+        "lateral_length_ft": 9701,
+        "operator": "MEWBOURNE OIL COMPANY",
+        "surface_section": "23-19N-26W",
+        "well_id": "3504523954"
+      },
+      {
+        "bottom_hole_section": "04-09N-11W",
+        "lateral_length_ft": 6599,
+        "operator": "STAGHORN PETROLEUM II LLC",
+        "surface_section": "32-10N-11W",
+        "well_id": "3501523346"
+      },
+      {
+        "bottom_hole_section": "10-14N-21W",
+        "lateral_length_ft": 9475,
+        "operator": "MEWBOURNE OIL COMPANY",
+        "surface_section": "03-14N-21W",
+        "well_id": "3512924148"
+      },
+      {
+        "bottom_hole_section": "35-18N-17W",
+        "lateral_length_ft": 9907,
+        "operator": "MEWBOURNE OIL COMPANY",
+        "surface_section": "11-17N-19W",
+        "well_id": "3504323798"
+      },
+      {
+        "bottom_hole_section": "33-15N-21W",
+        "lateral_length_ft": 9143,
+        "operator": "CRAWLEY PETROLEUM CORPORATION",
+        "surface_section": "28-15N-21W",
+        "well_id": "3512924149"
+      },
+      {
+        "bottom_hole_section": "08-17N-22W",
+        "lateral_length_ft": 9786,
+        "operator": "MEWBOURNE OIL COMPANY",
+        "surface_section": "20-17N-22W",
+        "well_id": "3504523949"
+      },
+      {
+        "bottom_hole_section": "18-17N-23W",
+        "lateral_length_ft": 9768,
+        "operator": "MEWBOURNE OIL COMPANY",
+        "surface_section": "30-17N-23W",
+        "well_id": "3504523944"
+      },
+      {
+        "bottom_hole_section": "15-13N-19W",
+        "lateral_length_ft": 8461,
+        "operator": "NADEL AND GUSSMAN LLC",
+        "surface_section": "03-13N-19W",
+        "well_id": "3503922640"
+      },
+      {
+        "bottom_hole_section": "09-19N-16W",
+        "lateral_length_ft": 5436,
+        "operator": "COMANCHE EXPLORATION CO LLC",
+        "surface_section": "16-19N-16W",
+        "well_id": "3504323794"
+      },
+      {
+        "bottom_hole_section": "35-14N-17W",
+        "lateral_length_ft": 9969,
+        "operator": "MEWBOURNE OIL COMPANY",
+        "surface_section": "11-13N-17W",
+        "well_id": "3503922633"
+      },
+      {
+        "bottom_hole_section": "17-18N-22W",
+        "lateral_length_ft": 10264,
+        "operator": "HOG OPERATING LLC",
+        "surface_section": "29-18N-22W",
+        "well_id": "3504523950"
+      },
+      {
+        "bottom_hole_section": "27-15N-27W",
+        "lateral_length_ft": 9860,
+        "operator": "MEWBOURNE OIL COMPANY",
+        "surface_section": "03-14N-21W",
+        "well_id": "3512924147"
+      },
+      {
+        "bottom_hole_section": "34-16N-24W",
+        "lateral_length_ft": 9374,
+        "operator": "CRAWLEY PETROLEUM CORPORATION",
+        "surface_section": "27-16N-24W",
+        "well_id": "3512924146"
+      },
+      {
+        "bottom_hole_section": "32-10N-11W",
+        "lateral_length_ft": 8305,
+        "operator": "SANGUINE GAS EXPLORATION LLC",
+        "surface_section": "30-10N-11W",
+        "well_id": "3501523345"
+      },
+      {
+        "bottom_hole_section": "32-19N-15W",
+        "lateral_length_ft": 5358,
+        "operator": "COMANCHE EXPLORATION CO LLC",
+        "surface_section": "05-18N-15W",
+        "well_id": "3504323780"
+      },
+      {
+        "bottom_hole_section": "13-17N-24W",
+        "lateral_length_ft": 9740,
+        "operator": "MEWBOURNE OIL COMPANY",
+        "surface_section": "25-17N-24W",
+        "well_id": "3504523947"
+      },
+      {
+        "bottom_hole_section": "10-15N-17W",
+        "lateral_length_ft": 11635,
+        "operator": "MEWBOURNE OIL COMPANY",
+        "surface_section": "34-16N-17W",
+        "well_id": "3504323793"
+      },
+      {
+        "bottom_hole_section": "36-17N-24W",
+        "lateral_length_ft": 9601,
+        "operator": "MEWBOURNE OIL COMPANY",
+        "surface_section": "25-17N-24W",
+        "well_id": "3504523946"
+      },
+      {
+        "bottom_hole_section": "02-09N-11W",
+        "lateral_length_ft": 8025,
+        "operator": "PEACHRIDGE ENERGY OPERATING LLC",
+        "surface_section": "12-09N-11W",
+        "well_id": "3501523341"
+      },
+      {
+        "bottom_hole_section": "33-16N-24W",
+        "lateral_length_ft": 9372,
+        "operator": "CRAWLEY PETROLEUM CORPORATION",
+        "surface_section": "28-16N-24W",
+        "well_id": "3512924145"
+      },
+      {
+        "bottom_hole_section": "30-18N-22W",
+        "lateral_length_ft": 7893,
+        "operator": "VALPOINT OPERATING LLC",
+        "surface_section": "31-18N-22W",
+        "well_id": "3504523948"
+      },
+      {
+        "bottom_hole_section": "01-18N-24W",
+        "lateral_length_ft": 10080,
+        "operator": "MEWBOURNE OIL COMPANY",
+        "surface_section": "13-18N-24W",
+        "well_id": "3504523930"
+      },
+      {
+        "bottom_hole_section": "08-13N-16W",
+        "lateral_length_ft": 7279,
+        "operator": "MEWBOURNE OIL COMPANY",
+        "surface_section": "17-13N-16W",
+        "well_id": "3503922631"
+      },
+      {
+        "bottom_hole_section": "10-16N-24W",
+        "lateral_length_ft": 12819,
+        "operator": "MEWBOURNE OIL COMPANY",
+        "surface_section": "26-17N-24W",
+        "well_id": "3504523932"
+      },
+      {
+        "bottom_hole_section": "10-18N-23W",
+        "lateral_length_ft": 11364,
+        "operator": "VALPOINT OPERATING LLC",
+        "surface_section": "27-18N-23W",
+        "well_id": "3504523942"
+      },
+      {
+        "bottom_hole_section": "12-19N-25W",
+        "lateral_length_ft": 10237,
+        "operator": "MEWBOURNE OIL COMPANY",
+        "surface_section": "24-19N-26W",
+        "well_id": "3504523943"
+      },
+      {
+        "bottom_hole_section": "28-15N-18W",
+        "lateral_length_ft": 7942,
+        "operator": "NOTTING HILL ENERGY LLC",
+        "surface_section": "33-15N-18W",
+        "well_id": "3503922630"
+      },
+      {
+        "bottom_hole_section": "23-17N-24W",
+        "lateral_length_ft": 9911,
+        "operator": "MEWBOURNE OIL COMPANY",
+        "surface_section": "26-17N-24W",
+        "well_id": "3504523938"
+      },
+      {
+        "bottom_hole_section": "27-17N-24W",
+        "lateral_length_ft": 9410,
+        "operator": "CRAWLEY PETROLEUM CORPORATION",
+        "surface_section": "22-17N-24W",
+        "well_id": "3504523939"
+      },
+      {
+        "bottom_hole_section": "08-17N-19W",
+        "lateral_length_ft": 9780,
+        "operator": "MEWBOURNE OIL COMPANY",
+        "surface_section": "20-17N-19W",
+        "well_id": "3504323789"
+      },
+      {
+        "bottom_hole_section": "12-19N-26W",
+        "lateral_length_ft": 9895,
+        "operator": "MEWBOURNE OIL COMPANY",
+        "surface_section": "24-19N-26W",
+        "well_id": "3504523935"
+      },
+      {
+        "bottom_hole_section": "12-13N-17W",
+        "lateral_length_ft": 9710,
+        "operator": "MEWBOURNE OIL COMPANY",
+        "surface_section": "01-13N-17W",
+        "well_id": "3503922632"
+      },
+      {
+        "bottom_hole_section": "30-18N-22W",
+        "lateral_length_ft": 7897,
+        "operator": "VALPOINT OPERATING LLC",
+        "surface_section": "31-18N-22W",
+        "well_id": "3504523941"
+      },
+      {
+        "bottom_hole_section": "02-17N-24W",
+        "lateral_length_ft": 9857,
+        "operator": "MEWBOURNE OIL COMPANY",
+        "surface_section": "26-17N-24W",
+        "well_id": "3504523931"
+      },
+      {
+        "bottom_hole_section": "12-13N-17W",
+        "lateral_length_ft": 9416,
+        "operator": "MEWBOURNE OIL COMPANY",
+        "surface_section": "01-13N-17W",
+        "well_id": "3503922629"
+      },
+      {
+        "bottom_hole_section": "33-18N-22W",
+        "lateral_length_ft": 9157,
+        "operator": "BLAKE PRODUCTION COMPANY INC",
+        "surface_section": "21-18N-22W",
+        "well_id": "3504523940"
+      },
+      {
+        "bottom_hole_section": "35-14N-20W",
+        "lateral_length_ft": 10057,
+        "operator": "DEVON ENERGY PRODUCTION COMPANY LP",
+        "surface_section": "26-14N-20W",
+        "well_id": "3503922628"
+      },
+      {
+        "bottom_hole_section": "25-19N-26W",
+        "lateral_length_ft": 9698,
+        "operator": "MEWBOURNE OIL COMPANY",
+        "surface_section": "24-19N-26W",
+        "well_id": "3504523934"
+      },
+      {
+        "bottom_hole_section": "32-16N-24W",
+        "lateral_length_ft": 10626,
+        "operator": "SANDRIDGE EXPLORATION & PRODUCTION",
+        "surface_section": "08-15N-24W",
+        "well_id": "3512924144"
+      },
+      {
+        "bottom_hole_section": "11-16N-15W",
+        "lateral_length_ft": 5440,
+        "operator": "CORLENA OIL COMPANY",
+        "surface_section": "03-16N-15W",
+        "well_id": "3504323788"
+      },
+      {
+        "bottom_hole_section": "17-18N-22W",
+        "lateral_length_ft": 9757,
+        "operator": "HOG OPERATING LLC",
+        "surface_section": "20-18N-22W",
+        "well_id": "3504523936"
+      },
+      {
+        "bottom_hole_section": "32-18N-22W",
+        "lateral_length_ft": 9015,
+        "operator": "HOG OPERATING LLC",
+        "surface_section": "20-18N-22W",
+        "well_id": "3504523937"
+      },
+      {
+        "bottom_hole_section": "13-19N-25W",
+        "lateral_length_ft": 9908,
+        "operator": "MEWBOURNE OIL COMPANY",
+        "surface_section": "01-19N-25W",
+        "well_id": "3504523933"
+      },
+      {
+        "bottom_hole_section": "24-16N-24W",
+        "lateral_length_ft": 8406,
+        "operator": "CRAWLEY PETROLEUM CORPORATION",
+        "surface_section": "25-16N-24W",
+        "well_id": "3512924142"
+      },
+      {
+        "bottom_hole_section": "34-20N-25W",
+        "lateral_length_ft": 11138,
+        "operator": "SANDRIDGE EXPLORATION & PRODUCTION LLC",
+        "surface_section": "03-19N-25W",
+        "well_id": "3504523926"
+      },
+      {
+        "bottom_hole_section": "10-18N-23W",
+        "lateral_length_ft": 9559,
+        "operator": "VALPOINT OPERATING LLC",
+        "surface_section": "22-18N-23W",
+        "well_id": "3504523929"
+      },
+      {
+        "bottom_hole_section": "25-18N-25W",
+        "lateral_length_ft": 9919,
+        "operator": "MEWBOURNE OIL COMPANY",
+        "surface_section": "13-18N-25W",
+        "well_id": "3504523927"
+      },
+      {
+        "bottom_hole_section": "28-19N-25W",
+        "lateral_length_ft": 9439,
+        "operator": "MEWBOURNE OIL COMPANY",
+        "surface_section": "33-19N-25W",
+        "well_id": "3504523928"
+      },
+      {
+        "bottom_hole_section": "12-18N-25W",
+        "lateral_length_ft": 9636,
+        "operator": "MEWBOURNE OIL COMPANY",
+        "surface_section": "13-18N-25W",
+        "well_id": "3504523925"
+      },
+      {
+        "bottom_hole_section": "22-17N-16W",
+        "lateral_length_ft": 10256,
+        "operator": "MEWBOURNE OIL COMPANY",
+        "surface_section": "17-17N-16W",
+        "well_id": "3504323786"
+      },
+      {
+        "bottom_hole_section": "02-18N-25W",
+        "lateral_length_ft": 9954,
+        "operator": "MEWBOURNE OIL COMPANY",
+        "surface_section": "26-19N-25W",
+        "well_id": "3504523923"
+      },
+      {
+        "bottom_hole_section": "23-19N-25W",
+        "lateral_length_ft": 9609,
+        "operator": "MEWBOURNE OIL COMPANY",
+        "surface_section": "26-19N-25W",
+        "well_id": "3504523920"
+      },
+      {
+        "bottom_hole_section": "23-16N-24W",
+        "lateral_length_ft": 9915,
+        "operator": "CRAWLEY PETROLEUM CORPORATION",
+        "surface_section": "35-16N-24W",
+        "well_id": "3512924139"
+      },
+      {
+        "bottom_hole_section": "03-17N-16W",
+        "lateral_length_ft": 10426,
+        "operator": "CITIZEN ENERGY III LLC",
+        "surface_section": "10-17N-16W",
+        "well_id": "3504323784"
+      },
+      {
+        "bottom_hole_section": "22-19N-25W",
+        "lateral_length_ft": 9489,
+        "operator": "MEWBOURNE OIL COMPANY",
+        "surface_section": "27-19N-25W",
+        "well_id": "3504523924"
+      },
+      {
+        "bottom_hole_section": "03-17N-16W",
+        "lateral_length_ft": 7097,
+        "operator": "CITIZEN ENERGY III LLC",
+        "surface_section": "10-17N-16W",
+        "well_id": "3504323783"
+      },
+      {
+        "bottom_hole_section": "22-19N-26W",
+        "lateral_length_ft": 10100,
+        "operator": "UPLAND OPERATING LLC",
+        "surface_section": "10-19N-26W",
+        "well_id": "3504523922"
+      },
+      {
+        "bottom_hole_section": "22-19N-26W",
+        "lateral_length_ft": 10100,
+        "operator": "UPLAND OPERATING LLC",
+        "surface_section": "10-19N-26W",
+        "well_id": "3504523921"
+      },
+      {
+        "bottom_hole_section": "36-18N-25W",
+        "lateral_length_ft": 9580,
+        "operator": "MEWBOURNE OIL COMPANY",
+        "surface_section": "12-17N-25W",
+        "well_id": "3512924138"
+      },
+      {
+        "bottom_hole_section": "08-19N-24W",
+        "lateral_length_ft": 11159,
+        "operator": "SANDRIDGE EXPLORATION & PRODUCTION",
+        "surface_section": "20-19N-24W",
+        "well_id": "3504523918"
+      },
+      {
+        "bottom_hole_section": "08-20N-25W",
+        "lateral_length_ft": 10305,
+        "operator": "SANDRIDGE EXPLORATION & PRODUCTION",
+        "surface_section": "20-20N-25W",
+        "well_id": "3504523915"
+      },
+      {
+        "bottom_hole_section": "08-11N-12W",
+        "lateral_length_ft": 9032,
+        "operator": "BLAKE PRODUCTION COMPANY INC",
+        "surface_section": "32-12N-12W",
+        "well_id": "3501523342"
+      },
+      {
+        "bottom_hole_section": "05-14N-20W",
+        "lateral_length_ft": 9597,
+        "operator": "MEWBOURNE OIL COMPANY",
+        "surface_section": "29-15N-20W",
+        "well_id": "3503922627"
+      },
+      {
+        "bottom_hole_section": "29-20N-25W",
+        "lateral_length_ft": 10294,
+        "operator": "SANDRIDGE EXPLORATION & PRODUCTION LLC",
+        "surface_section": "20-20N-25W",
+        "well_id": "3504523893"
+      },
+      {
+        "bottom_hole_section": "08-19N-24W",
+        "lateral_length_ft": 10962,
+        "operator": "SANDRIDGE EXPLORATION & PRODUCTION",
+        "surface_section": "20-19N-24W",
+        "well_id": "3504523916"
+      },
+      {
+        "bottom_hole_section": "32-15N-25W",
+        "lateral_length_ft": 9678,
+        "operator": "DOUGLAS FAIRBANKS HOLDINGS LLC",
+        "surface_section": "29-15N-25W",
+        "well_id": "3512924137"
+      },
+      {
+        "bottom_hole_section": "25-14N-17W",
+        "lateral_length_ft": 8858,
+        "operator": "MEWBOURNE OIL COMPANY",
+        "surface_section": "36-14N-17W",
+        "well_id": "3503922626"
+      },
+      {
+        "bottom_hole_section": "26-17N-24W",
+        "lateral_length_ft": 9553,
+        "operator": "MEWBOURNE OIL COMPANY",
+        "surface_section": "23-17N-24W",
+        "well_id": "3504523917"
+      },
+      {
+        "bottom_hole_section": "28-15N-16W",
+        "lateral_length_ft": 8900,
+        "operator": "CRAWLEY PETROLEUM CORPORATION",
+        "surface_section": "33-15N-16W",
+        "well_id": "3503922625"
+      },
+      {
+        "bottom_hole_section": "20-17N-24W",
+        "lateral_length_ft": 9625,
+        "operator": "MEWBOURNE OIL COMPANY",
+        "surface_section": "29-17N-24W",
+        "well_id": "3504523912"
+      },
+      {
+        "bottom_hole_section": "28-11N-12W",
+        "lateral_length_ft": 7409,
+        "operator": "STAGHORN PETROLEUM II LLC",
+        "surface_section": "33-11N-12W",
+        "well_id": "3501523340"
+      },
+      {
+        "bottom_hole_section": "06-16N-25W",
+        "lateral_length_ft": 9299,
+        "operator": "DOUGLAS FAIRBANKS HOLDINGS LLC",
+        "surface_section": "07-16N-25W",
+        "well_id": "3512924136"
+      },
+      {
+        "bottom_hole_section": "11-19N-25W",
+        "lateral_length_ft": 9917,
+        "operator": "MEWBOURNE OIL COMPANY",
+        "surface_section": "23-19N-25W",
+        "well_id": "3504523914"
+      },
+      {
+        "bottom_hole_section": "09-13N-19W",
+        "lateral_length_ft": 7599,
+        "operator": "NADEL AND GUSSMAN LLC",
+        "surface_section": "04-13N-19W",
+        "well_id": "3503922624"
+      },
+      {
+        "bottom_hole_section": "33-19N-15W",
+        "lateral_length_ft": 5467,
+        "operator": "COMANCHE EXPLORATION CO LLC",
+        "surface_section": "04-18N-15W",
+        "well_id": "3504323778"
+      },
+      {
+        "bottom_hole_section": "11-17N-24W",
+        "lateral_length_ft": 9902,
+        "operator": "MEWBOURNE OIL COMPANY",
+        "surface_section": "23-17N-24W",
+        "well_id": "3504523908"
+      },
+      {
+        "bottom_hole_section": "05-16N-24W",
+        "lateral_length_ft": 9135,
+        "operator": "MEWBOURNE OIL COMPANY",
+        "surface_section": "29-17N-24W",
+        "well_id": "3504523913"
+      },
+      {
+        "bottom_hole_section": "13-18N-23W",
+        "lateral_length_ft": 13208,
+        "operator": "VALPOINT OPERATING LLC",
+        "surface_section": "36-18N-23W",
+        "well_id": "3504523911"
+      },
+      {
+        "bottom_hole_section": "05-18N-24W",
+        "lateral_length_ft": 9524,
+        "operator": "MEWBOURNE OIL COMPANY",
+        "surface_section": "32-19N-24W",
+        "well_id": "3504523907"
+      },
+      {
+        "bottom_hole_section": "18-20N-24W",
+        "lateral_length_ft": 11290,
+        "operator": "SANDRIDGE EXPLORATION & PRODUCTION",
+        "surface_section": "30-19N-24W",
+        "well_id": "3504523910"
+      },
+      {
+        "bottom_hole_section": "18-20N-24W",
+        "lateral_length_ft": 11218,
+        "operator": "SANDRIDGE EXPLORATION & PRODUCTION",
+        "surface_section": "30-19N-24W",
+        "well_id": "3504523909"
+      },
+      {
+        "bottom_hole_section": "15-18N-24W",
+        "lateral_length_ft": 9942,
+        "operator": "MEWBOURNE OIL COMPANY",
+        "surface_section": "03-18N-24W",
+        "well_id": "3504523906"
+      },
+      {
+        "bottom_hole_section": "14-18N-24W",
+        "lateral_length_ft": 9925,
+        "operator": "MEWBOURNE OIL COMPANY",
+        "surface_section": "02-18N-24W",
+        "well_id": "3504523879"
+      },
+      {
+        "bottom_hole_section": "20-19N-24W",
+        "lateral_length_ft": 9942,
+        "operator": "MEWBOURNE OIL COMPANY",
+        "surface_section": "32-19N-24W",
+        "well_id": "3504523905"
+      },
+      {
+        "bottom_hole_section": "16-18N-24W",
+        "lateral_length_ft": 9890,
+        "operator": "MEWBOURNE OIL COMPANY",
+        "surface_section": "09-18N-24W",
+        "well_id": "3504523895"
+      },
+      {
+        "bottom_hole_section": "29-19N-25W",
+        "lateral_length_ft": 9908,
+        "operator": "DUNCAN OIL PROPERTIES INC",
+        "surface_section": "17-19N-25W",
+        "well_id": "3504523899"
+      },
+      {
+        "bottom_hole_section": "21-19N-24W",
+        "lateral_length_ft": 9973,
+        "operator": "MEWBOURNE OIL COMPANY",
+        "surface_section": "33-19N-24W",
+        "well_id": "3504523896"
+      },
+      {
+        "bottom_hole_section": "35-19N-24W",
+        "lateral_length_ft": 9640,
+        "operator": "MEWBOURNE OIL COMPANY",
+        "surface_section": "02-18N-24W",
+        "well_id": "3504523880"
+      }
+    ],
+    "wells_with_owned_tract": 6,
+    "wells_without_owned_tract": 438
   },
-  "oseberg_folder": null
+  "oseberg_folder": "2026-05-22"
 }

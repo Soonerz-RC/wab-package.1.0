@@ -22,6 +22,12 @@
 - §10 — added `POOLING_APPLICATION` and `SPACING_APPLICATION` to the type enum; documented that `oseberg_url` is currently `null` for OCC regulatory records (no URL field in the Oseberg exports).
 - §12 — added `permits_affecting_owned_tracts`, `completions_affecting_owned_tracts`, `production_affecting_owned_tracts`, and `leasing_market_count` to `matching_report`.
 
+**In-place additions (post-Phase-7 inventory schema upgrade, same 2026-05-22 date):**
+- §2.4 — dropped the `"Reg" → PENDING` mineral rule. The inventory's STATUS column is now clean (`LEASED | HBP | OPEN`); regulatory state is captured in its own column. Anything containing `Reg` that still appears in STATUS now falls through to `OTHER`.
+- §4.3 — added mineral fields: `lease_url` (county-records hyperlink embedded in the STATUS cell when LEASED), `regulatory_status` (text from the new REGULATORY column), `regulatory_url` (Oseberg hyperlink embedded in that cell), `notes` (free text from the new Notes column).
+- §4.4 — added the same `regulatory_status` / `regulatory_url` / `notes` fields to ORRI tracts. ORRI tracts do not carry `lease_url` (no STATUS column in the ORRI section).
+- §13.1 — updated mineral header to reflect the inserted columns (H=STATUS, I=REGULATORY, J=Notes, K=LEASE EXP, L=NRA, M=SALES PER NRA, N=SALES REVENUE, O=SALES PER NMA). Aggregate-valuation cells moved from column I to column K (K46–K48 non-HBP; K91–K93 HBP). The ORRI header was extended with `REGULATORY` (col I) and `Notes` (col J).
+
 ---
 
 ## 1. Conventions

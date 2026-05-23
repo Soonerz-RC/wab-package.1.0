@@ -180,37 +180,102 @@ def _coerce_numeric(value, row_idx: int, col_label: str, section: str,
     return None
 
 
+def _cell_hyperlink(cell) -> Optional[str]:
+    """Return the URL embedded in a cell, or None if no hyperlink set."""
+    if cell is None:
+        return None
+    link = getattr(cell, "hyperlink", None)
+    if link is None:
+        return None
+    target = getattr(link, "target", None)
+    return str(target) if target else None
+
+
+def _row_is_all_blank(ws, r_idx: int, max_col: int) -> bool:
+    """Tolerant blank-row check: True iff every cell in this row is None / empty string."""
+    for c in range(1, max_col + 1):
+        v = ws.cell(row=r_idx, column=c).value
+        if v is not None and not (isinstance(v, str) and not v.strip()):
+            return False
+    return True
+
+
 def parse_mineral_section(ws, ingestion_errors: List[dict]) -> List[dict]:
-    """Find and parse the mineral section. Returns a list of raw-but-normalized row dicts."""
+    """Find and parse the mineral section. Returns a list of raw-but-normalized row dicts.
+
+    Uses header-name-driven column lookup so the parser is resilient to
+    column insertions / reorderings in future inventory refreshes. The
+    2026-05-22 schema (post inventory update) has columns:
+      B=COUNTY  C=DEAL    D=STR    E=TR    F=NMA    G=ROYALTY
+      H=STATUS  I=REGULATORY  J=Notes
+      K=LEASE EXP  L=NRA  M=SALES PER NRA  N=SALES REVENUE  O=SALES PER NMA
+    """
     header_row = _scan_for_header(ws, ((1, "COUNTY"), (2, "DEAL"), (3, "STR")))
-    # Column mapping inside the row tuple (0-indexed):
-    # 0=blank A, 1=COUNTY, 2=DEAL, 3=STR, 4=TR, 5=NMA, 6=ROYALTY, 7=STATUS,
-    # 8=LEASE EXP, 9=NRA, 10=SALES PER NRA, 11=SALES REVENUE, 12=SALES PER NMA
+    # Build header_name -> 1-indexed column number map (case-insensitive on the key)
+    header_map: Dict[str, int] = {}
+    for c in range(1, ws.max_column + 1):
+        v = ws.cell(row=header_row, column=c).value
+        if isinstance(v, str) and v.strip():
+            header_map[v.strip().upper()] = c
+
+    def col(name: str, *, required: bool = True) -> Optional[int]:
+        key = name.upper()
+        if key not in header_map:
+            if required:
+                raise RuntimeError(f"mineral section: column {name!r} not found in header row {header_row}")
+            return None
+        return header_map[key]
+
+    col_county = col("COUNTY")
+    col_deal = col("DEAL")
+    col_str = col("STR")
+    col_nma = col("NMA")
+    col_royalty = col("ROYALTY")
+    col_status = col("STATUS")
+    col_reg = col("REGULATORY", required=False)
+    col_notes = col("NOTES", required=False)
+    col_lease_exp = col("LEASE EXP")
+    col_nra = col("NRA")
+    col_sales_per_nra = col("SALES PER NRA")
+    col_sales_revenue = col("SALES REVENUE")
+    col_sales_per_nma = col("SALES PER NMA")
+
     rows: List[dict] = []
-    for r_idx, row in enumerate(
-        ws.iter_rows(min_row=header_row + 1, values_only=True), start=header_row + 1
-    ):
-        if _is_blank(row):
+    r_idx = header_row + 1
+    while r_idx <= ws.max_row:
+        if _row_is_all_blank(ws, r_idx, ws.max_column):
             break  # end of mineral section
-        if row[1] is None:
-            # Stray row with no county — skip but flag
-            ingestion_errors.append(
-                {"section": "mineral", "row": r_idx, "reason": "missing county", "raw": row}
-            )
+        county_cell = ws.cell(row=r_idx, column=col_county)
+        if county_cell.value is None:
+            r_idx += 1
             continue
         try:
-            county = normalize_county(row[1])
-            str_canonical = normalize_str(row[3])
-            deal_name = row[2] if isinstance(row[2], str) else (str(row[2]) if row[2] is not None else "")
+            county = normalize_county(county_cell.value)
+            str_canonical = normalize_str(ws.cell(row=r_idx, column=col_str).value)
+            deal_raw = ws.cell(row=r_idx, column=col_deal).value
+            deal_name = deal_raw if isinstance(deal_raw, str) else (str(deal_raw) if deal_raw is not None else "")
             deal_slug = normalize_deal_slug(deal_name)
-            status_raw, status_category = normalize_status_mineral(row[7])
-            lease_exp = to_iso_date_or_hbp(row[8])
-            nma = _coerce_numeric(row[5], r_idx, "NMA", "mineral", ingestion_errors)
-            royalty = _coerce_numeric(row[6], r_idx, "ROYALTY", "mineral", ingestion_errors)
-            nra = _coerce_numeric(row[9], r_idx, "NRA", "mineral", ingestion_errors)
-            sales_per_nra = _coerce_numeric(row[10], r_idx, "SALES PER NRA", "mineral", ingestion_errors, cast="int")
-            sales_revenue = _coerce_numeric(row[11], r_idx, "SALES REVENUE", "mineral", ingestion_errors, cast="int")
-            sales_per_nma = _coerce_numeric(row[12], r_idx, "SALES PER NMA", "mineral", ingestion_errors, cast="int")
+
+            status_cell = ws.cell(row=r_idx, column=col_status)
+            status_raw, status_category = normalize_status_mineral(status_cell.value)
+            lease_url = _cell_hyperlink(status_cell)
+
+            reg_cell = ws.cell(row=r_idx, column=col_reg) if col_reg else None
+            regulatory_status = reg_cell.value if reg_cell and reg_cell.value else None
+            regulatory_url = _cell_hyperlink(reg_cell) if reg_cell else None
+
+            notes_cell = ws.cell(row=r_idx, column=col_notes) if col_notes else None
+            notes = notes_cell.value if notes_cell and notes_cell.value else None
+            if isinstance(notes, str):
+                notes = notes.strip() or None
+
+            lease_exp = to_iso_date_or_hbp(ws.cell(row=r_idx, column=col_lease_exp).value)
+            nma = _coerce_numeric(ws.cell(row=r_idx, column=col_nma).value, r_idx, "NMA", "mineral", ingestion_errors)
+            royalty = _coerce_numeric(ws.cell(row=r_idx, column=col_royalty).value, r_idx, "ROYALTY", "mineral", ingestion_errors)
+            nra = _coerce_numeric(ws.cell(row=r_idx, column=col_nra).value, r_idx, "NRA", "mineral", ingestion_errors)
+            sales_per_nra = _coerce_numeric(ws.cell(row=r_idx, column=col_sales_per_nra).value, r_idx, "SALES PER NRA", "mineral", ingestion_errors, cast="int")
+            sales_revenue = _coerce_numeric(ws.cell(row=r_idx, column=col_sales_revenue).value, r_idx, "SALES REVENUE", "mineral", ingestion_errors, cast="int")
+            sales_per_nma = _coerce_numeric(ws.cell(row=r_idx, column=col_sales_per_nma).value, r_idx, "SALES PER NMA", "mineral", ingestion_errors, cast="int")
             rows.append(
                 {
                     "row_number": r_idx,
@@ -224,6 +289,10 @@ def parse_mineral_section(ws, ingestion_errors: List[dict]) -> List[dict]:
                     "royalty": royalty,
                     "status_raw": status_raw,
                     "status_category": status_category,
+                    "lease_url": lease_url,
+                    "regulatory_status": regulatory_status,
+                    "regulatory_url": regulatory_url,
+                    "notes": notes,
                     "lease_expiration": lease_exp,
                     "nra": round_acres(nra),
                     "sales_per_nra": sales_per_nra,
@@ -233,57 +302,87 @@ def parse_mineral_section(ws, ingestion_errors: List[dict]) -> List[dict]:
             )
         except NormalizationError as exc:
             ingestion_errors.append(
-                {"section": "mineral", "row": r_idx, "reason": str(exc), "raw": row}
+                {"section": "mineral", "row": r_idx, "reason": str(exc)}
             )
+        r_idx += 1
     return rows
 
 
 def parse_orri_section(
     ws, ingestion_errors: List[dict], aggregate_cells_skipped: List[dict]
 ) -> List[dict]:
-    """Find and parse the ORRI section. Returns a list of normalized row dicts."""
-    header_row = _scan_for_header(ws, ((2, "COUNTY"), (3, "STR"), (4, "NRA")))
-    # Column mapping inside the row tuple (0-indexed):
-    # 0,1 = blank, 2=COUNTY, 3=STR, 4=NRA, 5=DOL, 6=EXP, 7=blank, 8=I aggregate
-    rows: List[dict] = []
-    for r_idx, row in enumerate(
-        ws.iter_rows(min_row=header_row + 1, values_only=True), start=header_row + 1
-    ):
-        # The ORRI section runs to the end of the sheet. Skip totally-blank rows and
-        # rows with no county (junk like the trailing space-only row).
-        if _is_blank(row) or row[2] is None:
-            # Capture any aggregate-column-I value on this row even if the rest is blank
-            if len(row) > ORRI_AGGREGATE_COL_IDX and row[ORRI_AGGREGATE_COL_IDX] is not None:
-                aggregate_cells_skipped.append(
-                    {
-                        "sheet": SHEET_NAME,
-                        "cell": f"{get_column_letter(ORRI_AGGREGATE_COL_IDX + 1)}{r_idx}",
-                        "value": row[ORRI_AGGREGATE_COL_IDX],
-                        "interpretation": "ORRI section column-I aggregate calculation",
-                    }
-                )
-            continue
+    """Find and parse the ORRI section. Returns a list of normalized row dicts.
 
-        # Detect & record the aggregate cell value if present, but DO NOT attach it to the tract
-        if len(row) > ORRI_AGGREGATE_COL_IDX and row[ORRI_AGGREGATE_COL_IDX] is not None:
+    Header-driven column lookup. 2026-05-22 ORRI schema:
+      C=COUNTY  D=STR  E=NRA  F=DOL  G=EXP  I=REGULATORY  J=Notes
+    Aggregate-valuation cells (per-acre rates, projected sale-price totals)
+    now sit in column K (was column I before the schema upgrade).
+    """
+    header_row = _scan_for_header(ws, ((2, "COUNTY"), (3, "STR"), (4, "NRA")))
+    header_map: Dict[str, int] = {}
+    for c in range(1, ws.max_column + 1):
+        v = ws.cell(row=header_row, column=c).value
+        if isinstance(v, str) and v.strip():
+            header_map[v.strip().upper()] = c
+
+    col_county = header_map["COUNTY"]
+    col_str = header_map["STR"]
+    col_nra = header_map["NRA"]
+    col_dol = header_map["DOL"]
+    col_exp = header_map["EXP"]
+    col_reg = header_map.get("REGULATORY")
+    col_notes = header_map.get("NOTES")
+
+    # Aggregate cells now in column K (1-indexed col 11). Any non-null cell
+    # in this column inside the ORRI section is recorded as an aggregate cell
+    # in the matching report. (Per spec §13.1.)
+    AGGREGATE_COL = 11
+    documented_orri_cols = {
+        col_county, col_str, col_nra, col_dol, col_exp,
+    }
+    if col_reg: documented_orri_cols.add(col_reg)
+    if col_notes: documented_orri_cols.add(col_notes)
+
+    rows: List[dict] = []
+    r_idx = header_row + 1
+    while r_idx <= ws.max_row:
+        county_cell = ws.cell(row=r_idx, column=col_county)
+        is_data_row = county_cell.value is not None
+
+        # Capture any aggregate-cell value on this row (with or without data)
+        agg_cell = ws.cell(row=r_idx, column=AGGREGATE_COL)
+        if agg_cell.value is not None:
             aggregate_cells_skipped.append(
                 {
                     "sheet": SHEET_NAME,
-                    "cell": f"{get_column_letter(ORRI_AGGREGATE_COL_IDX + 1)}{r_idx}",
-                    "value": row[ORRI_AGGREGATE_COL_IDX],
-                    "interpretation": "ORRI section column-I aggregate calculation",
+                    "cell": f"{get_column_letter(AGGREGATE_COL)}{r_idx}",
+                    "value": agg_cell.value,
+                    "interpretation": "ORRI section column-K aggregate calculation",
                 }
             )
 
+        if not is_data_row:
+            r_idx += 1
+            continue
+
         try:
-            county = normalize_county(row[2])
-            str_canonical = normalize_str(row[3])
-            nra_raw = _coerce_numeric(row[4], r_idx, "NRA", "orri", ingestion_errors)
+            county = normalize_county(county_cell.value)
+            str_canonical = normalize_str(ws.cell(row=r_idx, column=col_str).value)
+            nra_raw = _coerce_numeric(ws.cell(row=r_idx, column=col_nra).value, r_idx, "NRA", "orri", ingestion_errors)
             nra = round_acres(nra_raw)
-            dol = to_iso_date_or_hbp(row[5])
-            exp = to_iso_date_or_hbp(row[6])
+            dol = to_iso_date_or_hbp(ws.cell(row=r_idx, column=col_dol).value)
+            exp = to_iso_date_or_hbp(ws.cell(row=r_idx, column=col_exp).value)
             status_category = derive_orri_status_category(dol, exp)
             row_hash = orri_row_hash(county, str_canonical, nra, dol, exp)
+
+            reg_cell = ws.cell(row=r_idx, column=col_reg) if col_reg else None
+            regulatory_status = reg_cell.value if reg_cell and reg_cell.value else None
+            regulatory_url = _cell_hyperlink(reg_cell) if reg_cell else None
+            notes_cell = ws.cell(row=r_idx, column=col_notes) if col_notes else None
+            notes = notes_cell.value if notes_cell and notes_cell.value else None
+            if isinstance(notes, str):
+                notes = notes.strip() or None
+
             rows.append(
                 {
                     "row_number": r_idx,
@@ -297,6 +396,9 @@ def parse_orri_section(
                     "date_of_lease": dol,
                     "lease_expiration": exp,
                     "row_hash": row_hash,
+                    "regulatory_status": regulatory_status,
+                    "regulatory_url": regulatory_url,
+                    "notes": notes,
                 }
             )
             if status_category == "OTHER":
@@ -305,13 +407,37 @@ def parse_orri_section(
                         "section": "orri",
                         "row": r_idx,
                         "reason": f"unexpected DOL/EXP combination: DOL={dol!r}, EXP={exp!r}",
-                        "raw": row,
                     }
                 )
         except NormalizationError as exc:
             ingestion_errors.append(
-                {"section": "orri", "row": r_idx, "reason": str(exc), "raw": row}
+                {"section": "orri", "row": r_idx, "reason": str(exc)}
             )
+        r_idx += 1
+
+    # URL propagation: for ORRI rows where multiple share the same
+    # (str, regulatory_status) but only one has a regulatory_url, propagate
+    # that URL to siblings. Same regulatory case applies to all of them.
+    url_map: Dict[Tuple[str, str], str] = {}
+    for r in rows:
+        rs = r.get("regulatory_status")
+        ru = r.get("regulatory_url")
+        if rs and ru:
+            url_map[(r["str"], rs)] = ru
+    propagated = 0
+    for r in rows:
+        rs = r.get("regulatory_status")
+        if rs and not r.get("regulatory_url"):
+            key = (r["str"], rs)
+            if key in url_map:
+                r["regulatory_url"] = url_map[key]
+                propagated += 1
+    if propagated:
+        # Informational only — not an ingestion error. Print so it shows in the
+        # console output during refresh runs.
+        print(f"  ORRI: propagated regulatory_url to {propagated} sibling rows "
+              f"(same STR + regulatory_status, original link on one row only)")
+
     return rows
 
 
@@ -451,9 +577,13 @@ def build_mineral_tract_obj(row: dict) -> dict:
         "first_seen": row["first_seen"],
         "lat": None,
         "lease_expiration": row["lease_expiration"],
+        "lease_url": row.get("lease_url"),
         "lon": None,
         "nma": row["nma"],
+        "notes": row.get("notes"),
         "nra": row["nra"],
+        "regulatory_status": row.get("regulatory_status"),
+        "regulatory_url": row.get("regulatory_url"),
         "royalty": row["royalty"],
         "sales_per_nma": row["sales_per_nma"],
         "sales_per_nra": row["sales_per_nra"],
@@ -482,7 +612,10 @@ def build_orri_tract_obj(row: dict) -> dict:
         "lat": None,
         "lease_expiration": row["lease_expiration"],
         "lon": None,
+        "notes": row.get("notes"),
         "nra": row["nra"],
+        "regulatory_status": row.get("regulatory_status"),
+        "regulatory_url": row.get("regulatory_url"),
         "row_hash": row["row_hash"],
         "sales_per_nra": sales_per_nra,
         "sales_revenue": sales_revenue,

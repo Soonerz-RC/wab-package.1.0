@@ -211,7 +211,13 @@ def normalize_status_mineral(raw) -> Tuple[Optional[str], str]:
 
     Returns ``(status_raw, status_category)``. ``status_raw`` preserves the
     original value verbatim (or None if missing). ``status_category`` is one
-    of LEASED, HBP, OPEN, PENDING, or OTHER.
+    of LEASED, HBP, OPEN, or OTHER.
+
+    Regulatory state (formerly captured by clerk-typed strings like
+    ``"Reign Reg"`` / ``"Crawley Reg"`` in this column) was moved to a
+    separate REGULATORY column in the 2026-05-22 inventory refresh. Any
+    leftover ``"Reg"``-pattern strings still in STATUS fall through to
+    OTHER per the dropped mapping.
     """
     if raw is None:
         return None, "OPEN"
@@ -225,8 +231,6 @@ def normalize_status_mineral(raw) -> Tuple[Optional[str], str]:
         return s_raw, "HBP"
     if "OPEN" in upper:
         return s_raw, "OPEN"
-    if "REG" in upper:
-        return s_raw, "PENDING"
     return s_raw, "OTHER"
 
 
@@ -407,9 +411,9 @@ def _selftest():
     check("status LEASED",       normalize_status_mineral("LEASED"),     ("LEASED", "LEASED"))
     check("status HBP",          normalize_status_mineral("HBP"),        ("HBP",    "HBP"))
     check("status OPEN",         normalize_status_mineral("OPEN"),       ("OPEN",   "OPEN"))
-    check("status Reign Reg",    normalize_status_mineral("Reign Reg"),  ("Reign Reg",   "PENDING"))
-    check("status Crawley Reg",  normalize_status_mineral("Crawley Reg"),("Crawley Reg", "PENDING"))
-    check("status weird",        normalize_status_mineral("Foo Bar"),    ("Foo Bar","OTHER"))
+    check("status Reign Reg (now OTHER)",   normalize_status_mineral("Reign Reg"),  ("Reign Reg",   "OTHER"))
+    check("status Crawley Reg (now OTHER)", normalize_status_mineral("Crawley Reg"),("Crawley Reg", "OTHER"))
+    check("status weird",                   normalize_status_mineral("Foo Bar"),    ("Foo Bar","OTHER"))
     check("status None",         normalize_status_mineral(None),         (None,     "OPEN"))
     check("status empty string", normalize_status_mineral(""),           (None,     "OPEN"))
     check("status whitespace",   normalize_status_mineral("   "),        (None,     "OPEN"))

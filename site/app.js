@@ -392,12 +392,49 @@
       tr.appendChild(_td("—", { cls: "data-table__cell--num data-table__cell--muted" }));
     }
 
-    // Status pill
+    // Status pill (+ optional lease URL link + optional REG badge)
+    const statusCell = document.createElement("td");
+    statusCell.className = "data-table__cell--status";
+
     const pill = document.createElement("span");
     pill.className = _pillClassFor(t.status_category);
     pill.textContent = formatStatus(t.status_category);
     pill.title = t.status_raw || formatStatus(t.status_category);
-    tr.appendChild(_td(pill));
+
+    if (t.lease_url) {
+      // Wrap the pill in an outbound link to county records
+      const a = document.createElement("a");
+      a.href = t.lease_url;
+      a.target = "_blank";
+      a.rel = "noopener noreferrer";
+      a.className = "pill-link";
+      a.title = "View lease document at okcountyrecords.com (opens in new tab)";
+      a.appendChild(pill);
+      statusCell.appendChild(a);
+    } else {
+      statusCell.appendChild(pill);
+    }
+
+    // Regulatory badge: small "REG ↗" link next to status pill when present
+    if (t.regulatory_status) {
+      const badge = document.createElement(t.regulatory_url ? "a" : "span");
+      badge.className = "reg-badge";
+      badge.textContent = "REG";
+      if (t.regulatory_url) {
+        badge.href = t.regulatory_url;
+        badge.target = "_blank";
+        badge.rel = "noopener noreferrer";
+        const arrow = document.createElement("span");
+        arrow.className = "reg-badge__arrow";
+        arrow.textContent = "↗";
+        badge.appendChild(arrow);
+      }
+      badge.title = t.regulatory_status + (t.regulatory_url
+        ? " — Oseberg filing (opens in new tab)"
+        : "");
+      statusCell.appendChild(badge);
+    }
+    tr.appendChild(statusCell);
 
     // Asking (mineral + ORRI both carry sales_revenue per spec §4.3, §4.4)
     if (t.sales_revenue !== null && t.sales_revenue !== undefined) {
@@ -995,6 +1032,50 @@
     metrics.forEach((m) => host.appendChild(m));
   }
 
+  function _renderRegulatoryCard(root, tract) {
+    const section = root.querySelector("[data-regulatory-section]");
+    const card = root.querySelector("[data-regulatory-card]");
+    if (!section || !card) return;
+    _replaceContent(card, []);
+
+    const hasLeaseUrl = !!tract.lease_url;
+    const hasReg = !!tract.regulatory_status;
+    const hasNotes = !!tract.notes;
+    if (!hasLeaseUrl && !hasReg && !hasNotes) {
+      section.hidden = true;
+      return;
+    }
+    section.hidden = false;
+
+    const addRow = (labelText, valueNode) => {
+      const dt = document.createElement("dt");
+      dt.textContent = labelText;
+      card.appendChild(dt);
+      const dd = document.createElement("dd");
+      if (valueNode instanceof Node) dd.appendChild(valueNode);
+      else dd.textContent = valueNode;
+      card.appendChild(dd);
+    };
+
+    if (hasLeaseUrl) {
+      addRow("Lease document", _link("View at okcountyrecords.com", tract.lease_url, { external: true }));
+    }
+    if (hasReg) {
+      let regNode;
+      if (tract.regulatory_url) {
+        regNode = document.createElement("span");
+        regNode.appendChild(document.createTextNode(tract.regulatory_status + " · "));
+        regNode.appendChild(_link("View Oseberg filing", tract.regulatory_url, { external: true }));
+      } else {
+        regNode = document.createTextNode(tract.regulatory_status);
+      }
+      addRow("Regulatory", regNode);
+    }
+    if (hasNotes) {
+      addRow("Notes", tract.notes);
+    }
+  }
+
   function _renderCrossLinks(root, currentTract, allTracts) {
     const section = root.querySelector("[data-cross-links-section]");
     const list = root.querySelector("[data-cross-link-list]");
@@ -1336,6 +1417,7 @@
 
       _renderTractHeader(root, tract);
       _renderTractSummary(root, tract);
+      _renderRegulatoryCard(root, tract);
       _renderCrossLinks(root, tract, allTracts);
 
       // Filter each activity stream to this tract
