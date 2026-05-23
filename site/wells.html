@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Wells — WAB Package 1.0</title>
+  <meta name="robots" content="noindex,nofollow" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@400;500;700&family=Roboto:wght@400;500;700&display=swap" />
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+        crossorigin="" />
+  <link rel="stylesheet" href="styles.css?v=2026-05-22-17" />
+</head>
+
+<body data-page="wells">
+
+  <header class="site-header">
+    <div class="container site-header__inner">
+      <div class="wordmark">
+        <span class="wordmark__primary">Oklahoma Minerals</span>
+        <span class="wordmark__secondary">WAB Package 1.0</span>
+      </div>
+      <nav class="site-nav" aria-label="Primary">
+        <a href="index.html">Overview</a>
+        <a href="tracts.html">Tracts</a>
+        <a href="activity.html">Activity</a>
+        <a href="townships.html">Coverage</a>
+        <a href="wells.html" class="is-current">Wells</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="container hero hero--compact">
+      <div class="hero__eyebrow">Wells in the AOI</div>
+      <h1 class="hero__title hero__title--compact">Key wells across the Western Anadarko Basin</h1>
+      <p class="hero__subtitle">
+        <span data-text="hero-stats">—</span>. By default the map and table show Cherokee and Red Fork wells spudded in the last five years, the cohort most relevant to near-term development on the package's owned sections. Adjust the filters below to broaden or narrow.
+      </p>
+    </section>
+
+    <section class="container section--tight">
+      <div class="kpi-strip" data-kpi-strip>
+        <div class="kpi">
+          <span class="kpi__value" data-kpi="total">—</span>
+          <span class="kpi__label">Wells in view</span>
+        </div>
+        <div class="kpi">
+          <span class="kpi__value" data-kpi="cherokee">—</span>
+          <span class="kpi__label">Cherokee</span>
+        </div>
+        <div class="kpi">
+          <span class="kpi__value" data-kpi="redfork">—</span>
+          <span class="kpi__label">Red Fork</span>
+        </div>
+        <div class="kpi">
+          <span class="kpi__value" data-kpi="operators">—</span>
+          <span class="kpi__label">Operators</span>
+        </div>
+        <div class="kpi">
+          <span class="kpi__value" data-kpi="avg-ll">—</span>
+          <span class="kpi__label">Avg lateral (ft)</span>
+        </div>
+        <div class="kpi">
+          <span class="kpi__value" data-kpi="cum-oil">—</span>
+          <span class="kpi__label">Cum oil (MBbl)</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="container section--tight">
+      <div class="filter-bar" role="group" aria-label="Well filters">
+        <label class="filter-bar__field">
+          <span class="filter-bar__label">Formation</span>
+          <select data-filter="formation">
+            <option value="CHEROKEE_OR_REDFORK">Cherokee or Red Fork (default)</option>
+            <option value="">All formations</option>
+            <option value="CHEROKEE">Cherokee only</option>
+            <option value="REDFORK">Red Fork only</option>
+            <option value="GRANITE_WASH">Granite Wash</option>
+            <option value="CLEVELAND">Cleveland</option>
+            <option value="TONKAWA">Tonkawa</option>
+            <option value="ATOKA">Atoka</option>
+            <option value="OTHER">Other / Unknown</option>
+          </select>
+        </label>
+        <label class="filter-bar__field">
+          <span class="filter-bar__label">Vintage</span>
+          <select data-filter="vintage">
+            <option value="5">Last 5 yrs (default)</option>
+            <option value="3">Last 3 yrs</option>
+            <option value="1">Last 1 yr</option>
+            <option value="">All vintages</option>
+          </select>
+        </label>
+        <label class="filter-bar__field">
+          <span class="filter-bar__label">County</span>
+          <select data-filter="county">
+            <option value="">All</option>
+          </select>
+        </label>
+        <label class="filter-bar__field">
+          <span class="filter-bar__label">Operator</span>
+          <select data-filter="operator">
+            <option value="">All</option>
+          </select>
+        </label>
+        <label class="filter-bar__field">
+          <span class="filter-bar__label">Min LL (ft)</span>
+          <input type="number" data-filter="min-ll" min="0" step="500" placeholder="0" />
+        </label>
+        <label class="filter-bar__field filter-bar__field--search">
+          <span class="filter-bar__label">Search</span>
+          <input type="search" data-filter="search" placeholder="API, well name, operator…" />
+        </label>
+        <button type="button" class="filter-bar__reset" data-action="reset-filters">Reset</button>
+      </div>
+    </section>
+
+    <section class="container section--tight wells-map-section">
+      <div class="wells-legend">
+        <span class="leg-swatch wells-leg-swatch--cherokee"></span>Cherokee
+        <span class="leg-swatch wells-leg-swatch--redfork"></span>Red Fork
+        <span class="leg-swatch wells-leg-swatch--granite"></span>Granite Wash
+        <span class="leg-swatch wells-leg-swatch--cleveland"></span>Cleveland
+        <span class="leg-swatch wells-leg-swatch--tonkawa"></span>Tonkawa
+        <span class="leg-swatch wells-leg-swatch--atoka"></span>Atoka
+        <span class="leg-swatch wells-leg-swatch--other"></span>Other / Unknown
+      </div>
+      <div class="wells-map-wrap">
+        <div id="wells-map" class="wells-map"></div>
+      </div>
+    </section>
+
+    <section class="container section--tight">
+      <div class="section-heading">Well table <span class="section-heading__count" data-text="table-count">—</span></div>
+      <div class="table-wrap">
+        <table class="data-table" id="wells-table">
+          <thead>
+            <tr>
+              <th scope="col" data-sort="api" class="data-table__th--sortable">API</th>
+              <th scope="col" data-sort="well_name" class="data-table__th--sortable">Well name</th>
+              <th scope="col" data-sort="operator" class="data-table__th--sortable">Operator</th>
+              <th scope="col" data-sort="formation" class="data-table__th--sortable">Formation</th>
+              <th scope="col" data-sort="county" class="data-table__th--sortable">County</th>
+              <th scope="col" data-sort="spud_date" class="data-table__th--sortable">Spud</th>
+              <th scope="col" data-sort="lateral_length_ft" class="data-table__th--sortable data-table__th--num">LL (ft)</th>
+              <th scope="col" data-sort="cumulative_oil_bbl" class="data-table__th--sortable data-table__th--num">Cum oil (Bbl)</th>
+              <th scope="col" data-sort="cumulative_gas_mcf" class="data-table__th--sortable data-table__th--num">Cum gas (Mcf)</th>
+              <th scope="col">Owned overlap</th>
+            </tr>
+          </thead>
+          <tbody data-wells-rows></tbody>
+        </table>
+      </div>
+      <div class="empty-state" data-text="empty-state" hidden>
+        No wells match the current filters.
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container site-footer__row">
+      <div class="site-footer__brand">
+        GBK International Group, Ltd &middot; TPC Minerals, LLC
+      </div>
+      <div class="site-footer__meta">
+        Data as of <span data-text="data-asof">—</span> &middot;
+        Inventory: <span data-text="inventory-file">—</span> &middot;
+        Oseberg: <span data-text="oseberg-folder">—</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+          integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+          crossorigin=""></script>
+  <script src="app.js?v=2026-05-22-17"></script>
+  <script>
+    if (window.wab) { window.wab.initWells(); }
+  </script>
+</body>
+</html>

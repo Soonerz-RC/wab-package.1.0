@@ -2174,6 +2174,472 @@
   }
 
   // -------------------------------------------------------------------------
+  // Wells page (wells.html)
+  // -------------------------------------------------------------------------
+
+  // Formation classification: normalize the raw formation/reservoir text from
+  // completions.json (formation) or production.json (reservoir_name) into one
+  // of the canonical categories the filter dropdown exposes. Matching is
+  // substring-based and order-sensitive (Red Fork before Cherokee since Red
+  // Fork is within the Cherokee Group nomenclature).
+  function _classifyFormation(rawText) {
+    if (!rawText) return "OTHER";
+    const t = String(rawText).toUpperCase();
+    if (t.includes("RED FORK") || t.includes("REDFORK")) return "REDFORK";
+    if (t.includes("CHEROKEE")) return "CHEROKEE";
+    if (t.includes("GRANITE WASH") || t.includes("GRANITE")) return "GRANITE_WASH";
+    if (t.includes("CLEVELAND")) return "CLEVELAND";
+    if (t.includes("TONKAWA")) return "TONKAWA";
+    if (t.includes("ATOKA")) return "ATOKA";
+    return "OTHER";
+  }
+
+  function _formationLabel(category) {
+    switch (category) {
+      case "CHEROKEE":     return "Cherokee";
+      case "REDFORK":      return "Red Fork";
+      case "GRANITE_WASH": return "Granite Wash";
+      case "CLEVELAND":    return "Cleveland";
+      case "TONKAWA":      return "Tonkawa";
+      case "ATOKA":        return "Atoka";
+      default:             return "Other / Unknown";
+    }
+  }
+
+  function _formationColor(category) {
+    switch (category) {
+      case "CHEROKEE":     return "#9b2c31";  // maroon
+      case "REDFORK":      return "#c4636a";  // maroon-light
+      case "GRANITE_WASH": return "#2f6e3f";  // green
+      case "CLEVELAND":    return "#4f8a55";  // green-mid
+      case "TONKAWA":      return "#798e8f";  // teal-gray
+      case "ATOKA":        return "#54595f";  // dark gray
+      default:             return "#c7c7c0";  // light gray
+    }
+  }
+
+  // Build a circle marker for a well, sized by lateral length and
+  // colored by formation. "Key" wells (Cherokee/Red Fork in last 5 yrs)
+  // get a thicker outline.
+  function _wellMarker(well, isKey) {
+    const color = _formationColor(well.formation_category);
+    const ll = well.lateral_length_ft || 0;
+    // Marker radius: 4 to 9 px based on lateral length
+    const radius = ll ? Math.max(4, Math.min(9, 4 + (ll / 12000) * 5)) : 4;
+    const opts = {
+      radius: radius,
+      color: isKey ? "#222222" : color,
+      weight: isKey ? 2 : 1,
+      fillColor: color,
+      fillOpacity: 0.85,
+    };
+    return window.L.circleMarker([well.lat, well.lon], opts);
+  }
+
+  function _wellPopupHtml(well, ownedTractIds) {
+    // Build the popup DOM safely (no innerHTML on untrusted data)
+    const wrap = document.createElement("div");
+    const title = document.createElement("div");
+    title.className = "well-popup__title";
+    title.textContent = well.well_name || well.well_id || "Well";
+    wrap.appendChild(title);
+    const sub = document.createElement("div");
+    sub.className = "well-popup__subtitle";
+    sub.textContent = `API ${well.well_id || "—"} · ${well.county || "—"}`;
+    wrap.appendChild(sub);
+
+    const kv = document.createElement("dl");
+    kv.className = "well-popup__kv";
+    const row = (k, v) => {
+      const dt = document.createElement("dt");
+      dt.textContent = k;
+      const dd = document.createElement("dd");
+      if (v instanceof Node) dd.appendChild(v);
+      else dd.textContent = v == null ? "—" : String(v);
+      kv.appendChild(dt);
+      kv.appendChild(dd);
+    };
+    row("Operator", well.operator || "—");
+    row("Formation", _formationLabel(well.formation_category));
+    row("Profile", well.wellbore_profile || "—");
+    row("Spud", formatDate(well.spud_date));
+    row("Completion", formatDate(well.completion_date));
+    row("Lateral length", well.lateral_length_ft ? formatNumber(well.lateral_length_ft) + " ft" : "—");
+    row("Status", well.well_status || "—");
+    if (well.cumulative_oil_bbl) row("Cum oil", formatNumber(well.cumulative_oil_bbl, { decimals: 0 }) + " bbl");
+    if (well.cumulative_gas_mcf) row("Cum gas", formatNumber(well.cumulative_gas_mcf, { decimals: 0 }) + " mcf");
+    wrap.appendChild(kv);
+
+    const footer = document.createElement("div");
+    footer.className = "well-popup__footer";
+    if (ownedTractIds && ownedTractIds.length) {
+      const span = document.createElement("span");
+      span.style.color = "var(--color-text-secondary)";
+      span.appendChild(document.createTextNode("Owned overlap: "));
+      ownedTractIds.forEach((tid, i) => {
+        if (i > 0) span.appendChild(document.createTextNode(", "));
+        const a = document.createElement("a");
+        a.href = "tract.html?id=" + encodeURIComponent(tid);
+        a.textContent = tid;
+        span.appendChild(a);
+      });
+      footer.appendChild(span);
+    }
+    if (well.oseberg_url) {
+      if (footer.firstChild) footer.appendChild(document.createElement("br"));
+      const a = _link("View OCC record", well.oseberg_url, { external: true });
+      footer.appendChild(a);
+    }
+    if (footer.firstChild) wrap.appendChild(footer);
+    return wrap;
+  }
+
+  async function initWells() {
+    const root = document.querySelector("[data-page='wells']");
+    if (!root) return;
+    if (typeof window.L === "undefined") {
+      renderError(root, new Error("Leaflet failed to load. Check network connectivity to unpkg.com."));
+      return;
+    }
+
+    try {
+      const [wellsDoc, completionsDoc, productionDoc, tractsDoc, metaDoc] = await Promise.all([
+        loadJSON("data/wells.json"),
+        loadJSON("data/completions.json"),
+        loadJSON("data/production.json"),
+        loadJSON("data/tracts.json"),
+        loadJSON("data/meta.json").catch(() => null),
+      ]);
+      const allWells = wellsDoc.wells || [];
+      const completions = completionsDoc.completions || [];
+      const production = productionDoc.production || [];
+      const tracts = tractsDoc.tracts || [];
+
+      // Build owned-section -> tract IDs lookup
+      const ownedByStr = {};
+      tracts.forEach((t) => {
+        if (!ownedByStr[t.str]) ownedByStr[t.str] = [];
+        ownedByStr[t.str].push(t.tract_id);
+      });
+
+      // Build well -> formation lookup. Prefer completion's formation;
+      // fall back to production's reservoir_name when no completion match.
+      const formationByApi = {};
+      completions.forEach((c) => {
+        if (c.well_id && c.formation && !formationByApi[c.well_id]) {
+          formationByApi[c.well_id] = c.formation;
+        }
+      });
+      // Fallback: production lease records carry api_numbers[] and reservoir_name.
+      production.forEach((p) => {
+        const reservoir = p.reservoir_name;
+        if (!reservoir) return;
+        (p.api_numbers || []).forEach((api) => {
+          if (!formationByApi[api]) formationByApi[api] = reservoir;
+        });
+      });
+
+      // Build well -> {cum_oil, cum_gas} via the lease-level production data.
+      // Note: per-well-per-month rate data isn't available; we use the lease
+      // sums as a proxy when the well is the only one on the lease, otherwise
+      // we just expose the lease totals as a contextual hint.
+      const prodByApi = {};
+      production.forEach((p) => {
+        (p.api_numbers || []).forEach((api) => {
+          if (!prodByApi[api]) {
+            prodByApi[api] = {
+              cumulative_oil_bbl: p.cumulative_oil_bbl,
+              cumulative_gas_mcf: p.cumulative_gas_mcf,
+              last_prod_date: p.last_prod_date,
+              lease_name: p.lease_name,
+            };
+          }
+        });
+      });
+
+      // Enrich each well with formation, owned-tract overlap, and cum production
+      const enriched = allWells.map((w) => {
+        const rawFormation = formationByApi[w.well_id] || null;
+        const formation_category = _classifyFormation(rawFormation);
+        const overlap = [];
+        (w.sections || []).forEach((s) => {
+          (ownedByStr[s] || []).forEach((tid) => {
+            if (!overlap.includes(tid)) overlap.push(tid);
+          });
+        });
+        const prod = prodByApi[w.well_id] || {};
+        return {
+          ...w,
+          formation_raw: rawFormation,
+          formation_category,
+          owned_tract_ids: overlap,
+          cumulative_oil_bbl: prod.cumulative_oil_bbl || null,
+          cumulative_gas_mcf: prod.cumulative_gas_mcf || null,
+        };
+      });
+
+      // Populate filter dropdowns
+      const counties = Array.from(new Set(enriched.map((w) => w.county).filter(Boolean))).sort();
+      const countySel = root.querySelector("select[data-filter='county']");
+      counties.forEach((c) => {
+        const o = document.createElement("option");
+        o.value = c; o.textContent = c; countySel.appendChild(o);
+      });
+      const operators = Array.from(new Set(enriched.map((w) => w.operator).filter(Boolean))).sort();
+      const opSel = root.querySelector("select[data-filter='operator']");
+      operators.forEach((o) => {
+        const el = document.createElement("option");
+        el.value = o; el.textContent = o; opSel.appendChild(el);
+      });
+
+      // Initial filter state — defaults per Gib's prompt
+      const state = {
+        filters: {
+          formation: "CHEROKEE_OR_REDFORK",
+          vintage: "5",
+          county: "",
+          operator: "",
+          "min-ll": "",
+          search: "",
+        },
+      };
+
+      const filterInputs = root.querySelectorAll("[data-filter]");
+      filterInputs.forEach((el) => {
+        const ev = el.tagName === "SELECT" ? "change" : "input";
+        if (state.filters[el.dataset.filter] !== undefined && el.tagName === "SELECT") {
+          el.value = state.filters[el.dataset.filter];
+        }
+        el.addEventListener(ev, () => {
+          state.filters[el.dataset.filter] = el.value;
+          render();
+        });
+      });
+      root.querySelector("[data-action='reset-filters']").addEventListener("click", () => {
+        state.filters = {
+          formation: "CHEROKEE_OR_REDFORK",
+          vintage: "5",
+          county: "",
+          operator: "",
+          "min-ll": "",
+          search: "",
+        };
+        filterInputs.forEach((el) => {
+          if (state.filters[el.dataset.filter] !== undefined) {
+            el.value = state.filters[el.dataset.filter];
+          } else {
+            el.value = "";
+          }
+        });
+        render();
+      });
+
+      // Initialize Leaflet map. Center on the mean of well lat/lons.
+      const validCoords = enriched.filter((w) => w.lat && w.lon);
+      const meanLat = validCoords.reduce((s, w) => s + w.lat, 0) / Math.max(1, validCoords.length);
+      const meanLon = validCoords.reduce((s, w) => s + w.lon, 0) / Math.max(1, validCoords.length);
+      const map = window.L.map("wells-map", {
+        center: [meanLat || 35.7, meanLon || -99.5],
+        zoom: 9,
+        scrollWheelZoom: true,
+      });
+      window.L.tileLayer(
+        "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
+        {
+          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+          subdomains: "abcd",
+          maxZoom: 18,
+        }
+      ).addTo(map);
+
+      // Layer group for filtered well markers (cleared & re-added on each render)
+      const markerLayer = window.L.layerGroup().addTo(map);
+
+      function _wellPasses(w, f) {
+        // Formation
+        if (f.formation === "CHEROKEE_OR_REDFORK") {
+          if (w.formation_category !== "CHEROKEE" && w.formation_category !== "REDFORK") return false;
+        } else if (f.formation && w.formation_category !== f.formation) {
+          return false;
+        }
+        // Vintage
+        const years = parseInt(f.vintage, 10);
+        if (years && w.spud_date) {
+          const today = new Date();
+          const spud = new Date(w.spud_date + "T00:00:00Z");
+          const cutoff = new Date(today.getTime() - years * 365 * 24 * 3600 * 1000);
+          if (spud < cutoff) return false;
+        } else if (years && !w.spud_date) {
+          // No spud date — drop when a vintage filter is active
+          return false;
+        }
+        // County
+        if (f.county && w.county !== f.county) return false;
+        // Operator
+        if (f.operator && w.operator !== f.operator) return false;
+        // Min LL
+        const minLl = parseFloat(f["min-ll"]);
+        if (!isNaN(minLl) && minLl > 0) {
+          if (!w.lateral_length_ft || w.lateral_length_ft < minLl) return false;
+        }
+        // Search
+        const q = (f.search || "").trim().toLowerCase();
+        if (q) {
+          const haystack = [
+            w.well_id, w.well_name, w.operator, w.county, w.formation_raw,
+            (w.owned_tract_ids || []).join(" "),
+          ].filter(Boolean).join(" ").toLowerCase();
+          if (!haystack.includes(q)) return false;
+        }
+        return true;
+      }
+
+      function _renderMap(filteredWells) {
+        markerLayer.clearLayers();
+        const fiveYearsAgo = new Date(Date.now() - 5 * 365 * 24 * 3600 * 1000);
+        filteredWells.forEach((w) => {
+          if (!w.lat || !w.lon) return;
+          const isCherryRF = w.formation_category === "CHEROKEE" || w.formation_category === "REDFORK";
+          const isRecent = w.spud_date && new Date(w.spud_date + "T00:00:00Z") >= fiveYearsAgo;
+          const isKey = isCherryRF && isRecent;
+          const marker = _wellMarker(w, isKey);
+          marker.bindPopup(_wellPopupHtml(w, w.owned_tract_ids));
+          markerLayer.addLayer(marker);
+        });
+      }
+
+      function _renderKPIs(filteredWells) {
+        const total = filteredWells.length;
+        const cherokee = filteredWells.filter((w) => w.formation_category === "CHEROKEE").length;
+        const redfork = filteredWells.filter((w) => w.formation_category === "REDFORK").length;
+        const ops = new Set(filteredWells.map((w) => w.operator).filter(Boolean)).size;
+        const llVals = filteredWells.map((w) => w.lateral_length_ft).filter((v) => typeof v === "number" && v > 0);
+        const avgLl = llVals.length ? llVals.reduce((s, v) => s + v, 0) / llVals.length : 0;
+        const cumOilBbl = filteredWells.reduce((s, w) => s + (w.cumulative_oil_bbl || 0), 0);
+        _setKpi(root, "total", formatNumber(total));
+        _setKpi(root, "cherokee", formatNumber(cherokee));
+        _setKpi(root, "redfork", formatNumber(redfork));
+        _setKpi(root, "operators", formatNumber(ops));
+        _setKpi(root, "avg-ll", avgLl ? formatNumber(avgLl, { decimals: 0 }) : "—");
+        _setKpi(root, "cum-oil", cumOilBbl
+          ? formatNumber(cumOilBbl / 1000, { decimals: 0 })  // MBBL
+          : "—");
+      }
+
+      function _wellSortableValue(w, key) {
+        if (key === "api") return w.well_id;
+        if (key === "formation") return _formationLabel(w.formation_category);
+        return w[key];
+      }
+
+      const tableSort = { key: "spud_date", dir: "desc" };
+      root.querySelectorAll("[data-sort]").forEach((th) => {
+        th.addEventListener("click", () => {
+          const k = th.dataset.sort;
+          if (tableSort.key === k) tableSort.dir = tableSort.dir === "asc" ? "desc" : "asc";
+          else { tableSort.key = k; tableSort.dir = "asc"; }
+          render();
+        });
+      });
+
+      function _renderTable(filteredWells) {
+        const rows = filteredWells.slice().sort((a, b) => {
+          const av = _wellSortableValue(a, tableSort.key);
+          const bv = _wellSortableValue(b, tableSort.key);
+          if (av == null && bv == null) return 0;
+          if (av == null) return 1;
+          if (bv == null) return -1;
+          if (typeof av === "number" && typeof bv === "number") {
+            return tableSort.dir === "asc" ? av - bv : bv - av;
+          }
+          const cmp = String(av).toLowerCase().localeCompare(String(bv).toLowerCase());
+          return tableSort.dir === "asc" ? cmp : -cmp;
+        });
+        const tbody = root.querySelector("[data-wells-rows]");
+        while (tbody.firstChild) tbody.removeChild(tbody.firstChild);
+        rows.forEach((w) => {
+          const tr = document.createElement("tr");
+          // API as link to OCC record
+          const apiTd = document.createElement("td");
+          apiTd.className = "data-table__cell--id";
+          apiTd.appendChild(_link(w.well_id, w.oseberg_url, { external: !!w.oseberg_url }));
+          tr.appendChild(apiTd);
+          tr.appendChild(_td(w.well_name));
+          tr.appendChild(_td(w.operator));
+          // Formation cell with little color dot
+          const fmCell = document.createElement("td");
+          const dot = document.createElement("span");
+          dot.style.cssText = `display:inline-block;width:9px;height:9px;background:${_formationColor(w.formation_category)};margin-right:6px;vertical-align:middle;`;
+          fmCell.appendChild(dot);
+          fmCell.appendChild(document.createTextNode(_formationLabel(w.formation_category)));
+          tr.appendChild(fmCell);
+          tr.appendChild(_td(w.county));
+          tr.appendChild(_td(formatDate(w.spud_date)));
+          tr.appendChild(_td(w.lateral_length_ft ? formatNumber(w.lateral_length_ft) : "—",
+                             { cls: "data-table__cell--num" }));
+          tr.appendChild(_td(w.cumulative_oil_bbl ? formatNumber(w.cumulative_oil_bbl, { decimals: 0 }) : "—",
+                             { cls: "data-table__cell--num" }));
+          tr.appendChild(_td(w.cumulative_gas_mcf ? formatNumber(w.cumulative_gas_mcf, { decimals: 0 }) : "—",
+                             { cls: "data-table__cell--num" }));
+          // Owned overlap
+          if (w.owned_tract_ids && w.owned_tract_ids.length) {
+            const td = document.createElement("td");
+            w.owned_tract_ids.forEach((tid, i) => {
+              if (i > 0) td.appendChild(document.createTextNode(", "));
+              const a = document.createElement("a");
+              a.href = "tract.html?id=" + encodeURIComponent(tid);
+              a.textContent = tid;
+              td.appendChild(a);
+            });
+            tr.appendChild(td);
+          } else {
+            tr.appendChild(_td("—", { cls: "data-table__cell--muted" }));
+          }
+          tbody.appendChild(tr);
+        });
+        // Sort indicator
+        root.querySelectorAll("[data-sort]").forEach((th) => {
+          th.classList.remove("is-sorted-asc", "is-sorted-desc");
+          if (th.dataset.sort === tableSort.key) {
+            th.classList.add(tableSort.dir === "asc" ? "is-sorted-asc" : "is-sorted-desc");
+          }
+        });
+        _setText(root, "table-count", `${rows.length} of ${enriched.length}`);
+      }
+
+      function render() {
+        const filtered = enriched.filter((w) => _wellPasses(w, state.filters));
+        _renderKPIs(filtered);
+        _renderMap(filtered);
+        _renderTable(filtered);
+        _setText(
+          root,
+          "hero-stats",
+          `${formatNumber(filtered.length)} wells in current view — across ${new Set(filtered.map(w => w.operator).filter(Boolean)).size} operators`
+        );
+        const empty = root.querySelector("[data-text='empty-state']");
+        if (empty) empty.hidden = filtered.length !== 0;
+      }
+
+      render();
+
+      // Footer
+      if (metaDoc) {
+        _setText(root, "data-asof", formatDate(metaDoc.generated_at || ""));
+        _setText(root, "inventory-file", metaDoc.inventory_file || "—");
+        _setText(root, "oseberg-folder", metaDoc.oseberg_folder || "—");
+      }
+    } catch (err) {
+      renderError(root, err);
+    }
+  }
+
+  function _setKpi(root, key, val) {
+    const el = root.querySelector(`[data-kpi='${key}']`);
+    if (el) el.textContent = val;
+  }
+
+  // -------------------------------------------------------------------------
   // Export
   // -------------------------------------------------------------------------
 
@@ -2189,5 +2655,6 @@
     initTract,
     initActivity,
     initTownships,
+    initWells,
   };
 })();
