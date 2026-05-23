@@ -592,12 +592,25 @@
           }
         }
 
-        // --- County horizontal bar: NRA by county ---
+        // --- County horizontal bar: NRA by county, labelled with section count ---
+        // Sections per county = count of unique STRs touching a county.
+        const sectionsByCounty = new Map();
+        {
+          const seen = new Map();
+          rows.forEach((t) => {
+            if (!seen.has(t.county)) seen.set(t.county, new Set());
+            seen.get(t.county).add(t.str);
+          });
+          seen.forEach((set, county) => sectionsByCounty.set(county, set.size));
+        }
         const countyBuckets = _aggregateBy(rows, (t) => t.county, (t) => t.nra || 0);
         const countyEntries = Array.from(countyBuckets.entries())
           .sort((a, b) => b[1] - a[1]);
-        const countyLabels = countyEntries.map((e) => e[0]);
-        const countyData = countyEntries.map((e) => Number(e[1].toFixed(2)));
+        const countyLabels = countyEntries.map(([c]) => {
+          const sec = sectionsByCounty.get(c) || 0;
+          return `${c} · ${sec} sec`;
+        });
+        const countyData = countyEntries.map(([, nra]) => Number(nra.toFixed(2)));
 
         const countyCanvas = root.querySelector("#chart-county");
         if (countyCanvas) {
@@ -650,66 +663,45 @@
           }
         }
 
-        // --- Asking by type: stacked horizontal bar (Mineral vs ORRI) ---
-        // Both types now carry sales_revenue per spec §4.3, §4.4, so the
-        // sums are straightforward and stay correct under any filter.
-        const mineralAsk = rows
-          .filter((t) => t.type === "mineral")
-          .reduce((s, t) => s + (t.sales_revenue || 0), 0);
-        const orriAsk = rows
-          .filter((t) => t.type === "orri")
-          .reduce((s, t) => s + (t.sales_revenue || 0), 0);
+        // --- Top 10 mineral deals by asking $ (horizontal bar) ---
+        const top10Mineral = rows
+          .filter((t) => t.type === "mineral" && t.sales_revenue)
+          .sort((a, b) => b.sales_revenue - a.sales_revenue)
+          .slice(0, 10);
+        const top10Labels = top10Mineral.map((t) => `${t.deal_name} (${t.tract_id})`);
+        const top10Data = top10Mineral.map((t) => t.sales_revenue);
 
         const askingCanvas = root.querySelector("#chart-asking");
         if (askingCanvas) {
           if (charts.asking) {
-            charts.asking.data.datasets[0].data = [Math.round(mineralAsk)];
-            charts.asking.data.datasets[1].data = [Math.round(orriAsk)];
+            charts.asking.data.labels = top10Labels;
+            charts.asking.data.datasets[0].data = top10Data;
             charts.asking.update();
           } else {
             charts.asking = new window.Chart(askingCanvas, {
               type: "bar",
               data: {
-                labels: [""],
-                datasets: [
-                  {
-                    label: "Mineral",
-                    data: [Math.round(mineralAsk)],
-                    backgroundColor: CHART_COLORS.maroon,
-                    borderWidth: 0,
-                  },
-                  {
-                    label: "ORRI",
-                    data: [Math.round(orriAsk)],
-                    backgroundColor: CHART_COLORS.maroonLight,
-                    borderWidth: 0,
-                  },
-                ],
+                labels: top10Labels,
+                datasets: [{
+                  data: top10Data,
+                  backgroundColor: CHART_COLORS.maroon,
+                  borderWidth: 0,
+                }],
               },
               options: {
                 indexAxis: "y",
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
-                  legend: {
-                    position: "bottom",
-                    labels: {
-                      font: { family: "Roboto, sans-serif", size: 11 },
-                      color: CHART_COLORS.textSecondary,
-                      boxWidth: 10,
-                      boxHeight: 10,
-                      padding: 8,
-                    },
-                  },
+                  legend: { display: false },
                   tooltip: {
                     callbacks: {
-                      label: (ctx) => `${ctx.dataset.label}: ${formatCurrency(ctx.parsed.x)}`,
+                      label: (ctx) => formatCurrency(ctx.parsed.x),
                     },
                   },
                 },
                 scales: {
                   x: {
-                    stacked: true,
                     grid: { color: "#e5e5e0", drawBorder: false },
                     ticks: {
                       font: { family: "Roboto, sans-serif", size: 10 },
@@ -718,9 +710,12 @@
                     },
                   },
                   y: {
-                    stacked: true,
                     grid: { display: false, drawBorder: false },
-                    ticks: { display: false },
+                    ticks: {
+                      font: { family: "Roboto, sans-serif", size: 10 },
+                      color: CHART_COLORS.text,
+                      autoSkip: false,
+                    },
                   },
                 },
               },
