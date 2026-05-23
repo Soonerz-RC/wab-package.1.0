@@ -967,7 +967,7 @@
       }
       if (tract.sales_revenue) {
         metrics.push(
-          _makeMetric(formatCurrency(tract.sales_revenue), "Asking")
+          _makeMetric(formatCurrency(tract.sales_revenue), "Price")
         );
       }
     } else {
@@ -988,7 +988,7 @@
           : "—";
       metrics.push(_makeMetric(expDisplay, "Lease expiration"));
       if (tract.sales_revenue) {
-        metrics.push(_makeMetric(formatCurrency(tract.sales_revenue), "Asking"));
+        metrics.push(_makeMetric(formatCurrency(tract.sales_revenue), "Price"));
       }
     }
 
