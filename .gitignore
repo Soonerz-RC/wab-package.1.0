@@ -31,3 +31,6 @@ site/data/
 # Excel lock files (created when a file is open in Excel)
 ~$*.xlsx
 ~$*.xls
+
+# Claude plugin tooling artifacts
+site/CLAUDE.md

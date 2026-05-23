@@ -438,6 +438,44 @@
     return tr;
   }
 
+  // -------------------------------------------------------------------------
+  // Chart palette (matches the rest of the site's brand tokens)
+  // -------------------------------------------------------------------------
+
+  const CHART_COLORS = {
+    maroon: "#9b2c31",
+    maroonLight: "#c4636a",
+    green: "#2f6e3f",
+    greenLight: "#4f8a55",
+    gray: "#798e8f",
+    grayLight: "#c7c7c0",
+    bg: "#ffffff",
+    bgAlt: "#fafaf8",
+    text: "#222222",
+    textSecondary: "#54595f",
+  };
+
+  // Status -> color mapping (consistent with pill colors elsewhere on the site)
+  const STATUS_COLORS = {
+    HBP: CHART_COLORS.green,
+    LEASED: CHART_COLORS.greenLight,
+    NON_PRODUCING: CHART_COLORS.maroon,
+    PENDING: CHART_COLORS.maroonLight,
+    OPEN: CHART_COLORS.gray,
+    OTHER: CHART_COLORS.grayLight,
+  };
+
+  function _aggregateBy(rows, keyFn, valueFn) {
+    const out = new Map();
+    rows.forEach((r) => {
+      const k = keyFn(r);
+      if (k === null || k === undefined) return;
+      const v = valueFn(r);
+      out.set(k, (out.get(k) || 0) + (v || 0));
+    });
+    return out;
+  }
+
   async function initTracts() {
     const root = document.querySelector("[data-page='tracts']");
     if (!root) return;
@@ -448,6 +486,9 @@
         loadJSON("data/meta.json").catch(() => null),
       ]);
       const allTracts = tractsDoc.tracts || [];
+
+      // Hold chart instances so we can update them on filter changes
+      const charts = { status: null, county: null, asking: null };
 
       // Populate the county filter
       const counties = Array.from(new Set(allTracts.map((t) => t.county))).sort();
@@ -503,6 +544,213 @@
         render();
       });
 
+      function _updateTractCharts(rows) {
+        if (typeof window.Chart === "undefined") return;
+
+        // --- Status donut: NRA aggregated by status_category ---
+        // Ordered for visual stacking (HBP/LEASED first, then maroon group, then gray)
+        const STATUS_ORDER = ["HBP", "LEASED", "NON_PRODUCING", "PENDING", "OPEN", "OTHER"];
+        const statusBuckets = _aggregateBy(rows, (t) => t.status_category, (t) => t.nra || 0);
+        const statusLabels = [];
+        const statusData = [];
+        const statusColors = [];
+        STATUS_ORDER.forEach((s) => {
+          if (statusBuckets.has(s) && statusBuckets.get(s) > 0) {
+            statusLabels.push(formatStatus(s));
+            statusData.push(Number(statusBuckets.get(s).toFixed(2)));
+            statusColors.push(STATUS_COLORS[s] || CHART_COLORS.grayLight);
+          }
+        });
+        const totalNRA = rows.reduce((s, t) => s + (t.nra || 0), 0);
+        _setText(root, "status-total-nra", formatNumber(totalNRA, { decimals: 1 }));
+
+        const statusCanvas = root.querySelector("#chart-status");
+        if (statusCanvas) {
+          if (charts.status) {
+            charts.status.data.labels = statusLabels;
+            charts.status.data.datasets[0].data = statusData;
+            charts.status.data.datasets[0].backgroundColor = statusColors;
+            charts.status.update();
+          } else {
+            charts.status = new window.Chart(statusCanvas, {
+              type: "doughnut",
+              data: {
+                labels: statusLabels,
+                datasets: [{
+                  data: statusData,
+                  backgroundColor: statusColors,
+                  borderColor: CHART_COLORS.bg,
+                  borderWidth: 2,
+                }],
+              },
+              options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: "62%",
+                plugins: {
+                  legend: {
+                    position: "bottom",
+                    labels: {
+                      font: { family: "Roboto, sans-serif", size: 11 },
+                      color: CHART_COLORS.textSecondary,
+                      boxWidth: 10,
+                      boxHeight: 10,
+                      padding: 8,
+                    },
+                  },
+                  tooltip: {
+                    callbacks: {
+                      label: (ctx) => `${ctx.label}: ${formatNumber(ctx.parsed, { decimals: 1 })} NRA`,
+                    },
+                  },
+                },
+              },
+            });
+          }
+        }
+
+        // --- County horizontal bar: NRA by county ---
+        const countyBuckets = _aggregateBy(rows, (t) => t.county, (t) => t.nra || 0);
+        const countyEntries = Array.from(countyBuckets.entries())
+          .sort((a, b) => b[1] - a[1]);
+        const countyLabels = countyEntries.map((e) => e[0]);
+        const countyData = countyEntries.map((e) => Number(e[1].toFixed(2)));
+
+        const countyCanvas = root.querySelector("#chart-county");
+        if (countyCanvas) {
+          if (charts.county) {
+            charts.county.data.labels = countyLabels;
+            charts.county.data.datasets[0].data = countyData;
+            charts.county.update();
+          } else {
+            charts.county = new window.Chart(countyCanvas, {
+              type: "bar",
+              data: {
+                labels: countyLabels,
+                datasets: [{
+                  data: countyData,
+                  backgroundColor: CHART_COLORS.maroon,
+                  borderColor: CHART_COLORS.maroon,
+                  borderWidth: 0,
+                }],
+              },
+              options: {
+                indexAxis: "y",
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                  legend: { display: false },
+                  tooltip: {
+                    callbacks: {
+                      label: (ctx) => `${formatNumber(ctx.parsed.x, { decimals: 1 })} NRA`,
+                    },
+                  },
+                },
+                scales: {
+                  x: {
+                    grid: { color: "#e5e5e0", drawBorder: false },
+                    ticks: {
+                      font: { family: "Roboto, sans-serif", size: 10 },
+                      color: CHART_COLORS.textSecondary,
+                    },
+                  },
+                  y: {
+                    grid: { display: false, drawBorder: false },
+                    ticks: {
+                      font: { family: "Roboto, sans-serif", size: 11 },
+                      color: CHART_COLORS.text,
+                    },
+                  },
+                },
+              },
+            });
+          }
+        }
+
+        // --- Asking by type: stacked horizontal bar (Mineral vs ORRI) ---
+        const mineralAsk = rows
+          .filter((t) => t.type === "mineral")
+          .reduce((s, t) => s + (t.sales_revenue || 0), 0);
+        // ORRI ask comes from meta.json aggregate cells (I48 + I93). The
+        // tracts list charts are tract-scoped, so we approximate from the
+        // filtered ORRIs using the per-acre assumptions ($1500 non-HBP,
+        // $3500 HBP) that Gib documented in those cells.
+        const orriAsk = rows
+          .filter((t) => t.type === "orri")
+          .reduce((s, t) => {
+            const ratePerAcre = t.status_category === "HBP" ? 3500 : 1500;
+            return s + (t.nra || 0) * ratePerAcre;
+          }, 0);
+
+        const askingCanvas = root.querySelector("#chart-asking");
+        if (askingCanvas) {
+          if (charts.asking) {
+            charts.asking.data.datasets[0].data = [Math.round(mineralAsk)];
+            charts.asking.data.datasets[1].data = [Math.round(orriAsk)];
+            charts.asking.update();
+          } else {
+            charts.asking = new window.Chart(askingCanvas, {
+              type: "bar",
+              data: {
+                labels: [""],
+                datasets: [
+                  {
+                    label: "Mineral",
+                    data: [Math.round(mineralAsk)],
+                    backgroundColor: CHART_COLORS.maroon,
+                    borderWidth: 0,
+                  },
+                  {
+                    label: "ORRI",
+                    data: [Math.round(orriAsk)],
+                    backgroundColor: CHART_COLORS.maroonLight,
+                    borderWidth: 0,
+                  },
+                ],
+              },
+              options: {
+                indexAxis: "y",
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                  legend: {
+                    position: "bottom",
+                    labels: {
+                      font: { family: "Roboto, sans-serif", size: 11 },
+                      color: CHART_COLORS.textSecondary,
+                      boxWidth: 10,
+                      boxHeight: 10,
+                      padding: 8,
+                    },
+                  },
+                  tooltip: {
+                    callbacks: {
+                      label: (ctx) => `${ctx.dataset.label}: ${formatCurrency(ctx.parsed.x)}`,
+                    },
+                  },
+                },
+                scales: {
+                  x: {
+                    stacked: true,
+                    grid: { color: "#e5e5e0", drawBorder: false },
+                    ticks: {
+                      font: { family: "Roboto, sans-serif", size: 10 },
+                      color: CHART_COLORS.textSecondary,
+                      callback: (v) => formatCurrency(v, { compact: true }),
+                    },
+                  },
+                  y: {
+                    stacked: true,
+                    grid: { display: false, drawBorder: false },
+                    ticks: { display: false },
+                  },
+                },
+              },
+            });
+          }
+        }
+      }
+
       function render() {
         // Apply filters
         const f = state.filters;
@@ -518,6 +766,9 @@
           }
           return true;
         });
+
+        // Update orientation charts to reflect the filtered subset
+        _updateTractCharts(rows);
 
         // Sort
         rows.sort((a, b) => _compareTracts(a, b, state.sort.key, state.sort.dir));

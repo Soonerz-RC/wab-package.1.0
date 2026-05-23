@@ -733,6 +733,78 @@ ul, ol {
 }
 
 /* ------------------------------------------------------------------------- */
+/* Orientation charts (tracts page)                                           */
+/* ------------------------------------------------------------------------- */
+
+.charts-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-4);
+  margin-top: var(--space-4);
+}
+
+@media (max-width: 900px) {
+  .charts-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.chart-card {
+  border: 1px solid var(--color-hairline);
+  border-top: 2px solid var(--color-maroon);
+  padding: var(--space-4);
+  background: var(--color-bg);
+}
+
+.chart-card__title {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-3);
+  font-weight: 500;
+}
+
+.chart-card__canvas-wrap {
+  position: relative;
+  height: 200px;
+}
+
+.chart-card__canvas-wrap--donut {
+  /* Add center label space; the donut leaves a hole in the middle */
+}
+
+.donut-center {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  text-align: center;
+}
+
+.donut-center__value {
+  font-family: var(--font-serif);
+  font-size: 24px;
+  font-weight: 500;
+  line-height: 1;
+  color: var(--color-text);
+  font-variant-numeric: tabular-nums;
+}
+
+.donut-center__label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--color-text-secondary);
+  font-weight: 500;
+  margin-top: 4px;
+}
+
+/* ------------------------------------------------------------------------- */
 /* Data table                                                                 */
 /* ------------------------------------------------------------------------- */
 
