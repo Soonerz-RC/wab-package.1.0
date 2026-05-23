@@ -162,6 +162,12 @@
       const orriAsk = sumOf(orris, "sales_revenue");
       const packageAsk = mineralAsk + orriAsk;
 
+      // Average price per NRA across the whole package (mineral NRA + all ORRI NRA).
+      // Computed from package-level totals rather than averaging per-tract rates so
+      // it reflects the blended $/NRA a buyer would pay on the package as offered.
+      const totalPackageNRA = mineralNRA + hbpNRA + nonHbpNRA;
+      const avgPricePerNRA = totalPackageNRA > 0 ? packageAsk / totalPackageNRA : 0;
+
       // Big-number values
       _setMetric(root, "total-sections", formatNumber(totalSections));
       _setMetric(root, "mineral-sections", formatNumber(mineralSections));
@@ -176,6 +182,7 @@
       _setText(root, "nonhbp-orri-nra", formatNumber(nonHbpNRA, { decimals: 1 }));
       _setText(root, "mineral-ask", formatCurrency(mineralAsk));
       _setText(root, "orri-ask", formatCurrency(orriAsk));
+      _setText(root, "avg-price-per-nra", "$" + formatNumber(avgPricePerNRA, { decimals: 0 }) + "/NRA");
 
       // Hero subtitle counties — dynamic from data
       const counties = Array.from(new Set(tracts.map((t) => t.county))).sort();
@@ -437,9 +444,22 @@
       tr.appendChild(_td("—", { cls: "data-table__cell--notes data-table__cell--muted" }));
     }
 
-    // Asking (mineral + ORRI both carry sales_revenue per spec §4.3, §4.4)
+    // Asking (mineral + ORRI both carry sales_revenue per spec §4.3, §4.4).
+    // Show the per-NRA rate as a small secondary line beneath the price so
+    // buyers can compare tract-level economics at a glance.
     if (t.sales_revenue !== null && t.sales_revenue !== undefined) {
-      tr.appendChild(_td(formatCurrency(t.sales_revenue), { cls: "data-table__cell--num" }));
+      const priceCell = document.createElement("td");
+      priceCell.className = "data-table__cell--num";
+      const priceMain = document.createElement("div");
+      priceMain.textContent = formatCurrency(t.sales_revenue);
+      priceCell.appendChild(priceMain);
+      if (t.sales_per_nra !== null && t.sales_per_nra !== undefined) {
+        const priceSub = document.createElement("div");
+        priceSub.className = "data-table__cell--subline";
+        priceSub.textContent = "$" + formatNumber(t.sales_per_nra, { decimals: 0 }) + "/NRA";
+        priceCell.appendChild(priceSub);
+      }
+      tr.appendChild(priceCell);
     } else {
       tr.appendChild(_td("—", { cls: "data-table__cell--num data-table__cell--muted" }));
     }
@@ -1008,6 +1028,11 @@
           _makeMetric(formatCurrency(tract.sales_revenue), "Price")
         );
       }
+      if (tract.sales_per_nra !== null && tract.sales_per_nra !== undefined) {
+        metrics.push(
+          _makeMetric("$" + formatNumber(tract.sales_per_nra, { decimals: 0 }), "$/NRA")
+        );
+      }
     } else {
       metrics.push(_makeMetric(formatNumber(tract.nra, { decimals: 2 }), "NRA"));
       metrics.push(_makeMetric(_statusPill(tract.status_category, tract.status_raw), "Status"));
@@ -1027,6 +1052,11 @@
       metrics.push(_makeMetric(expDisplay, "Lease expiration"));
       if (tract.sales_revenue) {
         metrics.push(_makeMetric(formatCurrency(tract.sales_revenue), "Price"));
+      }
+      if (tract.sales_per_nra !== null && tract.sales_per_nra !== undefined) {
+        metrics.push(
+          _makeMetric("$" + formatNumber(tract.sales_per_nra, { decimals: 0 }), "$/NRA")
+        );
       }
     }
 

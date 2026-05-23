@@ -926,6 +926,14 @@ ul, ol {
   color: var(--color-text-muted);
 }
 
+.data-table__cell--subline {
+  font-size: 10px;
+  color: var(--color-text-muted);
+  font-weight: 400;
+  margin-top: 2px;
+  letter-spacing: 0.02em;
+}
+
 .data-table__cell--notes {
   font-size: 11px;
   color: var(--color-text-secondary);
