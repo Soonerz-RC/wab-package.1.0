@@ -1287,6 +1287,303 @@ a.reg-badge:hover {
 }
 
 /* ------------------------------------------------------------------------- */
+/* Township coverage grid (townships.html)                                    */
+/* ------------------------------------------------------------------------- */
+
+.townships-section {
+  padding-bottom: var(--space-7);
+}
+
+.townships-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3) var(--space-4);
+  align-items: center;
+  font-size: 11.5px;
+  color: var(--color-text-secondary);
+  padding: var(--space-3) 0;
+  margin-bottom: var(--space-4);
+  border-top: 1px solid var(--color-hairline);
+  border-bottom: 1px solid var(--color-hairline);
+}
+
+.leg-swatch {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 1px solid var(--color-hairline-strong);
+  margin-right: 6px;
+  vertical-align: middle;
+}
+
+.leg-swatch--hbp           { background: var(--color-up); border-color: var(--color-up); }
+.leg-swatch--leased        { background: #abc8b1; border-color: #abc8b1; }
+.leg-swatch--non-producing { background: var(--color-maroon); border-color: var(--color-maroon); }
+.leg-swatch--open          { background: var(--color-gray, var(--color-hairline-strong)); border-color: var(--color-text-muted); }
+.leg-swatch--empty         { background: var(--color-bg); border-color: var(--color-hairline); }
+.leg-swatch--reg-marker    {
+  background: var(--color-bg);
+  border-color: var(--color-hairline);
+  position: relative;
+}
+.leg-swatch--reg-marker::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 5px;
+  height: 5px;
+  background: var(--color-maroon);
+}
+
+/* Townships grid — multiple township blocks arranged in a responsive grid */
+.townships-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--space-5);
+}
+
+.township-card {
+  border: 1px solid var(--color-hairline);
+  border-top: 2px solid var(--color-maroon);
+  padding: var(--space-4);
+  background: var(--color-bg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.township-card__header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.township-card__title {
+  font-family: var(--font-serif);
+  font-size: 17px;
+  font-weight: 500;
+  line-height: 1.2;
+  color: var(--color-text);
+  margin: 0;
+}
+
+.township-card__county {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--color-text-secondary);
+}
+
+/* Inner 6×6 PLSS grid */
+.twp-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 2px;
+}
+
+.twp-cell {
+  aspect-ratio: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-sans);
+  font-variant-numeric: tabular-nums;
+  background: var(--color-bg);
+  border: 1px solid var(--color-hairline);
+  position: relative;
+  user-select: none;
+}
+
+/* Owned section cells — clickable, status-coloured */
+.twp-cell--owned {
+  cursor: pointer;
+  border-color: transparent;
+}
+
+.twp-cell--owned:hover {
+  outline: 2px solid var(--color-maroon);
+  outline-offset: -1px;
+  z-index: 1;
+}
+
+.twp-cell--hbp           { background: var(--color-up);          color: #ffffff; }
+.twp-cell--leased        { background: #abc8b1;                  color: var(--color-text); }
+.twp-cell--non-producing { background: var(--color-maroon);      color: #ffffff; }
+.twp-cell--pending       { background: var(--color-maroon-light, #c4636a); color: #ffffff; }
+.twp-cell--open          { background: #e8eaea;                  color: var(--color-text); }
+.twp-cell--other         { background: var(--color-hairline-strong); color: var(--color-text); }
+.twp-cell--filtered      { opacity: 0.18; cursor: default; }
+
+/* Section number + tract count inside each cell */
+.sec-num {
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1;
+}
+.sec-count {
+  font-size: 9px;
+  letter-spacing: 0.05em;
+  margin-top: 2px;
+  opacity: 0.85;
+}
+
+/* Top-right marker indicating regulatory activity on this section */
+.twp-cell--has-reg::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 6px;
+  height: 6px;
+  background: var(--color-maroon);
+}
+
+.twp-cell--has-reg.twp-cell--non-producing::after,
+.twp-cell--has-reg.twp-cell--pending::after {
+  /* If cell is already maroon, draw the marker in a brighter accent */
+  background: #ffffff;
+}
+
+/* Township footer stats */
+.township-card__footer {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--color-text-secondary);
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--color-hairline);
+}
+
+/* Slide-out section detail panel */
+.section-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 460px;
+  max-width: 92vw;
+  height: 100vh;
+  background: var(--color-bg);
+  border-left: 1px solid var(--color-hairline);
+  box-shadow: -4px 0 16px rgba(0,0,0,0.06);
+  z-index: 100;
+  overflow-y: auto;
+  transform: translateX(0);
+  transition: transform 220ms ease-out;
+}
+
+.section-panel[hidden] {
+  display: block;
+  transform: translateX(101%);
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.section-panel__close {
+  position: sticky;
+  top: 0;
+  margin-left: auto;
+  display: block;
+  background: var(--color-bg);
+  border: none;
+  font-size: 26px;
+  line-height: 1;
+  padding: var(--space-3) var(--space-4);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  z-index: 1;
+}
+
+.section-panel__close:hover {
+  color: var(--color-maroon);
+}
+
+.section-panel__content {
+  padding: var(--space-2) var(--space-5) var(--space-6);
+}
+
+.section-panel__title {
+  font-family: var(--font-serif);
+  font-size: 22px;
+  font-weight: 500;
+  line-height: 1.2;
+  margin: 0 0 var(--space-2);
+  color: var(--color-text);
+}
+
+.section-panel__subtitle {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--color-text-secondary);
+  margin: 0 0 var(--space-4);
+}
+
+.section-panel__section {
+  margin-top: var(--space-5);
+}
+
+.section-panel__heading {
+  font-family: var(--font-sans);
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  margin: 0 0 var(--space-2);
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--color-maroon);
+}
+
+.section-panel__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 13px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.section-panel__list li {
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid var(--color-hairline);
+}
+
+.section-panel__list li:last-child {
+  border-bottom: none;
+}
+
+.section-panel__list-id {
+  font-weight: 500;
+  color: var(--color-maroon);
+  margin-right: var(--space-2);
+}
+
+.section-panel__empty {
+  font-size: 12px;
+  color: var(--color-text-muted);
+  font-style: italic;
+  margin: var(--space-2) 0 0;
+}
+
+.section-panel-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(34, 34, 34, 0.18);
+  z-index: 99;
+  transition: opacity 200ms ease-out;
+}
+
+.section-panel-backdrop[hidden] {
+  display: none;
+}
+
+/* ------------------------------------------------------------------------- */
 /* Error box                                                                  */
 /* ------------------------------------------------------------------------- */
 

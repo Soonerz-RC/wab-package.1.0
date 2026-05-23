@@ -1745,6 +1745,435 @@
   }
 
   // -------------------------------------------------------------------------
+  // Township coverage page (townships.html)
+  // -------------------------------------------------------------------------
+
+  // PLSS section numbering follows a snake pattern. Returns the section number
+  // for the cell at logical grid position (row, col), both 0-indexed from
+  // top-left.
+  function _plssSectionAt(row, col) {
+    const PLSS_GRID = [
+      [6, 5, 4, 3, 2, 1],
+      [7, 8, 9, 10, 11, 12],
+      [18, 17, 16, 15, 14, 13],
+      [19, 20, 21, 22, 23, 24],
+      [30, 29, 28, 27, 26, 25],
+      [31, 32, 33, 34, 35, 36],
+    ];
+    return PLSS_GRID[row][col];
+  }
+
+  function _statusToCellClass(category) {
+    switch (category) {
+      case "HBP": return "twp-cell--hbp";
+      case "LEASED": return "twp-cell--leased";
+      case "NON_PRODUCING": return "twp-cell--non-producing";
+      case "PENDING": return "twp-cell--pending";
+      case "OPEN": return "twp-cell--open";
+      default: return "twp-cell--other";
+    }
+  }
+
+  // Pick the most informative status when a section has multiple tracts
+  function _dominantStatus(statuses) {
+    const priority = ["HBP", "LEASED", "NON_PRODUCING", "PENDING", "OPEN", "OTHER"];
+    for (const p of priority) {
+      if (statuses.includes(p)) return p;
+    }
+    return statuses[0] || "OTHER";
+  }
+
+  async function initTownships() {
+    const root = document.querySelector("[data-page='townships']");
+    if (!root) return;
+
+    try {
+      const [tractsDoc, productionDoc, regDoc, leasingDoc, wellsDoc, permitsDoc, metaDoc] =
+        await Promise.all([
+          loadJSON("data/tracts.json"),
+          loadJSON("data/production.json"),
+          loadJSON("data/regulatory.json"),
+          loadJSON("data/leasing.json"),
+          loadJSON("data/wells.json"),
+          loadJSON("data/permits.json"),
+          loadJSON("data/meta.json").catch(() => null),
+        ]);
+      const allTracts = tractsDoc.tracts || [];
+
+      // Index data by section STR for fast section panel lookups
+      const productionBySection = {};
+      (productionDoc.production || []).forEach((p) => {
+        (p.sections || []).forEach((s) => {
+          if (!productionBySection[s]) productionBySection[s] = [];
+          productionBySection[s].push(p);
+        });
+      });
+      const regBySection = {};
+      (regDoc.actions || []).forEach((a) => {
+        (a.sections || []).forEach((s) => {
+          if (!regBySection[s]) regBySection[s] = [];
+          regBySection[s].push(a);
+        });
+      });
+      const leasingBySection = {};
+      (leasingDoc.leases || []).forEach((l) => {
+        (l.sections || []).forEach((s) => {
+          if (!leasingBySection[s]) leasingBySection[s] = [];
+          leasingBySection[s].push(l);
+        });
+      });
+      const wellsBySection = {};
+      (wellsDoc.wells || []).forEach((w) => {
+        (w.sections || []).forEach((s) => {
+          if (!wellsBySection[s]) wellsBySection[s] = [];
+          wellsBySection[s].push(w);
+        });
+      });
+      const permitsBySection = {};
+      (permitsDoc.permits || []).forEach((p) => {
+        (p.sections || []).forEach((s) => {
+          if (!permitsBySection[s]) permitsBySection[s] = [];
+          permitsBySection[s].push(p);
+        });
+      });
+
+      // Aggregate tracts by (township_range), then by section number
+      // township_range is "12N-23W"; section number parsed from str's leading "NN-"
+      const byTownship = {};
+      allTracts.forEach((t) => {
+        const tr = t.township_range;
+        const secNum = parseInt(t.str.split("-")[0], 10);
+        if (!byTownship[tr]) {
+          byTownship[tr] = { township_range: tr, county: t.county, sections: {} };
+        }
+        if (!byTownship[tr].sections[secNum]) {
+          byTownship[tr].sections[secNum] = [];
+        }
+        byTownship[tr].sections[secNum].push(t);
+      });
+
+      // Populate county filter
+      const counties = Array.from(new Set(Object.values(byTownship).map((tw) => tw.county))).sort();
+      const countySel = root.querySelector("select[data-filter='county']");
+      counties.forEach((c) => {
+        const opt = document.createElement("option");
+        opt.value = c;
+        opt.textContent = c;
+        countySel.appendChild(opt);
+      });
+
+      const state = { filters: { county: "", show: "" } };
+
+      root.querySelectorAll("[data-filter]").forEach((el) => {
+        el.addEventListener("change", () => {
+          state.filters[el.dataset.filter] = el.value;
+          render();
+        });
+      });
+      root.querySelector("[data-action='reset-filters']").addEventListener("click", () => {
+        state.filters = { county: "", show: "" };
+        root.querySelectorAll("[data-filter]").forEach((el) => { el.value = ""; });
+        render();
+      });
+
+      function _sectionPasses(sectionTracts, filter) {
+        if (!filter) return true;
+        if (filter === "HAS_REG") {
+          return sectionTracts.some((t) => !!t.regulatory_status);
+        }
+        const statuses = sectionTracts.map((t) => t.status_category);
+        return statuses.includes(filter);
+      }
+
+      function _townshipPasses(township, filters) {
+        if (filters.county && township.county !== filters.county) return false;
+        if (!filters.show) return true;
+        // At least one section must pass the show filter
+        return Object.values(township.sections).some(
+          (st) => _sectionPasses(st, filters.show)
+        );
+      }
+
+      function _renderTownshipCard(township, filters) {
+        const card = document.createElement("article");
+        card.className = "township-card";
+
+        const header = document.createElement("div");
+        header.className = "township-card__header";
+        const title = document.createElement("h3");
+        title.className = "township-card__title";
+        title.textContent = township.township_range;
+        const county = document.createElement("span");
+        county.className = "township-card__county";
+        county.textContent = township.county;
+        header.appendChild(title);
+        header.appendChild(county);
+        card.appendChild(header);
+
+        const grid = document.createElement("div");
+        grid.className = "twp-grid";
+        // Render 6x6 cells in the PLSS snake order
+        for (let r = 0; r < 6; r++) {
+          for (let c = 0; c < 6; c++) {
+            const sec = _plssSectionAt(r, c);
+            const cell = document.createElement("div");
+            cell.className = "twp-cell";
+            const secTracts = township.sections[sec] || [];
+            if (secTracts.length > 0) {
+              const passes = _sectionPasses(secTracts, filters.show);
+              const dominant = _dominantStatus(secTracts.map((t) => t.status_category));
+              cell.classList.add("twp-cell--owned", _statusToCellClass(dominant));
+              if (!passes && filters.show) {
+                cell.classList.add("twp-cell--filtered");
+              }
+              const hasReg = secTracts.some((t) => !!t.regulatory_status);
+              if (hasReg) cell.classList.add("twp-cell--has-reg");
+              const tractCount = secTracts.length;
+              cell.title = `Section ${sec} · ${tractCount} owned tract${tractCount > 1 ? "s" : ""} (${formatStatus(dominant)})`;
+              cell.dataset.section = sec;
+              cell.dataset.str = `${String(sec).padStart(2, "0")}-${township.township_range}`;
+              cell.addEventListener("click", () => {
+                if (!cell.classList.contains("twp-cell--filtered")) {
+                  _openSectionPanel(cell.dataset.str, secTracts);
+                }
+              });
+            } else {
+              cell.title = `Section ${sec} · not owned`;
+            }
+            const num = document.createElement("div");
+            num.className = "sec-num";
+            num.textContent = String(sec);
+            cell.appendChild(num);
+            if (secTracts.length > 0) {
+              const cnt = document.createElement("div");
+              cnt.className = "sec-count";
+              cnt.textContent = secTracts.length + " tr";
+              cell.appendChild(cnt);
+            }
+            grid.appendChild(cell);
+          }
+        }
+        card.appendChild(grid);
+
+        // Footer stats
+        const ownedSecs = Object.keys(township.sections).length;
+        const allTractsInTwp = Object.values(township.sections).flat();
+        const hbpCount = allTractsInTwp.filter((t) => t.status_category === "HBP").length;
+        const totalNRA = allTractsInTwp.reduce((s, t) => s + (t.nra || 0), 0);
+        const footer = document.createElement("div");
+        footer.className = "township-card__footer";
+        const left = document.createElement("span");
+        left.textContent = `${ownedSecs}/36 sec · ${hbpCount} HBP`;
+        const right = document.createElement("span");
+        right.textContent = `${formatNumber(totalNRA, { decimals: 1 })} NRA`;
+        footer.appendChild(left);
+        footer.appendChild(right);
+        card.appendChild(footer);
+        return card;
+      }
+
+      function render() {
+        const host = root.querySelector("[data-townships-grid]");
+        _replaceContent(host, []);
+
+        const townships = Object.values(byTownship)
+          .filter((tw) => _townshipPasses(tw, state.filters))
+          .sort((a, b) => {
+            if (a.county !== b.county) return a.county.localeCompare(b.county);
+            return a.township_range.localeCompare(b.township_range);
+          });
+
+        if (townships.length === 0) {
+          const empty = root.querySelector("[data-text='empty-state']");
+          empty.hidden = false;
+          return;
+        }
+        root.querySelector("[data-text='empty-state']").hidden = true;
+        townships.forEach((tw) => host.appendChild(_renderTownshipCard(tw, state.filters)));
+
+        // Hero stats
+        const totalSections = townships.reduce((s, tw) => s + Object.keys(tw.sections).length, 0);
+        _setText(
+          root,
+          "hero-stats",
+          `${formatNumber(totalSections)} owned sections across ${townships.length} unique township${townships.length === 1 ? "" : "s"} in ${new Set(townships.map((tw) => tw.county)).size} counties`
+        );
+      }
+
+      // Slide-out panel
+      function _openSectionPanel(str, sectionTracts) {
+        const panel = root.parentNode.querySelector("[data-section-panel]") ||
+                      document.querySelector("[data-section-panel]");
+        const backdrop = document.querySelector("[data-section-panel-backdrop]");
+        const content = document.querySelector("[data-section-panel-content]");
+        if (!panel || !content) return;
+
+        _replaceContent(content, []);
+
+        // Header
+        const t0 = sectionTracts[0];
+        const h = document.createElement("h2");
+        h.className = "section-panel__title";
+        h.textContent = `Section ${parseInt(t0.str.split("-")[0], 10)} · ${t0.township_range}`;
+        content.appendChild(h);
+
+        const sub = document.createElement("p");
+        sub.className = "section-panel__subtitle";
+        sub.textContent = `${t0.county} County · STR ${t0.str}`;
+        content.appendChild(sub);
+
+        const _section = (heading, contentNodes) => {
+          const sec = document.createElement("section");
+          sec.className = "section-panel__section";
+          const h3 = document.createElement("h3");
+          h3.className = "section-panel__heading";
+          h3.textContent = heading;
+          sec.appendChild(h3);
+          if (contentNodes.length === 0) {
+            const e = document.createElement("p");
+            e.className = "section-panel__empty";
+            e.textContent = "None.";
+            sec.appendChild(e);
+          } else {
+            const ul = document.createElement("ul");
+            ul.className = "section-panel__list";
+            contentNodes.forEach((n) => ul.appendChild(n));
+            sec.appendChild(ul);
+          }
+          return sec;
+        };
+
+        // Owned tracts list
+        const tractItems = sectionTracts.map((t) => {
+          const li = document.createElement("li");
+          const link = document.createElement("a");
+          link.className = "section-panel__list-id";
+          link.href = "tract.html?id=" + encodeURIComponent(t.tract_id);
+          link.textContent = t.tract_id;
+          li.appendChild(link);
+          const meta = document.createElement("span");
+          if (t.type === "mineral") {
+            meta.textContent = `${t.deal_name} · ${formatNumber(t.nra, { decimals: 2 })} NRA · ${formatStatus(t.status_category)}`;
+          } else {
+            meta.textContent = `ORRI · ${formatNumber(t.nra, { decimals: 2 })} NRA · ${formatStatus(t.status_category)}`;
+          }
+          li.appendChild(meta);
+          return li;
+        });
+        content.appendChild(_section(`Owned tracts (${sectionTracts.length})`, tractItems));
+
+        // Producing leases
+        const prod = productionBySection[str] || [];
+        const prodItems = prod.map((p) => {
+          const li = document.createElement("li");
+          const name = document.createElement("strong");
+          name.textContent = (p.lease_name || p.production_id) + " · " + (p.operator || "—");
+          li.appendChild(name);
+          li.appendChild(document.createElement("br"));
+          const stats = document.createElement("span");
+          stats.style.fontSize = "12px";
+          stats.style.color = "var(--color-text-secondary)";
+          stats.textContent = `Cum: ${formatNumber(p.cumulative_oil_bbl, { decimals: 0 })} bbl + ${formatNumber(p.cumulative_gas_mcf, { decimals: 0 })} mcf · Last prod ${formatDate(p.last_prod_date)}`;
+          li.appendChild(stats);
+          return li;
+        });
+        content.appendChild(_section(`Producing leases (${prod.length})`, prodItems));
+
+        // Wells
+        const wells = wellsBySection[str] || [];
+        const wellItems = wells.slice(0, 10).map((w) => {
+          const li = document.createElement("li");
+          li.textContent = `${w.well_id} · ${w.well_name || "—"} · ${w.operator || "—"} (${w.well_status || "—"})`;
+          return li;
+        });
+        if (wells.length > 10) {
+          const more = document.createElement("li");
+          more.className = "section-panel__empty";
+          more.textContent = `… and ${wells.length - 10} more`;
+          wellItems.push(more);
+        }
+        content.appendChild(_section(`Wells (${wells.length})`, wellItems));
+
+        // Permits
+        const perms = permitsBySection[str] || [];
+        const permItems = perms.slice(0, 5).map((p) => {
+          const li = document.createElement("li");
+          li.textContent = `${p.permit_number || p.permit_id} · ${formatDate(p.permit_date)} · ${p.operator || "—"}`;
+          return li;
+        });
+        if (perms.length > 5) {
+          const more = document.createElement("li");
+          more.className = "section-panel__empty";
+          more.textContent = `… and ${perms.length - 5} more`;
+          permItems.push(more);
+        }
+        content.appendChild(_section(`OCC / BLM permits (${perms.length})`, permItems));
+
+        // Regulatory
+        const regs = regBySection[str] || [];
+        const regItems = regs.slice(0, 5).map((r) => {
+          const li = document.createElement("li");
+          li.textContent = `[${formatDate(r.filing_date)}] ${formatRegulatoryType(r.type)} · ${r.applicant || "—"} (cause ${r.cause_number || "—"})`;
+          return li;
+        });
+        if (regs.length > 5) {
+          const more = document.createElement("li");
+          more.className = "section-panel__empty";
+          more.textContent = `… and ${regs.length - 5} more`;
+          regItems.push(more);
+        }
+        content.appendChild(_section(`OCC regulatory actions (${regs.length})`, regItems));
+
+        // Recent leasing on owned tracts
+        const leasesHere = (leasingBySection[str] || []).slice(0, 5);
+        const leaseItems = leasesHere.map((l) => {
+          const li = document.createElement("li");
+          li.textContent = `[${formatDate(l.recording_date)}] ${l.lessor || "—"} → ${l.lessee || "—"}`;
+          return li;
+        });
+        if ((leasingBySection[str] || []).length > 5) {
+          const more = document.createElement("li");
+          more.className = "section-panel__empty";
+          more.textContent = `… and ${(leasingBySection[str] || []).length - 5} more`;
+          leaseItems.push(more);
+        }
+        content.appendChild(_section(`Recent leasing on owned tracts (${(leasingBySection[str] || []).length})`, leaseItems));
+
+        panel.hidden = false;
+        panel.setAttribute("aria-hidden", "false");
+        backdrop.hidden = false;
+      }
+
+      function _closeSectionPanel() {
+        const panel = document.querySelector("[data-section-panel]");
+        const backdrop = document.querySelector("[data-section-panel-backdrop]");
+        if (panel) {
+          panel.hidden = true;
+          panel.setAttribute("aria-hidden", "true");
+        }
+        if (backdrop) backdrop.hidden = true;
+      }
+
+      document.querySelector("[data-section-panel-close]")?.addEventListener("click", _closeSectionPanel);
+      document.querySelector("[data-section-panel-backdrop]")?.addEventListener("click", _closeSectionPanel);
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") _closeSectionPanel();
+      });
+
+      render();
+
+      // Footer
+      if (metaDoc) {
+        _setText(root, "data-asof", formatDate(metaDoc.generated_at || ""));
+        _setText(root, "inventory-file", metaDoc.inventory_file || "—");
+        _setText(root, "oseberg-folder", metaDoc.oseberg_folder || "—");
+      }
+    } catch (err) {
+      renderError(root, err);
+    }
+  }
+
+  // -------------------------------------------------------------------------
   // Export
   // -------------------------------------------------------------------------
 
@@ -1759,5 +2188,6 @@
     initTracts,
     initTract,
     initActivity,
+    initTownships,
   };
 })();

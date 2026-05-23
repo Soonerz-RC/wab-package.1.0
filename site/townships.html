@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Coverage — WAB Package 1.0</title>
+  <meta name="robots" content="noindex,nofollow" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@400;500;700&family=Roboto:wght@400;500;700&display=swap" />
+
+  <link rel="stylesheet" href="styles.css?v=2026-05-22-16" />
+</head>
+
+<body data-page="townships">
+
+  <header class="site-header">
+    <div class="container site-header__inner">
+      <div class="wordmark">
+        <span class="wordmark__primary">Oklahoma Minerals</span>
+        <span class="wordmark__secondary">WAB Package 1.0</span>
+      </div>
+      <nav class="site-nav" aria-label="Primary">
+        <a href="index.html">Overview</a>
+        <a href="tracts.html">Tracts</a>
+        <a href="activity.html">Activity</a>
+        <a href="townships.html" class="is-current">Coverage</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="container hero hero--compact">
+      <div class="hero__eyebrow">Coverage map</div>
+      <h1 class="hero__title hero__title--compact">Township &amp; section coverage</h1>
+      <p class="hero__subtitle">
+        <span data-text="hero-stats">—</span>. Each township is a 6&times;6 grid of PLSS sections, numbered in the standard snake pattern. Owned sections are colored by status. Click any owned section for details.
+      </p>
+    </section>
+
+    <section class="container section--tight">
+      <div class="filter-bar" role="group" aria-label="Coverage filters">
+        <label class="filter-bar__field">
+          <span class="filter-bar__label">County</span>
+          <select data-filter="county">
+            <option value="">All</option>
+          </select>
+        </label>
+        <label class="filter-bar__field">
+          <span class="filter-bar__label">Show</span>
+          <select data-filter="show">
+            <option value="">All sections</option>
+            <option value="HBP">HBP only</option>
+            <option value="NON_PRODUCING">Non-HBP only</option>
+            <option value="LEASED">Leased (no production yet)</option>
+            <option value="HAS_REG">Has regulatory activity</option>
+          </select>
+        </label>
+        <button type="button" class="filter-bar__reset" data-action="reset-filters">Reset</button>
+      </div>
+    </section>
+
+    <section class="container section--tight townships-section">
+      <div class="townships-legend">
+        <span class="leg-swatch leg-swatch--hbp"></span>HBP / Producing
+        <span class="leg-swatch leg-swatch--leased"></span>Leased
+        <span class="leg-swatch leg-swatch--non-producing"></span>Non-HBP ORRI
+        <span class="leg-swatch leg-swatch--open"></span>Open
+        <span class="leg-swatch leg-swatch--empty"></span>Not owned
+        <span class="leg-swatch leg-swatch--reg-marker"></span>Has regulatory activity (corner mark)
+      </div>
+
+      <div class="townships-grid" data-townships-grid>
+        <p class="activity-section__empty">Loading…</p>
+      </div>
+      <div class="empty-state" data-text="empty-state" hidden>
+        No townships match the current filters.
+      </div>
+    </section>
+  </main>
+
+  <!-- Slide-out section detail panel -->
+  <aside class="section-panel" data-section-panel hidden aria-hidden="true">
+    <button type="button" class="section-panel__close" data-section-panel-close aria-label="Close">×</button>
+    <div class="section-panel__content" data-section-panel-content>
+      <!-- populated by JS on click -->
+    </div>
+  </aside>
+  <div class="section-panel-backdrop" data-section-panel-backdrop hidden></div>
+
+  <footer class="site-footer">
+    <div class="container site-footer__row">
+      <div class="site-footer__brand">
+        GBK International Group, Ltd &middot; TPC Minerals, LLC
+      </div>
+      <div class="site-footer__meta">
+        Data as of <span data-text="data-asof">—</span> &middot;
+        Inventory: <span data-text="inventory-file">—</span> &middot;
+        Oseberg: <span data-text="oseberg-folder">—</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="app.js?v=2026-05-22-16"></script>
+  <script>
+    if (window.wab) { window.wab.initTownships(); }
+  </script>
+</body>
+</html>
