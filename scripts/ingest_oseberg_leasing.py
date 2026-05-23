@@ -21,7 +21,12 @@ SCRIPTS_DIR = Path(__file__).resolve().parent
 if str(SCRIPTS_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPTS_DIR))
 
-from normalize import CANONICAL_COUNTIES, NormalizationError, normalize_county  # noqa: E402
+from normalize import (  # noqa: E402
+    CANONICAL_COUNTIES,
+    NormalizationError,
+    normalize_county,
+    normalize_upland_in_string,
+)
 from ingest_oseberg_wells import (  # noqa: E402
     find_latest_oseberg_folder,
     parse_section_from_legal,
@@ -129,8 +134,8 @@ def parse_leasing(xlsx_path: Path, owned_index: Dict[str, List[str]]) -> Tuple[L
             "instrument_type": to_str_or_none(row[H["Instrument Type"]]),
             "legal_raw": legal_raw,
             "lease_id": lease_id,
-            "lessee": to_str_or_none(row[H["Lessee/Grantee"]]),
-            "lessor": to_str_or_none(row[H["Lessor/Grantor"]]),
+            "lessee": normalize_upland_in_string(to_str_or_none(row[H["Lessee/Grantee"]])),
+            "lessor": normalize_upland_in_string(to_str_or_none(row[H["Lessor/Grantor"]])),
             "matched_tract_ids": matched_tract_ids,
             "oseberg_url": to_str_or_none(row[H["source_url"]]),
             "recording_date": _date_or_none(row[H["Recorded Date"]]),

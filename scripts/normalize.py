@@ -126,6 +126,60 @@ def normalize_county(raw) -> str:
 
 
 # ---------------------------------------------------------------------------
+# Operator-name normalization — currently targeted only at Upland.
+# County-records data is full of clerk-typed typos. We do not attempt
+# global operator-name cleanup; this function only collapses the 18+
+# observed misspellings of Upland Operating LLC / Upland Exploration
+# Oklahoma LLC into a single canonical "Upland Operating LLC" so the
+# operator name reads cleanly on tract detail pages and in filters.
+# ---------------------------------------------------------------------------
+
+UPLAND_CANONICAL = "Upland Operating LLC"
+
+
+def _is_upland_variant(token: str) -> bool:
+    """Detect any spelling of Upland Operating / Upland Exploration."""
+    if not token:
+        return False
+    upper = token.upper().strip()
+    # Direct matches and the most common typos
+    if "UPLAND" in upper:
+        return True
+    if "ULPLAND" in upper:    # ULPLAND -> UPLAND swap
+        return True
+    if "EUPLAND" in upper:    # EUPLAND -> stray-E prefix
+        return True
+    return False
+
+
+def normalize_upland_in_string(s):
+    """Replace any Upland-variant token in a multi-operator string with the canonical form.
+
+    The source data sometimes packs multiple operators into one cell with
+    `;` separators (e.g. ``"SAND CREEK OKLAHOMA LLC; UPLAND EXPLORATION OKLAHOMA LLC"``).
+    We split on `;`, replace Upland-variant tokens with the canonical
+    name (deduplicating if multiple Upland variants appear in the same
+    cell), and rejoin. Non-Upland tokens pass through unchanged.
+
+    Returns the input unchanged if it's None / empty / contains no Upland
+    variants.
+    """
+    if not s:
+        return s
+    parts = [p.strip() for p in str(s).split(";")]
+    out = []
+    seen_canonical = False
+    for part in parts:
+        if _is_upland_variant(part):
+            if not seen_canonical:
+                out.append(UPLAND_CANONICAL)
+                seen_canonical = True
+        elif part:
+            out.append(part)
+    return "; ".join(out) if out else s
+
+
+# ---------------------------------------------------------------------------
 # Deal slug  (spec §2.3)
 # ---------------------------------------------------------------------------
 
@@ -394,6 +448,22 @@ def _selftest():
     check("round 0.16670000000000001", round_acres(0.16670000000000001), 0.1667)
     check("round 20",                  round_acres(20),                 20.0)
     check("round None",                round_acres(None),               None)
+
+    # --- normalize_upland_in_string ---
+    check("upland canonical passthrough",   normalize_upland_in_string("UPLAND OPERATING LLC"),   "Upland Operating LLC")
+    check("upland exploration variant",     normalize_upland_in_string("UPLAND EXPLORATION OKLAHOMA LLC"), "Upland Operating LLC")
+    check("upland typo OKALHOMA",           normalize_upland_in_string("UPLAND EXPLORATION OKALHOMA LLC"), "Upland Operating LLC")
+    check("upland typo EXPLRATION",         normalize_upland_in_string("UPLAND EXPLRATION OKLAHOMA LLC"),  "Upland Operating LLC")
+    check("upland typo ULPLAND",            normalize_upland_in_string("ULPLAND EX"),                      "Upland Operating LLC")
+    check("upland typo EUPLAND",            normalize_upland_in_string("EUPLAND EXPLORATION OKLAHOMA LLC"),"Upland Operating LLC")
+    check("upland multi-operator cell",     normalize_upland_in_string("SAND CREEK OKLAHOMA LLC; UPLAND EXPLORATION OKLAHOMA LLC"),
+                                            "SAND CREEK OKLAHOMA LLC; Upland Operating LLC")
+    check("upland multi w/ presidio",       normalize_upland_in_string("PRESIDIO FINANCE NOMINEE CORP; UPLAND EXPLORATION LLC; UPLAND OPERATING LLC"),
+                                            "PRESIDIO FINANCE NOMINEE CORP; Upland Operating LLC")
+    check("non-upland passthrough",         normalize_upland_in_string("DEVON ENERGY PRODUCTION COMPANY LP"),
+                                            "DEVON ENERGY PRODUCTION COMPANY LP")
+    check("None passthrough",               normalize_upland_in_string(None),  None)
+    check("empty passthrough",              normalize_upland_in_string(""),    "")
 
     # --- to_iso_date_or_hbp ---
     check("date None",        to_iso_date_or_hbp(None),                  None)

@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-05-22T19:02:44Z",
+  "generated_at": "2026-05-23T12:15:06Z",
   "leases": [
     {
       "acres": 160.0,
@@ -233,7 +233,7 @@
       "instrument_type": "OIL AND GAS LEASE",
       "lease_id": "lease-roger-mills-2693-I-2026-001978",
       "legal_raw": "17-12N-23W-IM",
-      "lessee": "UPLAND EXPLORATION OKALHOMA LLC",
+      "lessee": "Upland Operating LLC",
       "lessor": "HOPKINS, ANN",
       "matched_tract_ids": [
         "Min018",
@@ -319,7 +319,7 @@
       "instrument_type": "OIL AND GAS LEASE",
       "lease_id": "lease-roger-mills-2690-I-2026-001546",
       "legal_raw": "17-12N-23W-IM",
-      "lessee": "UPLAND EXPLORATION OKLAHOMA LLC",
+      "lessee": "Upland Operating LLC",
       "lessor": "MITCHELL, REID M",
       "matched_tract_ids": [
         "Min018",
@@ -357,7 +357,7 @@
       "instrument_type": "OIL AND GAS LEASE",
       "lease_id": "lease-roger-mills-2690-I-2026-001545",
       "legal_raw": "17-12N-23W-IM",
-      "lessee": "UPLAND EXPLORATION OKLAHOMA LLC",
+      "lessee": "Upland Operating LLC",
       "lessor": "WRIGHT, JOHN L, JR",
       "matched_tract_ids": [
         "Min018",
@@ -395,7 +395,7 @@
       "instrument_type": "OIL AND GAS LEASE",
       "lease_id": "lease-roger-mills-2690-I-2026-001543",
       "legal_raw": "17-12N-23W-IM",
-      "lessee": "UPLAND EXPLORATION OKLAHOMA LLC",
+      "lessee": "Upland Operating LLC",
       "lessor": "GIFFORD, STEPHEN P",
       "matched_tract_ids": [
         "Min018",
@@ -457,7 +457,7 @@
       "instrument_type": "OIL AND GAS LEASE",
       "lease_id": "lease-roger-mills-2687-I-2026-001287",
       "legal_raw": "17-12N-23W-IM",
-      "lessee": "UPLAND EXPLORATION OKLAHOMA LLC",
+      "lessee": "Upland Operating LLC",
       "lessor": "JESSUP, GREGORY L.",
       "matched_tract_ids": [
         "Min018",
@@ -615,7 +615,7 @@
       "instrument_type": "OIL AND GAS LEASE",
       "lease_id": "lease-roger-mills-2681-I-2026-000646",
       "legal_raw": "16-12N-23W-IM",
-      "lessee": "UPLAND EXPLORATION OKLAHOMA LLC",
+      "lessee": "Upland Operating LLC",
       "lessor": "ARKOMA BASIN MINERALS INC.",
       "matched_tract_ids": [
         "Min016",
@@ -652,7 +652,7 @@
       "instrument_type": "OIL AND GAS LEASE",
       "lease_id": "lease-roger-mills-2681-I-2026-000646",
       "legal_raw": "16-12N-23W-IM",
-      "lessee": "UPLAND EXPLORATION OKLAHOMA LLC",
+      "lessee": "Upland Operating LLC",
       "lessor": "ARKOMA BASIN MINERALS INC.",
       "matched_tract_ids": [
         "Min016",
@@ -689,7 +689,7 @@
       "instrument_type": "OIL AND GAS LEASE",
       "lease_id": "lease-roger-mills-2681-I-2026-000646",
       "legal_raw": "16-12N-23W-IM",
-      "lessee": "UPLAND EXPLORATION OKLAHOMA LLC",
+      "lessee": "Upland Operating LLC",
       "lessor": "ARKOMA BASIN MINERALS INC.",
       "matched_tract_ids": [
         "Min016",
@@ -726,7 +726,7 @@
       "instrument_type": "OIL AND GAS LEASE",
       "lease_id": "lease-roger-mills-2681-I-2026-000646",
       "legal_raw": "16-12N-23W-IM",
-      "lessee": "UPLAND EXPLORATION OKLAHOMA LLC",
+      "lessee": "Upland Operating LLC",
       "lessor": "ARKOMA BASIN MINERALS INC.",
       "matched_tract_ids": [
         "Min016",
@@ -763,7 +763,7 @@
       "instrument_type": "OIL AND GAS LEASE",
       "lease_id": "lease-roger-mills-2681-I-2026-000646",
       "legal_raw": "16-12N-23W-IM",
-      "lessee": "UPLAND EXPLORATION OKLAHOMA LLC",
+      "lessee": "Upland Operating LLC",
       "lessor": "ARKOMA BASIN MINERALS INC.",
       "matched_tract_ids": [
         "Min016",
@@ -800,7 +800,7 @@
       "instrument_type": "OIL AND GAS LEASE",
       "lease_id": "lease-roger-mills-2681-I-2026-000646",
       "legal_raw": "16-12N-23W-IM",
-      "lessee": "UPLAND EXPLORATION OKLAHOMA LLC",
+      "lessee": "Upland Operating LLC",
       "lessor": "ARKOMA BASIN MINERALS INC.",
       "matched_tract_ids": [
         "Min016",
@@ -837,7 +837,7 @@
       "instrument_type": "OIL AND GAS LEASE",
       "lease_id": "lease-roger-mills-2681-I-2026-000646",
       "legal_raw": "16-12N-23W-IM",
-      "lessee": "UPLAND EXPLORATION OKLAHOMA LLC",
+      "lessee": "Upland Operating LLC",
       "lessor": "ARKOMA BASIN MINERALS INC.",
       "matched_tract_ids": [
         "Min016",
@@ -874,7 +874,7 @@
       "instrument_type": "OIL AND GAS LEASE",
       "lease_id": "lease-roger-mills-2681-I-2026-000646",
       "legal_raw": "16-12N-23W-IM",
-      "lessee": "UPLAND EXPLORATION OKLAHOMA LLC",
+      "lessee": "Upland Operating LLC",
       "lessor": "ARKOMA BASIN MINERALS INC.",
       "matched_tract_ids": [
         "Min016",
@@ -911,7 +911,7 @@
       "instrument_type": "OIL AND GAS LEASE",
       "lease_id": "lease-roger-mills-2681-I-2026-000646",
       "legal_raw": "16-12N-23W-IM",
-      "lessee": "UPLAND EXPLORATION OKLAHOMA LLC",
+      "lessee": "Upland Operating LLC",
       "lessor": "ARKOMA BASIN MINERALS INC.",
       "matched_tract_ids": [
         "Min016",
@@ -948,7 +948,7 @@
       "instrument_type": "OIL AND GAS LEASE",
       "lease_id": "lease-roger-mills-2681-I-2026-000645",
       "legal_raw": "16-12N-23W-IM",
-      "lessee": "UPLAND EXPLORATION OKLAHOMA LLC",
+      "lessee": "Upland Operating LLC",
       "lessor": "ARKOMA BASIN MINERALS INC.",
       "matched_tract_ids": [
         "Min016",
@@ -985,7 +985,7 @@
       "instrument_type": "OIL AND GAS LEASE",
       "lease_id": "lease-roger-mills-2681-I-2026-000645",
       "legal_raw": "16-12N-23W-IM",
-      "lessee": "UPLAND EXPLORATION OKLAHOMA LLC",
+      "lessee": "Upland Operating LLC",
       "lessor": "ARKOMA BASIN MINERALS INC.",
       "matched_tract_ids": [
         "Min016",
@@ -1022,7 +1022,7 @@
       "instrument_type": "OIL AND GAS LEASE",
       "lease_id": "lease-roger-mills-2681-I-2026-000645",
       "legal_raw": "16-12N-23W-IM",
-      "lessee": "UPLAND EXPLORATION OKLAHOMA LLC",
+      "lessee": "Upland Operating LLC",
       "lessor": "ARKOMA BASIN MINERALS INC.",
       "matched_tract_ids": [
         "Min016",
@@ -1059,7 +1059,7 @@
       "instrument_type": "OIL AND GAS LEASE",
       "lease_id": "lease-roger-mills-2681-I-2026-000645",
       "legal_raw": "16-12N-23W-IM",
-      "lessee": "UPLAND EXPLORATION OKLAHOMA LLC",
+      "lessee": "Upland Operating LLC",
       "lessor": "ARKOMA BASIN MINERALS INC.",
       "matched_tract_ids": [
         "Min016",
@@ -1096,7 +1096,7 @@
       "instrument_type": "OIL AND GAS LEASE",
       "lease_id": "lease-roger-mills-2681-I-2026-000645",
       "legal_raw": "16-12N-23W-IM",
-      "lessee": "UPLAND EXPLORATION OKLAHOMA LLC",
+      "lessee": "Upland Operating LLC",
       "lessor": "ARKOMA BASIN MINERALS INC.",
       "matched_tract_ids": [
         "Min016",
@@ -1133,7 +1133,7 @@
       "instrument_type": "OIL AND GAS LEASE",
       "lease_id": "lease-roger-mills-2681-I-2026-000645",
       "legal_raw": "16-12N-23W-IM",
-      "lessee": "UPLAND EXPLORATION OKLAHOMA LLC",
+      "lessee": "Upland Operating LLC",
       "lessor": "ARKOMA BASIN MINERALS INC.",
       "matched_tract_ids": [
         "Min016",
@@ -1170,7 +1170,7 @@
       "instrument_type": "OIL AND GAS LEASE",
       "lease_id": "lease-roger-mills-2681-I-2026-000645",
       "legal_raw": "16-12N-23W-IM",
-      "lessee": "UPLAND EXPLORATION OKLAHOMA LLC",
+      "lessee": "Upland Operating LLC",
       "lessor": "ARKOMA BASIN MINERALS INC.",
       "matched_tract_ids": [
         "Min016",
@@ -1207,7 +1207,7 @@
       "instrument_type": "OIL AND GAS LEASE",
       "lease_id": "lease-roger-mills-2681-I-2026-000645",
       "legal_raw": "16-12N-23W-IM",
-      "lessee": "UPLAND EXPLORATION OKLAHOMA LLC",
+      "lessee": "Upland Operating LLC",
       "lessor": "ARKOMA BASIN MINERALS INC.",
       "matched_tract_ids": [
         "Min016",
@@ -1364,7 +1364,7 @@
       "instrument_type": "OIL AND GAS LEASE",
       "lease_id": "lease-roger-mills-2677-I-2026-000339",
       "legal_raw": "17-12N-23W-IM",
-      "lessee": "UPLAND EXPLORATION OKLAHOMA LLC",
+      "lessee": "Upland Operating LLC",
       "lessor": "EDWARDS, JEFF",
       "matched_tract_ids": [
         "Min018",
@@ -1487,7 +1487,7 @@
       "instrument_type": "OIL AND GAS LEASE",
       "lease_id": "lease-roger-mills-2672-I-2025-007955",
       "legal_raw": "17-12N-23W-IM",
-      "lessee": "UPLAND EXPLORATION OKLAHOMA, LLC",
+      "lessee": "Upland Operating LLC",
       "lessor": "BRUEHL, KRYSTA",
       "matched_tract_ids": [
         "Min018",
@@ -1525,7 +1525,7 @@
       "instrument_type": "OIL AND GAS LEASE",
       "lease_id": "lease-roger-mills-2672-I-2025-007954",
       "legal_raw": "17-12N-23W-IM",
-      "lessee": "UPLAND EXPLORATION OKLAHOMA, LLC",
+      "lessee": "Upland Operating LLC",
       "lessor": "EDWARDS, MARK",
       "matched_tract_ids": [
         "Min018",
@@ -1563,7 +1563,7 @@
       "instrument_type": "OIL AND GAS LEASE",
       "lease_id": "lease-roger-mills-2672-I-2025-007953",
       "legal_raw": "17-12N-23W-IM",
-      "lessee": "UPLAND EXPLORATION OKLAHOMA, LLC",
+      "lessee": "Upland Operating LLC",
       "lessor": "EDWARDS, JENNIFER",
       "matched_tract_ids": [
         "Min018",
@@ -1601,7 +1601,7 @@
       "instrument_type": "OIL AND GAS LEASE",
       "lease_id": "lease-roger-mills-2672-I-2025-007952",
       "legal_raw": "17-12N-23W-IM",
-      "lessee": "UPLAND EXPLORATION OKLAHOMA, LLC",
+      "lessee": "Upland Operating LLC",
       "lessor": "WEBB, ASHLEE",
       "matched_tract_ids": [
         "Min018",
@@ -1639,7 +1639,7 @@
       "instrument_type": "OIL AND GAS LEASE",
       "lease_id": "lease-roger-mills-2672-I-2025-007951",
       "legal_raw": "17-12N-23W-IM",
-      "lessee": "UPLAND EXPLORATION OKLAHOMA, LLC",
+      "lessee": "Upland Operating LLC",
       "lessor": "SWENSON, ANDREA",
       "matched_tract_ids": [
         "Min018",
@@ -1677,7 +1677,7 @@
       "instrument_type": "OIL AND GAS LEASE",
       "lease_id": "lease-roger-mills-2672-I-2025-007950",
       "legal_raw": "17-12N-23W-IM",
-      "lessee": "UPLAND EXPLORATION OKLAHOMA, LLC",
+      "lessee": "Upland Operating LLC",
       "lessor": "EDWARDS, RUTH ANN, TTEE; RAW LIVING TRUST",
       "matched_tract_ids": [
         "Min018",
@@ -1949,7 +1949,7 @@
       "instrument_type": "OIL AND GAS LEASE",
       "lease_id": "lease-roger-mills-2670-I-2025-007757",
       "legal_raw": "16-12N-23W-IM",
-      "lessee": "UPLAND EXPLORATION OKLAHOMA LLC",
+      "lessee": "Upland Operating LLC",
       "lessor": "ROBINSON, MCKINLEY ANN",
       "matched_tract_ids": [
         "Min016",
@@ -1986,7 +1986,7 @@
       "instrument_type": "OIL AND GAS LEASE",
       "lease_id": "lease-roger-mills-2670-I-2025-007757",
       "legal_raw": "16-12N-23W-IM",
-      "lessee": "UPLAND EXPLORATION OKLAHOMA LLC",
+      "lessee": "Upland Operating LLC",
       "lessor": "ROBINSON, MCKINLEY ANN",
       "matched_tract_ids": [
         "Min016",
@@ -2023,7 +2023,7 @@
       "instrument_type": "OIL AND GAS LEASE",
       "lease_id": "lease-roger-mills-2670-I-2025-007757",
       "legal_raw": "16-12N-23W-IM",
-      "lessee": "UPLAND EXPLORATION OKLAHOMA LLC",
+      "lessee": "Upland Operating LLC",
       "lessor": "ROBINSON, MCKINLEY ANN",
       "matched_tract_ids": [
         "Min016",
@@ -2060,7 +2060,7 @@
       "instrument_type": "OIL AND GAS LEASE",
       "lease_id": "lease-roger-mills-2670-I-2025-007757",
       "legal_raw": "16-12N-23W-IM",
-      "lessee": "UPLAND EXPLORATION OKLAHOMA LLC",
+      "lessee": "Upland Operating LLC",
       "lessor": "ROBINSON, MCKINLEY ANN",
       "matched_tract_ids": [
         "Min016",
@@ -2097,7 +2097,7 @@
       "instrument_type": "OIL AND GAS LEASE",
       "lease_id": "lease-roger-mills-2670-I-2025-007757",
       "legal_raw": "16-12N-23W-IM",
-      "lessee": "UPLAND EXPLORATION OKLAHOMA LLC",
+      "lessee": "Upland Operating LLC",
       "lessor": "ROBINSON, MCKINLEY ANN",
       "matched_tract_ids": [
         "Min016",
@@ -2134,7 +2134,7 @@
       "instrument_type": "OIL AND GAS LEASE",
       "lease_id": "lease-roger-mills-2670-I-2025-007757",
       "legal_raw": "16-12N-23W-IM",
-      "lessee": "UPLAND EXPLORATION OKLAHOMA LLC",
+      "lessee": "Upland Operating LLC",
       "lessor": "ROBINSON, MCKINLEY ANN",
       "matched_tract_ids": [
         "Min016",
@@ -2171,7 +2171,7 @@
       "instrument_type": "OIL AND GAS LEASE",
       "lease_id": "lease-roger-mills-2670-I-2025-007757",
       "legal_raw": "16-12N-23W-IM",
-      "lessee": "UPLAND EXPLORATION OKLAHOMA LLC",
+      "lessee": "Upland Operating LLC",
       "lessor": "ROBINSON, MCKINLEY ANN",
       "matched_tract_ids": [
         "Min016",
@@ -2208,7 +2208,7 @@
       "instrument_type": "OIL AND GAS LEASE",
       "lease_id": "lease-roger-mills-2670-I-2025-007757",
       "legal_raw": "16-12N-23W-IM",
-      "lessee": "UPLAND EXPLORATION OKLAHOMA LLC",
+      "lessee": "Upland Operating LLC",
       "lessor": "ROBINSON, MCKINLEY ANN",
       "matched_tract_ids": [
         "Min016",
@@ -2245,7 +2245,7 @@
       "instrument_type": "OIL AND GAS LEASE",
       "lease_id": "lease-roger-mills-2670-I-2025-007752",
       "legal_raw": "16-12N-23W-IM",
-      "lessee": "UPLAND EXPLORATION OKLAHOMA, LLC",
+      "lessee": "Upland Operating LLC",
       "lessor": "TIRAS ONE LLC",
       "matched_tract_ids": [
         "Min016",
@@ -2282,7 +2282,7 @@
       "instrument_type": "OIL AND GAS LEASE",
       "lease_id": "lease-roger-mills-2670-I-2025-007750",
       "legal_raw": "16-12N-23W-IM",
-      "lessee": "UPLAND EXPLORATION OKLAHOMA, LLC",
+      "lessee": "Upland Operating LLC",
       "lessor": "SPRINGFIELD, SANDRA NEWTON",
       "matched_tract_ids": [
         "Min016",
@@ -2319,7 +2319,7 @@
       "instrument_type": "OIL AND GAS LEASE",
       "lease_id": "lease-roger-mills-2670-I-2025-007750",
       "legal_raw": "16-12N-23W-IM",
-      "lessee": "UPLAND EXPLORATION OKLAHOMA, LLC",
+      "lessee": "Upland Operating LLC",
       "lessor": "SPRINGFIELD, SANDRA NEWTON",
       "matched_tract_ids": [
         "Min016",
@@ -2356,7 +2356,7 @@
       "instrument_type": "OIL AND GAS LEASE",
       "lease_id": "lease-roger-mills-2670-I-2025-007750",
       "legal_raw": "16-12N-23W-IM",
-      "lessee": "UPLAND EXPLORATION OKLAHOMA, LLC",
+      "lessee": "Upland Operating LLC",
       "lessor": "SPRINGFIELD, SANDRA NEWTON",
       "matched_tract_ids": [
         "Min016",
@@ -2393,7 +2393,7 @@
       "instrument_type": "OIL AND GAS LEASE",
       "lease_id": "lease-roger-mills-2670-I-2025-007750",
       "legal_raw": "16-12N-23W-IM",
-      "lessee": "UPLAND EXPLORATION OKLAHOMA, LLC",
+      "lessee": "Upland Operating LLC",
       "lessor": "SPRINGFIELD, SANDRA NEWTON",
       "matched_tract_ids": [
         "Min016",
@@ -2430,7 +2430,7 @@
       "instrument_type": "OIL AND GAS LEASE",
       "lease_id": "lease-roger-mills-2670-I-2025-007750",
       "legal_raw": "16-12N-23W-IM",
-      "lessee": "UPLAND EXPLORATION OKLAHOMA, LLC",
+      "lessee": "Upland Operating LLC",
       "lessor": "SPRINGFIELD, SANDRA NEWTON",
       "matched_tract_ids": [
         "Min016",
@@ -2467,7 +2467,7 @@
       "instrument_type": "OIL AND GAS LEASE",
       "lease_id": "lease-roger-mills-2670-I-2025-007750",
       "legal_raw": "16-12N-23W-IM",
-      "lessee": "UPLAND EXPLORATION OKLAHOMA, LLC",
+      "lessee": "Upland Operating LLC",
       "lessor": "SPRINGFIELD, SANDRA NEWTON",
       "matched_tract_ids": [
         "Min016",
@@ -2504,7 +2504,7 @@
       "instrument_type": "OIL AND GAS LEASE",
       "lease_id": "lease-roger-mills-2670-I-2025-007750",
       "legal_raw": "16-12N-23W-IM",
-      "lessee": "UPLAND EXPLORATION OKLAHOMA, LLC",
+      "lessee": "Upland Operating LLC",
       "lessor": "SPRINGFIELD, SANDRA NEWTON",
       "matched_tract_ids": [
         "Min016",
@@ -2541,7 +2541,7 @@
       "instrument_type": "OIL AND GAS LEASE",
       "lease_id": "lease-roger-mills-2670-I-2025-007750",
       "legal_raw": "16-12N-23W-IM",
-      "lessee": "UPLAND EXPLORATION OKLAHOMA, LLC",
+      "lessee": "Upland Operating LLC",
       "lessor": "SPRINGFIELD, SANDRA NEWTON",
       "matched_tract_ids": [
         "Min016",
@@ -2578,7 +2578,7 @@
       "instrument_type": "OIL AND GAS LEASE",
       "lease_id": "lease-roger-mills-2670-I-2025-007749",
       "legal_raw": "16-12N-23W-IM",
-      "lessee": "UPLAND EXPLORATION OKLAHOMA LLC",
+      "lessee": "Upland Operating LLC",
       "lessor": "NEWTON, JOHN FRANK",
       "matched_tract_ids": [
         "Min016",
@@ -2615,7 +2615,7 @@
       "instrument_type": "OIL AND GAS LEASE",
       "lease_id": "lease-roger-mills-2670-I-2025-007749",
       "legal_raw": "16-12N-23W-IM",
-      "lessee": "UPLAND EXPLORATION OKLAHOMA LLC",
+      "lessee": "Upland Operating LLC",
       "lessor": "NEWTON, JOHN FRANK",
       "matched_tract_ids": [
         "Min016",
@@ -2652,7 +2652,7 @@
       "instrument_type": "OIL AND GAS LEASE",
       "lease_id": "lease-roger-mills-2670-I-2025-007749",
       "legal_raw": "16-12N-23W-IM",
-      "lessee": "UPLAND EXPLORATION OKLAHOMA LLC",
+      "lessee": "Upland Operating LLC",
       "lessor": "NEWTON, JOHN FRANK",
       "matched_tract_ids": [
         "Min016",
@@ -2689,7 +2689,7 @@
       "instrument_type": "OIL AND GAS LEASE",
       "lease_id": "lease-roger-mills-2670-I-2025-007749",
       "legal_raw": "16-12N-23W-IM",
-      "lessee": "UPLAND EXPLORATION OKLAHOMA LLC",
+      "lessee": "Upland Operating LLC",
       "lessor": "NEWTON, JOHN FRANK",
       "matched_tract_ids": [
         "Min016",
@@ -2726,7 +2726,7 @@
       "instrument_type": "OIL AND GAS LEASE",
       "lease_id": "lease-roger-mills-2670-I-2025-007749",
       "legal_raw": "16-12N-23W-IM",
-      "lessee": "UPLAND EXPLORATION OKLAHOMA LLC",
+      "lessee": "Upland Operating LLC",
       "lessor": "NEWTON, JOHN FRANK",
       "matched_tract_ids": [
         "Min016",
@@ -2763,7 +2763,7 @@
       "instrument_type": "OIL AND GAS LEASE",
       "lease_id": "lease-roger-mills-2670-I-2025-007749",
       "legal_raw": "16-12N-23W-IM",
-      "lessee": "UPLAND EXPLORATION OKLAHOMA LLC",
+      "lessee": "Upland Operating LLC",
       "lessor": "NEWTON, JOHN FRANK",
       "matched_tract_ids": [
         "Min016",
@@ -2800,7 +2800,7 @@
       "instrument_type": "OIL AND GAS LEASE",
       "lease_id": "lease-roger-mills-2670-I-2025-007749",
       "legal_raw": "16-12N-23W-IM",
-      "lessee": "UPLAND EXPLORATION OKLAHOMA LLC",
+      "lessee": "Upland Operating LLC",
       "lessor": "NEWTON, JOHN FRANK",
       "matched_tract_ids": [
         "Min016",
@@ -2837,7 +2837,7 @@
       "instrument_type": "OIL AND GAS LEASE",
       "lease_id": "lease-roger-mills-2670-I-2025-007749",
       "legal_raw": "16-12N-23W-IM",
-      "lessee": "UPLAND EXPLORATION OKLAHOMA LLC",
+      "lessee": "Upland Operating LLC",
       "lessor": "NEWTON, JOHN FRANK",
       "matched_tract_ids": [
         "Min016",
@@ -2874,7 +2874,7 @@
       "instrument_type": "OIL AND GAS LEASE",
       "lease_id": "lease-roger-mills-2670-I-2025-007745",
       "legal_raw": "16-12N-23W-IM",
-      "lessee": "UPLAND EXPLORATION OKLAHOMA LLC",
+      "lessee": "Upland Operating LLC",
       "lessor": "GRIFFIN, CATHERINE E; GRIFFIN, CATHERINE J, AKA",
       "matched_tract_ids": [
         "Min016",
@@ -2911,7 +2911,7 @@
       "instrument_type": "OIL AND GAS LEASE",
       "lease_id": "lease-roger-mills-2670-I-2025-007745",
       "legal_raw": "16-12N-23W-IM",
-      "lessee": "UPLAND EXPLORATION OKLAHOMA LLC",
+      "lessee": "Upland Operating LLC",
       "lessor": "GRIFFIN, CATHERINE E; GRIFFIN, CATHERINE J, AKA",
       "matched_tract_ids": [
         "Min016",
@@ -2948,7 +2948,7 @@
       "instrument_type": "OIL AND GAS LEASE",
       "lease_id": "lease-roger-mills-2670-I-2025-007745",
       "legal_raw": "16-12N-23W-IM",
-      "lessee": "UPLAND EXPLORATION OKLAHOMA LLC",
+      "lessee": "Upland Operating LLC",
       "lessor": "GRIFFIN, CATHERINE E; GRIFFIN, CATHERINE J, AKA",
       "matched_tract_ids": [
         "Min016",
@@ -2985,7 +2985,7 @@
       "instrument_type": "OIL AND GAS LEASE",
       "lease_id": "lease-roger-mills-2670-I-2025-007745",
       "legal_raw": "16-12N-23W-IM",
-      "lessee": "UPLAND EXPLORATION OKLAHOMA LLC",
+      "lessee": "Upland Operating LLC",
       "lessor": "GRIFFIN, CATHERINE E; GRIFFIN, CATHERINE J, AKA",
       "matched_tract_ids": [
         "Min016",
@@ -3022,7 +3022,7 @@
       "instrument_type": "OIL AND GAS LEASE",
       "lease_id": "lease-roger-mills-2670-I-2025-007745",
       "legal_raw": "16-12N-23W-IM",
-      "lessee": "UPLAND EXPLORATION OKLAHOMA LLC",
+      "lessee": "Upland Operating LLC",
       "lessor": "GRIFFIN, CATHERINE E; GRIFFIN, CATHERINE J, AKA",
       "matched_tract_ids": [
         "Min016",
@@ -3059,7 +3059,7 @@
       "instrument_type": "OIL AND GAS LEASE",
       "lease_id": "lease-roger-mills-2670-I-2025-007745",
       "legal_raw": "16-12N-23W-IM",
-      "lessee": "UPLAND EXPLORATION OKLAHOMA LLC",
+      "lessee": "Upland Operating LLC",
       "lessor": "GRIFFIN, CATHERINE E; GRIFFIN, CATHERINE J, AKA",
       "matched_tract_ids": [
         "Min016",
@@ -3096,7 +3096,7 @@
       "instrument_type": "OIL AND GAS LEASE",
       "lease_id": "lease-roger-mills-2670-I-2025-007745",
       "legal_raw": "16-12N-23W-IM",
-      "lessee": "UPLAND EXPLORATION OKLAHOMA LLC",
+      "lessee": "Upland Operating LLC",
       "lessor": "GRIFFIN, CATHERINE E; GRIFFIN, CATHERINE J, AKA",
       "matched_tract_ids": [
         "Min016",
@@ -3133,7 +3133,7 @@
       "instrument_type": "OIL AND GAS LEASE",
       "lease_id": "lease-roger-mills-2670-I-2025-007745",
       "legal_raw": "16-12N-23W-IM",
-      "lessee": "UPLAND EXPLORATION OKLAHOMA LLC",
+      "lessee": "Upland Operating LLC",
       "lessor": "GRIFFIN, CATHERINE E; GRIFFIN, CATHERINE J, AKA",
       "matched_tract_ids": [
         "Min016",
@@ -3170,7 +3170,7 @@
       "instrument_type": "OIL AND GAS LEASE",
       "lease_id": "lease-roger-mills-2670-I-2025-007743",
       "legal_raw": "16-12N-23W-IM",
-      "lessee": "UPLAND EXPLORATION OKLAHOMA LLC",
+      "lessee": "Upland Operating LLC",
       "lessor": "JENSON, BENALEE HEBISEN",
       "matched_tract_ids": [
         "Min016",
@@ -3207,7 +3207,7 @@
       "instrument_type": "OIL AND GAS LEASE",
       "lease_id": "lease-roger-mills-2670-I-2025-007743",
       "legal_raw": "16-12N-23W-IM",
-      "lessee": "UPLAND EXPLORATION OKLAHOMA LLC",
+      "lessee": "Upland Operating LLC",
       "lessor": "JENSON, BENALEE HEBISEN",
       "matched_tract_ids": [
         "Min016",
@@ -3244,7 +3244,7 @@
       "instrument_type": "OIL AND GAS LEASE",
       "lease_id": "lease-roger-mills-2670-I-2025-007743",
       "legal_raw": "16-12N-23W-IM",
-      "lessee": "UPLAND EXPLORATION OKLAHOMA LLC",
+      "lessee": "Upland Operating LLC",
       "lessor": "JENSON, BENALEE HEBISEN",
       "matched_tract_ids": [
         "Min016",
@@ -3281,7 +3281,7 @@
       "instrument_type": "OIL AND GAS LEASE",
       "lease_id": "lease-roger-mills-2670-I-2025-007743",
       "legal_raw": "16-12N-23W-IM",
-      "lessee": "UPLAND EXPLORATION OKLAHOMA LLC",
+      "lessee": "Upland Operating LLC",
       "lessor": "JENSON, BENALEE HEBISEN",
       "matched_tract_ids": [
         "Min016",
@@ -3318,7 +3318,7 @@
       "instrument_type": "OIL AND GAS LEASE",
       "lease_id": "lease-roger-mills-2670-I-2025-007743",
       "legal_raw": "16-12N-23W-IM",
-      "lessee": "UPLAND EXPLORATION OKLAHOMA LLC",
+      "lessee": "Upland Operating LLC",
       "lessor": "JENSON, BENALEE HEBISEN",
       "matched_tract_ids": [
         "Min016",
@@ -3355,7 +3355,7 @@
       "instrument_type": "OIL AND GAS LEASE",
       "lease_id": "lease-roger-mills-2670-I-2025-007743",
       "legal_raw": "16-12N-23W-IM",
-      "lessee": "UPLAND EXPLORATION OKLAHOMA LLC",
+      "lessee": "Upland Operating LLC",
       "lessor": "JENSON, BENALEE HEBISEN",
       "matched_tract_ids": [
         "Min016",
@@ -3392,7 +3392,7 @@
       "instrument_type": "OIL AND GAS LEASE",
       "lease_id": "lease-roger-mills-2670-I-2025-007743",
       "legal_raw": "16-12N-23W-IM",
-      "lessee": "UPLAND EXPLORATION OKLAHOMA LLC",
+      "lessee": "Upland Operating LLC",
       "lessor": "JENSON, BENALEE HEBISEN",
       "matched_tract_ids": [
         "Min016",
@@ -3429,7 +3429,7 @@
       "instrument_type": "OIL AND GAS LEASE",
       "lease_id": "lease-roger-mills-2670-I-2025-007743",
       "legal_raw": "16-12N-23W-IM",
-      "lessee": "UPLAND EXPLORATION OKLAHOMA LLC",
+      "lessee": "Upland Operating LLC",
       "lessor": "JENSON, BENALEE HEBISEN",
       "matched_tract_ids": [
         "Min016",
@@ -3515,7 +3515,7 @@
       "instrument_type": "OIL AND GAS LEASE",
       "lease_id": "lease-roger-mills-2665-I-2025-007156",
       "legal_raw": "16-12N-23W-IM",
-      "lessee": "UPLAND EXPLRATION OKLAHOMA LLC",
+      "lessee": "Upland Operating LLC",
       "lessor": "SHALLER, JOHN A.",
       "matched_tract_ids": [
         "Min016",
@@ -3552,7 +3552,7 @@
       "instrument_type": "OIL AND GAS LEASE",
       "lease_id": "lease-roger-mills-2665-I-2025-007156",
       "legal_raw": "16-12N-23W-IM",
-      "lessee": "UPLAND EXPLRATION OKLAHOMA LLC",
+      "lessee": "Upland Operating LLC",
       "lessor": "SHALLER, JOHN A.",
       "matched_tract_ids": [
         "Min016",
@@ -3589,7 +3589,7 @@
       "instrument_type": "OIL AND GAS LEASE",
       "lease_id": "lease-roger-mills-2665-I-2025-007156",
       "legal_raw": "16-12N-23W-IM",
-      "lessee": "UPLAND EXPLRATION OKLAHOMA LLC",
+      "lessee": "Upland Operating LLC",
       "lessor": "SHALLER, JOHN A.",
       "matched_tract_ids": [
         "Min016",
@@ -3626,7 +3626,7 @@
       "instrument_type": "OIL AND GAS LEASE",
       "lease_id": "lease-roger-mills-2665-I-2025-007156",
       "legal_raw": "16-12N-23W-IM",
-      "lessee": "UPLAND EXPLRATION OKLAHOMA LLC",
+      "lessee": "Upland Operating LLC",
       "lessor": "SHALLER, JOHN A.",
       "matched_tract_ids": [
         "Min016",
@@ -3663,7 +3663,7 @@
       "instrument_type": "OIL AND GAS LEASE",
       "lease_id": "lease-roger-mills-2665-I-2025-007156",
       "legal_raw": "16-12N-23W-IM",
-      "lessee": "UPLAND EXPLRATION OKLAHOMA LLC",
+      "lessee": "Upland Operating LLC",
       "lessor": "SHALLER, JOHN A.",
       "matched_tract_ids": [
         "Min016",
@@ -3700,7 +3700,7 @@
       "instrument_type": "OIL AND GAS LEASE",
       "lease_id": "lease-roger-mills-2665-I-2025-007156",
       "legal_raw": "16-12N-23W-IM",
-      "lessee": "UPLAND EXPLRATION OKLAHOMA LLC",
+      "lessee": "Upland Operating LLC",
       "lessor": "SHALLER, JOHN A.",
       "matched_tract_ids": [
         "Min016",
@@ -3737,7 +3737,7 @@
       "instrument_type": "OIL AND GAS LEASE",
       "lease_id": "lease-roger-mills-2665-I-2025-007156",
       "legal_raw": "16-12N-23W-IM",
-      "lessee": "UPLAND EXPLRATION OKLAHOMA LLC",
+      "lessee": "Upland Operating LLC",
       "lessor": "SHALLER, JOHN A.",
       "matched_tract_ids": [
         "Min016",
@@ -4646,7 +4646,7 @@
       "instrument_type": "OIL AND GAS LEASE",
       "lease_id": "lease-roger-mills-2653-I-2025-005917",
       "legal_raw": "07-12N-23W-IM",
-      "lessee": "UPLAND EXPLORATION OKLAHOMA LLC",
+      "lessee": "Upland Operating LLC",
       "lessor": "LORTZ, R MICHAEL",
       "matched_tract_ids": [
         "Min010",
@@ -4678,7 +4678,7 @@
       "instrument_type": "OIL AND GAS LEASE",
       "lease_id": "lease-roger-mills-2653-I-2025-005916",
       "legal_raw": "07-12N-23W-IM",
-      "lessee": "UPLAND EXPLORATION OKLAHOMA LLC",
+      "lessee": "Upland Operating LLC",
       "lessor": "YELTON, STUART G",
       "matched_tract_ids": [
         "Min010",
@@ -6725,7 +6725,7 @@
       "instrument_type": "OIL AND GAS LEASE",
       "lease_id": "lease-roger-mills-2628-I-2025-002863",
       "legal_raw": "16-12N-23W-IM",
-      "lessee": "UPLAND EXPLORATION OKLAHOMA LLC",
+      "lessee": "Upland Operating LLC",
       "lessor": "THE FIRST PRESBYTERIAN CHURCH OF CANADIAN",
       "matched_tract_ids": [
         "Min016",
@@ -14746,7 +14746,7 @@
       "instrument_type": "OIL AND GAS LEASE",
       "lease_id": "lease-roger-mills-2586-I-2024-005254",
       "legal_raw": "14-13N-23W-IM",
-      "lessee": "UPLAND EXPLORATION OKLAHOMA LLC",
+      "lessee": "Upland Operating LLC",
       "lessor": "OGI INC",
       "matched_tract_ids": [
         "OR025"
@@ -14770,7 +14770,7 @@
       "instrument_type": "OIL AND GAS LEASE",
       "lease_id": "lease-roger-mills-2586-I-2024-005254",
       "legal_raw": "14-13N-23W-IM",
-      "lessee": "UPLAND EXPLORATION OKLAHOMA LLC",
+      "lessee": "Upland Operating LLC",
       "lessor": "OGI INC",
       "matched_tract_ids": [
         "OR025"

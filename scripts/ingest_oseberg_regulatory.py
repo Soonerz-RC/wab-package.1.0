@@ -20,7 +20,12 @@ SCRIPTS_DIR = Path(__file__).resolve().parent
 if str(SCRIPTS_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPTS_DIR))
 
-from normalize import CANONICAL_COUNTIES, NormalizationError, normalize_county  # noqa: E402
+from normalize import (  # noqa: E402
+    CANONICAL_COUNTIES,
+    NormalizationError,
+    normalize_county,
+    normalize_upland_in_string,
+)
 from ingest_oseberg_wells import (  # noqa: E402
     find_latest_oseberg_folder,
     parse_section_from_legal,
@@ -106,7 +111,7 @@ def _parse_pooling(xlsx_path: Path, owned_index: Dict[str, List[str]]) -> Tuple[
         action_type = _classify_pooling(app_or_order)
         action_id = f"pool-{cause_number or 'unknown'}-{action_type.lower()}-r{r_idx}"
 
-        applicant = to_str_or_none(row[H["Applicant"]]) if "Applicant" in H else None
+        applicant = normalize_upland_in_string(to_str_or_none(row[H["Applicant"]]) if "Applicant" in H else None)
         formation = to_str_or_none(row[H["Formation"]]) if "Formation" in H else None
         legal_raw = to_str_or_none(row[H["Legal"]]) if "Legal" in H else None
 
@@ -174,7 +179,7 @@ def _parse_spacing(xlsx_path: Path, owned_index: Dict[str, List[str]]) -> Tuple[
         action_type = _classify_spacing(app_or_order)
         action_id = f"space-{cause_number or 'unknown'}-{action_type.lower()}-r{r_idx}"
 
-        applicant = to_str_or_none(row[H["Applicant"]]) if "Applicant" in H else None
+        applicant = normalize_upland_in_string(to_str_or_none(row[H["Applicant"]]) if "Applicant" in H else None)
         formation = to_str_or_none(row[H["Formation"]]) if "Formation" in H else None
         legal_raw = to_str_or_none(row[H["Legal"]]) if "Legal" in H else None
 
@@ -241,7 +246,7 @@ def _parse_le(xlsx_path: Path, owned_index: Dict[str, List[str]]) -> Tuple[List[
         cause_number = to_str_or_none(row[H["Cause Number"]]) if "Cause Number" in H else None
         action_id = f"le-{cause_number or 'unknown'}-r{r_idx}"
 
-        applicant = to_str_or_none(row[H["Applicant"]]) if "Applicant" in H else None
+        applicant = normalize_upland_in_string(to_str_or_none(row[H["Applicant"]]) if "Applicant" in H else None)
         formation = to_str_or_none(row[H["Formation"]]) if "Formation" in H else None
         legal_raw = to_str_or_none(row[H["Legal"]]) if "Legal" in H else None
 
