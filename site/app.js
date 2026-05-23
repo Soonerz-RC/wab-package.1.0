@@ -365,15 +365,9 @@
     // STR
     tr.appendChild(_td(t.str, { cls: "data-table__cell--str" }));
 
-    // Deal / Type
-    if (t.type === "mineral") {
-      tr.appendChild(_td(t.deal_name || "—"));
-    } else {
-      const span = document.createElement("span");
-      span.className = "data-table__cell--muted";
-      span.textContent = "ORRI";
-      tr.appendChild(_td(span));
-    }
+    // (Deal/Type column removed per Gib's review — Notes column replaces it
+    // below, after Status. Deal name is still surfaced on tract detail pages
+    // and in the tract list's ID-link tooltip / title bar.)
 
     // NMA (mineral only)
     if (t.type === "mineral") {
@@ -435,6 +429,13 @@
       statusCell.appendChild(badge);
     }
     tr.appendChild(statusCell);
+
+    // Notes (free-form context from the inventory Notes column)
+    if (t.notes) {
+      tr.appendChild(_td(t.notes, { cls: "data-table__cell--notes" }));
+    } else {
+      tr.appendChild(_td("—", { cls: "data-table__cell--notes data-table__cell--muted" }));
+    }
 
     // Asking (mineral + ORRI both carry sales_revenue per spec §4.3, §4.4)
     if (t.sales_revenue !== null && t.sales_revenue !== undefined) {
