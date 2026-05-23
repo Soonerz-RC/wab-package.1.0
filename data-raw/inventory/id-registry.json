@@ -523,6 +523,114 @@
       "first_seen": "2026-05-22",
       "row_hash": "b30d1991",
       "str": "27-12N-23W"
+    },
+    "OR053": {
+      "county": "Roger Mills",
+      "first_seen": "2026-05-23",
+      "row_hash": "18512281",
+      "str": "07-12N-23W"
+    },
+    "OR054": {
+      "county": "Roger Mills",
+      "first_seen": "2026-05-23",
+      "row_hash": "1f233ca9",
+      "str": "07-12N-23W"
+    },
+    "OR055": {
+      "county": "Roger Mills",
+      "first_seen": "2026-05-23",
+      "row_hash": "b029413d",
+      "str": "07-12N-23W"
+    },
+    "OR056": {
+      "county": "Roger Mills",
+      "first_seen": "2026-05-23",
+      "row_hash": "172c45b0",
+      "str": "12-12N-23W"
+    },
+    "OR057": {
+      "county": "Roger Mills",
+      "first_seen": "2026-05-23",
+      "row_hash": "28fa391c",
+      "str": "12-12N-23W"
+    },
+    "OR058": {
+      "county": "Roger Mills",
+      "first_seen": "2026-05-23",
+      "row_hash": "856d3abc",
+      "str": "12-12N-23W"
+    },
+    "OR059": {
+      "county": "Roger Mills",
+      "first_seen": "2026-05-23",
+      "row_hash": "b40cf513",
+      "str": "12-12N-23W"
+    },
+    "OR060": {
+      "county": "Roger Mills",
+      "first_seen": "2026-05-23",
+      "row_hash": "38816750",
+      "str": "16-12N-23W"
+    },
+    "OR061": {
+      "county": "Roger Mills",
+      "first_seen": "2026-05-23",
+      "row_hash": "7a2f5486",
+      "str": "16-12N-23W"
+    },
+    "OR062": {
+      "county": "Roger Mills",
+      "first_seen": "2026-05-23",
+      "row_hash": "7d77ee5a",
+      "str": "16-12N-23W"
+    },
+    "OR063": {
+      "county": "Roger Mills",
+      "first_seen": "2026-05-23",
+      "row_hash": "bb065c6e",
+      "str": "16-12N-23W"
+    },
+    "OR064": {
+      "county": "Roger Mills",
+      "first_seen": "2026-05-23",
+      "row_hash": "f6616408",
+      "str": "16-12N-23W"
+    },
+    "OR065": {
+      "county": "Roger Mills",
+      "first_seen": "2026-05-23",
+      "row_hash": "6454b540",
+      "str": "17-12N-23W"
+    },
+    "OR066": {
+      "county": "Roger Mills",
+      "first_seen": "2026-05-23",
+      "row_hash": "8ec6579c",
+      "str": "17-12N-23W"
+    },
+    "OR067": {
+      "county": "Roger Mills",
+      "first_seen": "2026-05-23",
+      "row_hash": "ba4dbbfe",
+      "str": "17-12N-23W"
+    },
+    "OR068": {
+      "county": "Roger Mills",
+      "first_seen": "2026-05-23",
+      "row_hash": "df6a1823",
+      "str": "17-12N-23W"
+    },
+    "OR069": {
+      "county": "Roger Mills",
+      "first_seen": "2026-05-23",
+      "row_hash": "e4278a3d",
+      "str": "17-12N-23W"
+    },
+    "OR070": {
+      "county": "Roger Mills",
+      "first_seen": "2026-05-23",
+      "row_hash": "fec0320c",
+      "str": "17-12N-23W"
     }
   },
   "retired": []

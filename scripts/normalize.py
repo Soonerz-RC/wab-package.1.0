@@ -298,17 +298,30 @@ def _format_date_for_hash(v) -> str:
     return str(v)
 
 
-def orri_row_hash(county: str, str_canonical: str, nra, dol, exp) -> str:
-    """Return the 8-char SHA-1 prefix used as ORRI row identity (spec §3.4)."""
-    key = "|".join(
-        [
-            county,
-            str_canonical,
-            _format_nra_for_hash(nra),
-            _format_date_for_hash(dol),
-            _format_date_for_hash(exp),
-        ]
-    )
+def orri_row_hash(county: str, str_canonical: str, nra, dol, exp, occurrence: int = 0) -> str:
+    """Return the 8-char SHA-1 prefix used as ORRI row identity (spec §3.4).
+
+    The ``occurrence`` parameter is a 0-indexed counter that the ingest assigns
+    based on the row's position among siblings sharing the same identity tuple
+    (county, str, nra, dol, exp). For the first occurrence (the default
+    occurrence=0), the hash is computed exactly as the original spec: hash key is
+    just the 5-field tuple. For 2nd, 3rd, ... occurrences, the counter is
+    appended to the hash key, yielding a fresh row_hash per source row.
+
+    This preserves frozen IDs for first-occurrence rows (their hashes match the
+    pre-amendment spec) while differentiating siblings that share an identity
+    tuple but represent distinct ORRI grants.
+    """
+    parts = [
+        county,
+        str_canonical,
+        _format_nra_for_hash(nra),
+        _format_date_for_hash(dol),
+        _format_date_for_hash(exp),
+    ]
+    if occurrence > 0:
+        parts.append(str(occurrence))
+    key = "|".join(parts)
     digest = hashlib.sha1(key.encode("utf-8")).hexdigest()
     return digest[:8]
 
@@ -446,6 +459,17 @@ def _selftest():
     # HBP variant
     he = orri_row_hash("Custer", "14-15N-20W", 3.2258, "HBP", "HBP")
     check("orri-hash HBP length 8", len(he), 8)
+
+    # Occurrence counter: first occurrence (counter=0) must match the unparam'd hash
+    h_base = orri_row_hash("Roger Mills", "07-12N-23W", 0.33334, "2025-01-06", "2028-01-06")
+    h_0    = orri_row_hash("Roger Mills", "07-12N-23W", 0.33334, "2025-01-06", "2028-01-06", 0)
+    check("orri-hash occurrence=0 matches no-counter", h_base, h_0)
+    # Occurrence counter: distinct occurrences yield distinct hashes
+    h_1 = orri_row_hash("Roger Mills", "07-12N-23W", 0.33334, "2025-01-06", "2028-01-06", 1)
+    h_2 = orri_row_hash("Roger Mills", "07-12N-23W", 0.33334, "2025-01-06", "2028-01-06", 2)
+    h_3 = orri_row_hash("Roger Mills", "07-12N-23W", 0.33334, "2025-01-06", "2028-01-06", 3)
+    if len({h_base, h_1, h_2, h_3}) != 4:
+        failures.append(f"  occurrence counter: 4 occurrences should yield 4 distinct hashes, got {len({h_base, h_1, h_2, h_3})}")
 
     # --- round_acres ---
     check("round 63.332999999999998", round_acres(63.332999999999998), 63.333)

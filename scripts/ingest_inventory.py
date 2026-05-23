@@ -345,6 +345,11 @@ def parse_orri_section(
 
     rows: List[dict] = []
     r_idx = header_row + 1
+    # Occurrence counter per identity tuple (county, str, nra, dol, exp).
+    # Spec §3.4: 1st occurrence uses 5-field hash (counter=0, no suffix in
+    # hash key); 2nd+ occurrences append the counter to differentiate.
+    tuple_counter: Dict[Tuple[str, str, Optional[float], Optional[str], Optional[str]], int] = {}
+
     while r_idx <= ws.max_row:
         county_cell = ws.cell(row=r_idx, column=col_county)
         is_data_row = county_cell.value is not None
@@ -373,7 +378,10 @@ def parse_orri_section(
             dol = to_iso_date_or_hbp(ws.cell(row=r_idx, column=col_dol).value)
             exp = to_iso_date_or_hbp(ws.cell(row=r_idx, column=col_exp).value)
             status_category = derive_orri_status_category(dol, exp)
-            row_hash = orri_row_hash(county, str_canonical, nra, dol, exp)
+            identity_tuple = (county, str_canonical, nra, dol, exp)
+            occurrence = tuple_counter.get(identity_tuple, 0)
+            tuple_counter[identity_tuple] = occurrence + 1
+            row_hash = orri_row_hash(county, str_canonical, nra, dol, exp, occurrence)
 
             reg_cell = ws.cell(row=r_idx, column=col_reg) if col_reg else None
             regulatory_status = reg_cell.value if reg_cell and reg_cell.value else None

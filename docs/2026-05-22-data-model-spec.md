@@ -204,14 +204,24 @@ The refresh script:
 `id-registry.json` is **the only file in `data-raw/` that the script may write to.** It is the bookkeeping that makes Hard Rule #1 work in practice without freezing the IDs in stone outside any tracking system.
 
 ### 3.4 ORRI row identity
-ORRI rows lack a "deal" field but have duplicates on the same STR with different decimals and dates. The `row_hash` is computed as a SHA-1 hex digest (first 8 chars) of `county|str|nra|dol|exp` where:
+
+ORRI rows lack a "deal" field but have duplicates on the same STR with different decimals and dates. The `row_hash` is computed as a SHA-1 hex digest (first 8 chars) of `county|str|nra|dol|exp` (the **identity tuple**) where:
 
 - `county` is the canonical county name.
 - `str` is the canonical STR.
 - `nra` is the NRA rounded to 4 decimals (per §1.2), formatted as a decimal string without trailing zeros (`0.5` not `0.5000`, `0.1667` not `0.166700`).
 - `dol` and `exp` are either the literal string `"HBP"` or an ISO date (`YYYY-MM-DD`), or empty string if null.
 
-That uniquely identifies an ORRI grant within the Inventory and lets the registry find the same grant across refreshes. Two grants on the same STR with NRA values that differ even slightly (e.g., `0.1666` vs `0.1667`) round to different 4-decimal values and therefore produce different row hashes.
+Two grants on the same STR with NRA values that differ even slightly (e.g., `0.1666` vs `0.1667`) round to different 4-decimal values and therefore produce different row hashes.
+
+**Occurrence-counter tiebreaker (added 2026-05-23).** Real inventories carry multiple ORRI grants from different lessors that happen to share an identical identity tuple — e.g., four separate `0.33334 NRA` grants on `7-12N-23W` with identical lease dates. Each of those rows is a distinct ORRI grant, not a duplicate of the same grant. To preserve one tract_id per source row:
+
+- The **first occurrence** of any identity tuple (in the inventory's natural row order) uses the original 5-field hash key: `county|str|nra|dol|exp`. Its row_hash is unchanged from earlier versions of this spec, so existing IDs assigned to first occurrences remain frozen per §3.3.
+- The **2nd, 3rd, …** occurrence of the same identity tuple appends an occurrence counter (1-indexed: `1`, `2`, …) to the hash key: `county|str|nra|dol|exp|1`, `county|str|nra|dol|exp|2`, etc. Each yields a fresh row_hash and therefore a fresh tract_id from the registry.
+
+The occurrence count is determined per inventory file at ingest time by traversing ORRI rows top-to-bottom and maintaining a counter keyed by the 5-field identity tuple. As long as the row order in the Excel doesn't shuffle, the counter assignments are stable across refreshes.
+
+If Gib later rearranges ORRI rows such that what used to be the "first occurrence" is no longer first, that earlier-first-now-second row would acquire a new row_hash and be assigned a new tract_id (with the original ID retired). To avoid that, the row order of ORRI grants in the inventory should be treated as part of the identity model — once a row is positioned, don't move it within its group.
 
 ---
 
