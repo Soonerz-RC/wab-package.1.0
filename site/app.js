@@ -95,6 +95,22 @@
     return map[category] || category || "—";
   }
 
+  // Display-only smart title-case: any whitespace-separated token that is
+  // entirely uppercase letters AND at least 5 characters gets title-cased
+  // ("MEWBOURNE" → "Mewbourne"). Shorter all-caps tokens are preserved as
+  // acronyms ("BCE", "OCC", "TPC", "GBK"). Mixed-case tokens are left alone
+  // ("Reign", "Mewbourne", "BCE Mach Reg"). Source data is unchanged; this
+  // is purely a presentation transform for inventory-typed labels.
+  function _smartTitleCase(s) {
+    if (!s || typeof s !== "string") return s;
+    return s.split(/\s+/).map((tok) => {
+      if (tok.length >= 5 && /^[A-Z]+$/.test(tok)) {
+        return tok.charAt(0) + tok.slice(1).toLowerCase();
+      }
+      return tok;
+    }).join(" ");
+  }
+
   // -------------------------------------------------------------------------
   // Render error helper
   // -------------------------------------------------------------------------
@@ -424,7 +440,7 @@
     if (t.regulatory_status) {
       const badge = document.createElement(t.regulatory_url ? "a" : "span");
       badge.className = "reg-badge";
-      badge.textContent = t.regulatory_status;
+      badge.textContent = _smartTitleCase(t.regulatory_status);
       if (t.regulatory_url) {
         badge.href = t.regulatory_url;
         badge.target = "_blank";
@@ -1096,13 +1112,14 @@
       addRow("Lease document", _link("View at okcountyrecords.com", tract.lease_url, { external: true }));
     }
     if (hasReg) {
+      const regDisplay = _smartTitleCase(tract.regulatory_status);
       let regNode;
       if (tract.regulatory_url) {
         regNode = document.createElement("span");
-        regNode.appendChild(document.createTextNode(tract.regulatory_status + " · "));
+        regNode.appendChild(document.createTextNode(regDisplay + " · "));
         regNode.appendChild(_link("View Oseberg filing", tract.regulatory_url, { external: true }));
       } else {
-        regNode = document.createTextNode(tract.regulatory_status);
+        regNode = document.createTextNode(regDisplay);
       }
       addRow("Regulatory", regNode);
     }
@@ -2095,7 +2112,7 @@
           if (t.regulatory_status) {
             const regBadge = document.createElement(t.regulatory_url ? "a" : "span");
             regBadge.className = "reg-badge";
-            regBadge.textContent = t.regulatory_status;
+            regBadge.textContent = _smartTitleCase(t.regulatory_status);
             if (t.regulatory_url) {
               regBadge.href = t.regulatory_url;
               regBadge.target = "_blank";
