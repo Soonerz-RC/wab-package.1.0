@@ -416,11 +416,15 @@
       statusCell.appendChild(pill);
     }
 
-    // Regulatory badge: small "REG ↗" link next to status pill when present
+    // Regulatory badge: shows the verbatim REGULATORY annotation from the
+    // inventory (e.g. "Reign Reg", "BCE Mach Reg") next to the status pill.
+    // Links to Oseberg filing when a URL is attached. The operator name is
+    // intentionally visible — the inventory column carries the operator
+    // leading the regulatory action, not just a generic flag.
     if (t.regulatory_status) {
       const badge = document.createElement(t.regulatory_url ? "a" : "span");
       badge.className = "reg-badge";
-      badge.textContent = "REG";
+      badge.textContent = t.regulatory_status;
       if (t.regulatory_url) {
         badge.href = t.regulatory_url;
         badge.target = "_blank";
@@ -430,8 +434,8 @@
         arrow.textContent = "↗";
         badge.appendChild(arrow);
       }
-      badge.title = t.regulatory_status + (t.regulatory_url
-        ? " — Oseberg filing (opens in new tab)"
+      badge.title = "OCC regulatory filing" + (t.regulatory_url
+        ? " — Oseberg link (opens in new tab)"
         : "");
       statusCell.appendChild(badge);
     }
@@ -2073,7 +2077,7 @@
           return sec;
         };
 
-        // Owned tracts list
+        // Owned tracts list (with inventory-flagged REG annotation when present)
         const tractItems = sectionTracts.map((t) => {
           const li = document.createElement("li");
           const link = document.createElement("a");
@@ -2088,6 +2092,24 @@
             meta.textContent = `ORRI · ${formatNumber(t.nra, { decimals: 2 })} NRA · ${formatStatus(t.status_category)}`;
           }
           li.appendChild(meta);
+          if (t.regulatory_status) {
+            const regBadge = document.createElement(t.regulatory_url ? "a" : "span");
+            regBadge.className = "reg-badge";
+            regBadge.textContent = t.regulatory_status;
+            if (t.regulatory_url) {
+              regBadge.href = t.regulatory_url;
+              regBadge.target = "_blank";
+              regBadge.rel = "noopener noreferrer";
+              const arrow = document.createElement("span");
+              arrow.className = "reg-badge__arrow";
+              arrow.textContent = "↗";
+              regBadge.appendChild(arrow);
+            }
+            regBadge.title = "OCC regulatory filing" + (t.regulatory_url
+              ? " — Oseberg link (opens in new tab)"
+              : "");
+            li.appendChild(regBadge);
+          }
           return li;
         });
         content.appendChild(_section(`Owned tracts (${sectionTracts.length})`, tractItems));

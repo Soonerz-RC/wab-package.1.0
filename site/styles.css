@@ -966,16 +966,16 @@ ul, ol {
   display: inline-block;
   margin-left: var(--space-2);
   font-family: var(--font-sans);
-  font-size: 9.5px;
-  font-weight: 600;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
   padding: 2px 6px;
   border: 1px solid var(--color-maroon);
   color: var(--color-maroon);
   text-decoration: none;
   vertical-align: middle;
   background: var(--color-bg);
+  white-space: nowrap;
 }
 
 a.reg-badge {
