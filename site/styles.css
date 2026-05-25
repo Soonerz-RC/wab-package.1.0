@@ -1703,6 +1703,45 @@ a.reg-badge:hover {
   font-variant-numeric: tabular-nums;
 }
 
+/* Layer-control widget (used on Wells map to toggle base layers + PLSS).
+   Tightens Leaflet defaults to the McKinsey hairline aesthetic. */
+.leaflet-control-layers {
+  background: var(--color-bg);
+  border: 1px solid var(--color-hairline-strong);
+  border-radius: 2px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+  font-family: var(--font-sans);
+  font-size: 12px;
+  color: var(--color-text);
+}
+
+.leaflet-control-layers-expanded {
+  padding: 10px 14px;
+  min-width: 180px;
+}
+
+.leaflet-control-layers-list label {
+  display: block;
+  margin: 4px 0;
+  cursor: pointer;
+}
+
+.leaflet-control-layers-separator {
+  border-top: 1px solid var(--color-hairline);
+  margin: 8px 0;
+}
+
+.leaflet-control-layers-base label span,
+.leaflet-control-layers-overlays label span {
+  font-weight: 400;
+}
+
+.leaflet-control-layers input[type="radio"],
+.leaflet-control-layers input[type="checkbox"] {
+  margin-right: 6px;
+  accent-color: var(--color-maroon);
+}
+
 .well-popup__title {
   font-family: var(--font-serif);
   font-size: 14px;

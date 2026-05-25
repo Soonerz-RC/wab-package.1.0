@@ -2834,19 +2834,75 @@
       const validCoords = enriched.filter((w) => w.lat && w.lon);
       const meanLat = validCoords.reduce((s, w) => s + w.lat, 0) / Math.max(1, validCoords.length);
       const meanLon = validCoords.reduce((s, w) => s + w.lon, 0) / Math.max(1, validCoords.length);
-      const map = window.L.map("wells-map", {
-        center: [meanLat || 35.7, meanLon || -99.5],
-        zoom: 9,
-        scrollWheelZoom: true,
-      });
-      window.L.tileLayer(
+
+      // Base layers. Carto light-gray cadastral stays the default — it's
+      // the cleanest backdrop for property work and matches the rest of
+      // the site's restrained palette. Esri imagery is included for the
+      // buyer who wants to look at actual pads/pipelines, and OSM is
+      // there for road context if needed.
+      const cartoLight = window.L.tileLayer(
         "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
         {
           attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
           subdomains: "abcd",
-          maxZoom: 18,
+          maxZoom: 19,
         }
-      ).addTo(map);
+      );
+      const esriImagery = window.L.tileLayer(
+        "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+        {
+          attribution: 'Tiles &copy; Esri &mdash; Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community',
+          maxZoom: 19,
+        }
+      );
+      const osm = window.L.tileLayer(
+        "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+        {
+          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+          maxZoom: 19,
+        }
+      );
+
+      // PLSS overlay: BLM National Public Land Survey System grid. Server
+      // hands back Township boundaries down to ~scale 4M and Section
+      // boundaries (1-36) down to ~scale 500K, with quarter-section
+      // intersections at deep zoom. Labels (e.g. "12N 23W") come baked in
+      // from the BLM service, so we don't add anything client-side.
+      const plssLayer = window.L && window.L.esri
+        ? window.L.esri.dynamicMapLayer({
+            url: "https://gis.blm.gov/arcgis/rest/services/Cadastral/BLM_Natl_PLSS_CadNSDI/MapServer",
+            opacity: 0.7,
+            format: "png32",
+            transparent: true,
+            attribution: 'PLSS grid &copy; <a href="https://www.blm.gov/services/geospatial">BLM National PLSS</a>',
+          })
+        : null;
+
+      const map = window.L.map("wells-map", {
+        center: [meanLat || 35.7, meanLon || -99.5],
+        zoom: 9,
+        scrollWheelZoom: true,
+        layers: plssLayer ? [cartoLight, plssLayer] : [cartoLight],
+      });
+
+      // Layer-control widget in the top-right. Kept un-collapsed by default
+      // because the PLSS toggle is one of the more useful affordances on
+      // this page — a buyer should see it without having to discover it.
+      const overlays = {};
+      if (plssLayer) {
+        overlays["PLSS grid (BLM)"] = plssLayer;
+      }
+      window.L.control
+        .layers(
+          {
+            "Light cadastral": cartoLight,
+            "Satellite (Esri)": esriImagery,
+            "OpenStreetMap": osm,
+          },
+          overlays,
+          { position: "topright", collapsed: false }
+        )
+        .addTo(map);
 
       // Layer group for filtered well markers (cleared & re-added on each render)
       const markerLayer = window.L.layerGroup().addTo(map);
