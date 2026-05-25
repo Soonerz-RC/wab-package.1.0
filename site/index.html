@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@400;500;700&family=Roboto:wght@400;500;700&display=swap" />
 
-  <link rel="stylesheet" href="styles.css?v=2026-05-22-22" />
+  <link rel="stylesheet" href="styles.css?v=2026-05-22-23" />
 </head>
 
 <body data-page="index">
@@ -40,6 +40,27 @@
       <p class="hero__subtitle">
         A curated portfolio of mineral interests and overriding royalty interests across <span data-text="county-count-word">—</span> Anadarko Basin counties — <span data-text="county-list">—</span>. Owned by GBK International Group, Ltd and TPC Minerals, LLC. This data room is intended for vetted buyers; please do not distribute the URL.
       </p>
+    </section>
+
+    <!-- Oklahoma footprint (clickable map preview → expands to interactive modal) -->
+    <section class="container section section--tight">
+      <button type="button" class="footprint-card" data-footprint-open
+              aria-label="Open Oklahoma footprint map">
+        <div class="footprint-card__text">
+          <div class="footprint-card__eyebrow">Oklahoma footprint</div>
+          <div class="footprint-card__headline">
+            Four Western Anadarko counties
+          </div>
+          <div class="footprint-card__body">
+            Caddo &middot; Custer &middot; Roger Mills &middot; Washita.
+            Click the map for county-level acreage, royalty, and pricing detail.
+          </div>
+          <div class="footprint-card__cta">Explore the map &rarr;</div>
+        </div>
+        <div class="footprint-card__map" data-footprint-preview>
+          <!-- SVG injected by app.js -->
+        </div>
+      </button>
     </section>
 
     <!-- Key investment highlights -->
@@ -210,6 +231,37 @@
     </section>
   </main>
 
+  <!-- Oklahoma footprint modal (hidden until opened) -->
+  <div class="county-modal" data-county-modal hidden aria-hidden="true" role="dialog" aria-labelledby="county-modal-title">
+    <div class="county-modal__backdrop" data-county-modal-close></div>
+    <div class="county-modal__panel" role="document">
+      <div class="county-modal__header">
+        <div>
+          <h2 id="county-modal-title" class="county-modal__title">Oklahoma footprint</h2>
+          <p class="county-modal__subtitle">Click an owned county for acreage, royalty, and pricing detail.</p>
+        </div>
+        <button type="button" class="county-modal__close" data-county-modal-close
+                aria-label="Close map">&times;</button>
+      </div>
+      <div class="county-modal__body">
+        <div class="county-modal__map" data-county-map-full>
+          <!-- SVG injected by app.js -->
+        </div>
+        <div class="county-popover" data-county-popover hidden role="region" aria-live="polite">
+          <!-- populated by app.js -->
+        </div>
+      </div>
+      <div class="county-modal__legend">
+        <span class="county-legend">
+          <span class="county-legend__swatch county-legend__swatch--owned"></span> Owned counties (4)
+        </span>
+        <span class="county-legend">
+          <span class="county-legend__swatch county-legend__swatch--other"></span> Other Oklahoma counties (73)
+        </span>
+      </div>
+    </div>
+  </div>
+
   <footer class="site-footer">
     <div class="container site-footer__row">
       <div class="site-footer__brand">
@@ -223,7 +275,7 @@
     </div>
   </footer>
 
-  <script src="app.js?v=2026-05-22-22"></script>
+  <script src="app.js?v=2026-05-22-23"></script>
   <script>
     if (window.wab) { window.wab.initIndex(); }
   </script>

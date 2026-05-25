@@ -265,9 +265,315 @@
         "oseberg-folder",
         (metaDoc && metaDoc.oseberg_folder) || "—"
       );
+
+      // Footprint map — preview card on Overview + interactive modal expand
+      _initFootprint(root, tracts).catch((err) => {
+        // Footprint failure should not blank the rest of the page.
+        if (window.console) console.error("[wab] footprint init failed:", err);
+      });
     } catch (err) {
       renderError(root, err);
     }
+  }
+
+  // -------------------------------------------------------------------------
+  // Oklahoma footprint — small clickable preview on Overview, full
+  // interactive map in modal. SVG is fetched once and reused for both.
+  // -------------------------------------------------------------------------
+
+  // 5-digit state+county FIPS codes for the four owned counties.
+  const FOOTPRINT_OWNED = {
+    "40015": "Caddo",
+    "40039": "Custer",
+    "40129": "Roger Mills",
+    "40149": "Washita",
+  };
+
+  async function _initFootprint(root, tracts) {
+    const preview = root.querySelector("[data-footprint-preview]");
+    const openBtn = root.querySelector("[data-footprint-open]");
+    const modal = document.querySelector("[data-county-modal]");
+    if (!preview || !modal) return;
+
+    // Per-county aggregates from the tract list
+    const byCounty = _aggregateCountyMetrics(tracts);
+
+    // Load SVG once, reuse for preview + modal
+    let svgText;
+    try {
+      const res = await fetch("assets/ok-counties.svg", { cache: "force-cache" });
+      if (!res.ok) throw new Error("HTTP " + res.status);
+      svgText = await res.text();
+    } catch (err) {
+      // Fail soft: hide the card if the map asset can't load.
+      if (openBtn) openBtn.style.display = "none";
+      throw err;
+    }
+
+    // Inject into preview (non-interactive thumbnail)
+    preview.innerHTML = svgText;
+    _markOwnedCounties(preview);
+
+    // Wire button → open modal. Lazy-populate the modal SVG on first open.
+    let modalReady = false;
+    openBtn.addEventListener("click", () => {
+      if (!modalReady) {
+        const mapHost = modal.querySelector("[data-county-map-full]");
+        mapHost.innerHTML = svgText;
+        _markOwnedCounties(mapHost, { interactive: true });
+        _wireCountyClicks(mapHost, modal, byCounty);
+        modalReady = true;
+      }
+      _openCountyModal(modal);
+    });
+
+    // Close handlers (backdrop, X button, Escape key)
+    modal.querySelectorAll("[data-county-modal-close]").forEach((el) => {
+      el.addEventListener("click", () => _closeCountyModal(modal));
+    });
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && !modal.hidden) _closeCountyModal(modal);
+    });
+  }
+
+  function _aggregateCountyMetrics(tracts) {
+    const acc = {};
+    for (const t of tracts) {
+      const c = t.county;
+      if (!c) continue;
+      if (!acc[c]) {
+        acc[c] = {
+          county: c,
+          tract_count: 0,
+          mineral_count: 0,
+          mineral_nma: 0,
+          mineral_nra: 0,
+          mineral_royalty_acres: 0,
+          hbp_count: 0,
+          hbp_nra: 0,
+          nonhbp_count: 0,
+          nonhbp_nra: 0,
+          total_nra: 0,
+          total_price: 0,
+          _sections: new Set(),
+        };
+      }
+      const a = acc[c];
+      a.tract_count += 1;
+      if (t.str) a._sections.add(t.str);
+      a.total_nra += t.nra || 0;
+      a.total_price += t.sales_revenue || 0;
+      if (t.type === "mineral") {
+        a.mineral_count += 1;
+        a.mineral_nma += t.nma || 0;
+        a.mineral_nra += t.nra || 0;
+        a.mineral_royalty_acres += (t.nma || 0) * (t.royalty || 0);
+      } else if (t.type === "orri") {
+        if (t.status_category === "HBP") {
+          a.hbp_count += 1;
+          a.hbp_nra += t.nra || 0;
+        } else {
+          a.nonhbp_count += 1;
+          a.nonhbp_nra += t.nra || 0;
+        }
+      }
+    }
+    for (const c in acc) {
+      const a = acc[c];
+      a.section_count = a._sections.size;
+      a.blended_royalty =
+        a.mineral_nma > 0 ? a.mineral_royalty_acres / a.mineral_nma : 0;
+      a.price_per_nra = a.total_nra > 0 ? a.total_price / a.total_nra : 0;
+      delete a._sections;
+    }
+    return acc;
+  }
+
+  function _markOwnedCounties(host, opts = {}) {
+    Object.keys(FOOTPRINT_OWNED).forEach((fips) => {
+      const p = host.querySelector(`.ok-county[data-fips="${fips}"]`);
+      if (!p) return;
+      p.classList.add("ok-county--owned");
+      if (opts.interactive) {
+        p.classList.add("ok-county--interactive");
+        const countyName = FOOTPRINT_OWNED[fips];
+        p.setAttribute("tabindex", "0");
+        p.setAttribute("role", "button");
+        p.setAttribute("aria-label", countyName + " County — view details");
+      }
+    });
+  }
+
+  function _wireCountyClicks(mapHost, modal, byCounty) {
+    mapHost.addEventListener("click", (e) => {
+      const path = e.target.closest(".ok-county--interactive");
+      if (!path) {
+        _hideCountyPopover(modal);
+        return;
+      }
+      _showCountyPopover(modal, path, byCounty, e);
+      e.stopPropagation();
+    });
+    // Outside click closes popover
+    modal
+      .querySelector(".county-modal__body")
+      .addEventListener("click", (e) => {
+        if (!e.target.closest(".ok-county--interactive") &&
+            !e.target.closest(".county-popover")) {
+          _hideCountyPopover(modal);
+        }
+      });
+    // Keyboard activation for accessibility
+    mapHost.addEventListener("keydown", (e) => {
+      const path = e.target.closest(".ok-county--interactive");
+      if (!path) return;
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        const rect = path.getBoundingClientRect();
+        const fakeEvt = {
+          clientX: rect.left + rect.width / 2,
+          clientY: rect.top + rect.height / 2,
+        };
+        _showCountyPopover(modal, path, byCounty, fakeEvt);
+      }
+    });
+  }
+
+  function _openCountyModal(modal) {
+    modal.hidden = false;
+    modal.setAttribute("aria-hidden", "false");
+    document.body.style.overflow = "hidden";
+  }
+
+  function _closeCountyModal(modal) {
+    modal.hidden = true;
+    modal.setAttribute("aria-hidden", "true");
+    document.body.style.overflow = "";
+    _hideCountyPopover(modal);
+    // Clear any active highlight on counties
+    modal.querySelectorAll(".ok-county--active").forEach((p) =>
+      p.classList.remove("ok-county--active")
+    );
+  }
+
+  function _hideCountyPopover(modal) {
+    const pop = modal.querySelector("[data-county-popover]");
+    if (pop) pop.hidden = true;
+    modal.querySelectorAll(".ok-county--active").forEach((p) =>
+      p.classList.remove("ok-county--active")
+    );
+  }
+
+  function _showCountyPopover(modal, pathEl, byCounty, evt) {
+    const fips = pathEl.dataset.fips;
+    const countyName = FOOTPRINT_OWNED[fips];
+    const agg = byCounty[countyName];
+    const pop = modal.querySelector("[data-county-popover]");
+    if (!pop || !countyName) return;
+    // Visual highlight
+    modal.querySelectorAll(".ok-county--active").forEach((p) =>
+      p.classList.remove("ok-county--active")
+    );
+    pathEl.classList.add("ok-county--active");
+
+    pop.innerHTML = "";
+    const title = document.createElement("div");
+    title.className = "county-pop__title";
+    title.textContent = countyName + " County";
+    pop.appendChild(title);
+
+    const meta = document.createElement("div");
+    meta.className = "county-pop__meta";
+    if (agg) {
+      meta.textContent =
+        agg.section_count +
+        " section" +
+        (agg.section_count === 1 ? "" : "s") +
+        " · " +
+        agg.tract_count +
+        " tract" +
+        (agg.tract_count === 1 ? "" : "s");
+    } else {
+      meta.textContent = "No tracts in this county";
+    }
+    pop.appendChild(meta);
+
+    if (agg) {
+      const rows = document.createElement("dl");
+      rows.className = "county-pop__rows";
+      const addRow = (dtText, ddText) => {
+        const row = document.createElement("div");
+        const dt = document.createElement("dt");
+        dt.textContent = dtText;
+        const dd = document.createElement("dd");
+        dd.textContent = ddText;
+        row.appendChild(dt);
+        row.appendChild(dd);
+        rows.appendChild(row);
+      };
+      if (agg.mineral_count > 0) {
+        addRow(
+          "Mineral",
+          agg.mineral_count +
+            " tracts · " +
+            formatNumber(agg.mineral_nra, { decimals: 1 }) +
+            " NRA"
+        );
+        addRow("NMA", formatNumber(agg.mineral_nma, { decimals: 1 }));
+        addRow("Blended royalty", formatPercent(agg.blended_royalty));
+      }
+      if (agg.hbp_count > 0) {
+        addRow(
+          "ORRI (HBP)",
+          agg.hbp_count +
+            " tracts · " +
+            formatNumber(agg.hbp_nra, { decimals: 1 }) +
+            " NRA"
+        );
+      }
+      if (agg.nonhbp_count > 0) {
+        addRow(
+          "ORRI (non-HBP)",
+          agg.nonhbp_count +
+            " tracts · " +
+            formatNumber(agg.nonhbp_nra, { decimals: 1 }) +
+            " NRA"
+        );
+      }
+      // Divider
+      const div = document.createElement("div");
+      div.className = "county-pop__divider";
+      rows.appendChild(div);
+      addRow("Allocated price", formatCurrency(agg.total_price));
+      addRow(
+        "$/NRA (county avg)",
+        "$" + formatNumber(agg.price_per_nra, { decimals: 0 })
+      );
+      pop.appendChild(rows);
+
+      const link = document.createElement("a");
+      link.className = "county-pop__link";
+      link.href = "tracts.html?county=" + encodeURIComponent(countyName);
+      link.textContent = "View tracts in " + countyName + " →";
+      pop.appendChild(link);
+    }
+
+    pop.hidden = false;
+
+    // Position relative to the modal body. Place near the click; nudge inside
+    // bounds so the popover doesn't escape the right or bottom edge.
+    const body = modal.querySelector(".county-modal__body");
+    const bodyRect = body.getBoundingClientRect();
+    const popW = 320; // a bit wider than the CSS to leave breathing room
+    const popH = pop.offsetHeight || 280;
+    let x = evt.clientX - bodyRect.left + body.scrollLeft + 14;
+    let y = evt.clientY - bodyRect.top + body.scrollTop + 14;
+    const maxX = body.scrollLeft + bodyRect.width - popW - 12;
+    const maxY = body.scrollTop + bodyRect.height - popH - 12;
+    if (x > maxX) x = Math.max(8, maxX);
+    if (y > maxY) y = Math.max(8, maxY);
+    pop.style.left = x + "px";
+    pop.style.top = y + "px";
   }
 
   function _setMetric(root, key, value) {
@@ -577,6 +883,27 @@
         filters: { type: "", county: "", status: "", search: "" },
         sort: { key: "tract_id", dir: "asc" },
       };
+
+      // Honor URL-driven filter prefills (e.g. tracts.html?county=Caddo).
+      // This is how the Overview footprint map deep-links to a county view.
+      const urlParams = new URLSearchParams(window.location.search);
+      ["type", "county", "status", "search"].forEach((key) => {
+        const value = urlParams.get(key);
+        if (value === null) return;
+        // Match case-insensitively against actual filter option values so
+        // ?county=caddo works even though the option value is "Caddo".
+        const input = root.querySelector(`[data-filter="${key}"]`);
+        if (!input) return;
+        let resolvedValue = value;
+        if (input.tagName === "SELECT") {
+          const match = Array.from(input.options).find(
+            (o) => o.value.toLowerCase() === value.toLowerCase()
+          );
+          resolvedValue = match ? match.value : value;
+        }
+        input.value = resolvedValue;
+        state.filters[key] = resolvedValue;
+      });
 
       const filterInputs = root.querySelectorAll("[data-filter]");
       filterInputs.forEach((el) => {

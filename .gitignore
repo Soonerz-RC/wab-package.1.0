@@ -34,3 +34,6 @@ site/data/
 
 # Claude plugin tooling artifacts
 site/CLAUDE.md
+
+# Map-build cache (Census TIGER shapefile download, regeneratable)
+scripts/.cache/

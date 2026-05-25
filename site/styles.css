@@ -1771,3 +1771,314 @@ a.reg-badge:hover {
   font-size: 13px;
   margin: var(--space-5) 0;
 }
+
+/* ------------------------------------------------------------------------- */
+/* Oklahoma footprint card (Overview page) + interactive modal                */
+/* ------------------------------------------------------------------------- */
+
+.footprint-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+  gap: var(--space-5);
+  align-items: center;
+  width: 100%;
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid var(--color-hairline);
+  background: var(--color-bg);
+  color: inherit;
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+  transition: border-color 120ms ease, box-shadow 120ms ease, transform 120ms ease;
+}
+
+.footprint-card:hover,
+.footprint-card:focus-visible {
+  border-color: var(--color-maroon);
+  outline: none;
+  transform: translateY(-1px);
+}
+
+.footprint-card__eyebrow {
+  font-family: var(--font-serif);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-maroon);
+  margin-bottom: var(--space-2);
+}
+
+.footprint-card__headline {
+  font-family: var(--font-serif);
+  font-size: 22px;
+  font-weight: 500;
+  letter-spacing: -0.005em;
+  color: var(--color-text);
+  margin: 0 0 var(--space-2);
+}
+
+.footprint-card__body {
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--color-text-secondary);
+  margin: 0 0 var(--space-3);
+}
+
+.footprint-card__cta {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--color-maroon);
+  text-transform: uppercase;
+}
+
+.footprint-card__map {
+  width: 100%;
+  max-width: 520px;
+  justify-self: end;
+}
+
+.footprint-card__map svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* County path coloring — preview and modal share these classes */
+.ok-county {
+  fill: var(--color-bg);
+  stroke: #c9c9c2;
+  stroke-width: 0.6;
+  vector-effect: non-scaling-stroke;
+}
+
+.ok-county--owned {
+  fill: #9ca3af;
+  stroke: var(--color-maroon);
+  stroke-width: 1.1;
+}
+
+.ok-county--interactive {
+  cursor: pointer;
+  transition: fill 100ms ease;
+}
+
+.ok-county--interactive:hover,
+.ok-county--active {
+  fill: var(--color-maroon);
+}
+
+@media (max-width: 720px) {
+  .footprint-card {
+    grid-template-columns: 1fr;
+  }
+  .footprint-card__map {
+    max-width: 100%;
+    justify-self: stretch;
+  }
+}
+
+/* Modal overlay */
+.county-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-4);
+}
+
+.county-modal[hidden] {
+  display: none;
+}
+
+.county-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(34, 34, 34, 0.55);
+}
+
+.county-modal__panel {
+  position: relative;
+  background: var(--color-bg);
+  border: 1px solid var(--color-hairline);
+  width: min(1240px, 100%);
+  max-height: calc(100vh - 32px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.county-modal__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: var(--space-4) var(--space-5);
+  border-bottom: 1px solid var(--color-hairline);
+}
+
+.county-modal__title {
+  font-family: var(--font-serif);
+  font-size: 20px;
+  font-weight: 500;
+  letter-spacing: -0.005em;
+  color: var(--color-text);
+  margin: 0;
+}
+
+.county-modal__subtitle {
+  font-size: 12px;
+  color: var(--color-text-muted);
+  margin: 4px 0 0;
+}
+
+.county-modal__close {
+  background: transparent;
+  border: 0;
+  color: var(--color-text-muted);
+  font-size: 28px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 var(--space-2);
+}
+
+.county-modal__close:hover {
+  color: var(--color-maroon);
+}
+
+.county-modal__body {
+  position: relative;
+  flex: 1;
+  overflow: auto;
+  padding: var(--space-4) var(--space-5);
+  background: var(--color-bg-alt);
+}
+
+.county-modal__map {
+  width: 100%;
+  max-width: 1120px;
+  margin: 0 auto;
+}
+
+.county-modal__map svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.county-modal__legend {
+  display: flex;
+  gap: var(--space-4);
+  padding: var(--space-3) var(--space-5);
+  border-top: 1px solid var(--color-hairline);
+  background: var(--color-bg);
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.county-legend {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.county-legend__swatch {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 1px solid #c9c9c2;
+}
+
+.county-legend__swatch--owned {
+  background: #9ca3af;
+  border-color: var(--color-maroon);
+}
+
+.county-legend__swatch--other {
+  background: var(--color-bg);
+  border-color: #c9c9c2;
+}
+
+/* County popover (positioned inside .county-modal__body) */
+.county-popover {
+  position: absolute;
+  width: 300px;
+  background: var(--color-bg);
+  border: 1px solid var(--color-maroon);
+  padding: var(--space-3) var(--space-4);
+  box-shadow: 0 6px 24px rgba(34, 34, 34, 0.12);
+  z-index: 10;
+  font-size: 13px;
+}
+
+.county-popover[hidden] {
+  display: none;
+}
+
+.county-pop__title {
+  font-family: var(--font-serif);
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--color-text);
+  margin: 0 0 2px;
+}
+
+.county-pop__meta {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-bottom: var(--space-3);
+}
+
+.county-pop__rows {
+  margin: 0 0 var(--space-3);
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.county-pop__rows > div {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+  font-size: 13px;
+  margin: 0;
+}
+
+.county-pop__rows dt {
+  color: var(--color-text-muted);
+  font-weight: 400;
+  margin: 0;
+}
+
+.county-pop__rows dd {
+  margin: 0;
+  font-weight: 500;
+  color: var(--color-text);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.county-pop__divider {
+  height: 1px;
+  background: var(--color-hairline);
+  margin: 4px 0;
+}
+
+.county-pop__link {
+  display: inline-block;
+  margin-top: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  color: var(--color-maroon);
+  text-decoration: none;
+  border-bottom: 1px solid var(--color-maroon);
+}
+
+.county-pop__link:hover {
+  color: var(--color-maroon-dark);
+}
