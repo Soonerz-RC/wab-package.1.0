@@ -742,6 +742,56 @@ ul, ol {
   border-color: var(--color-maroon);
 }
 
+/* Primary action sitting next to Reset — same outline metric as the reset
+   button, but in maroon to signal "this is the useful affordance here." */
+.filter-bar__download {
+  font: 12px var(--font-sans);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--color-maroon);
+  background: var(--color-bg);
+  border: 1px solid var(--color-maroon);
+  padding: 9px 14px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: background 120ms ease-out, color 120ms ease-out;
+  font-weight: 500;
+}
+
+.filter-bar__download:hover,
+.filter-bar__download:focus-visible {
+  background: var(--color-maroon);
+  color: var(--color-bg);
+  outline: none;
+}
+
+.filter-bar__download:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  background: var(--color-bg);
+  color: var(--color-maroon);
+}
+
+.filter-bar__download-icon {
+  font-size: 14px;
+  line-height: 1;
+  letter-spacing: 0;
+}
+
+.filter-bar__download-count {
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+  font-size: 11px;
+  opacity: 0.8;
+}
+
+.filter-bar__download-count:empty {
+  display: none;
+}
+
 /* ------------------------------------------------------------------------- */
 /* Orientation charts (tracts page)                                           */
 /* ------------------------------------------------------------------------- */

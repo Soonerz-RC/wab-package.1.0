@@ -95,6 +95,119 @@
     return map[category] || category || "—";
   }
 
+  // -------------------------------------------------------------------------
+  // CSV export helpers
+  //
+  // RFC-4180-flavored CSV with a UTF-8 BOM so Excel opens it cleanly on both
+  // macOS and Windows. Values are wrapped in double quotes only when they
+  // contain a comma, double-quote, CR, or LF; internal double-quotes are
+  // escaped by doubling. Line endings are CRLF, the Excel-friendly default.
+  // -------------------------------------------------------------------------
+  function _csvEscape(v) {
+    if (v === null || v === undefined) return "";
+    const s = typeof v === "string" ? v : String(v);
+    if (
+      s.indexOf(",") !== -1 ||
+      s.indexOf('"') !== -1 ||
+      s.indexOf("\n") !== -1 ||
+      s.indexOf("\r") !== -1
+    ) {
+      return '"' + s.replace(/"/g, '""') + '"';
+    }
+    return s;
+  }
+
+  function _buildCSV(headers, objectRows) {
+    const lines = [headers.map(_csvEscape).join(",")];
+    for (const row of objectRows) {
+      lines.push(headers.map((h) => _csvEscape(row[h])).join(","));
+    }
+    // Prepend the UTF-8 BOM (U+FEFF) so Excel on Windows and macOS reads
+    // special characters (em-dashes, the maroon "&" entity in some notes,
+    // accented county names) cleanly without mojibake.
+    return "﻿" + lines.join("\r\n");
+  }
+
+  function _triggerDownload(filename, content, mimeType) {
+    const blob = new Blob([content], {
+      type: (mimeType || "text/plain") + ";charset=utf-8",
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    // Cleanup on next tick so Safari has time to honor the click.
+    setTimeout(function () {
+      if (a.parentNode) a.parentNode.removeChild(a);
+      URL.revokeObjectURL(url);
+    }, 0);
+  }
+
+  // CSV column order for tract exports. Mineral-only columns are emitted as
+  // empty strings for ORRI rows and vice versa, so the schema is stable
+  // across the whole file (one header row, one column per concept).
+  const TRACT_CSV_HEADERS = [
+    "tract_id",
+    "type",
+    "county",
+    "str",
+    "township_range",
+    "deal_name",
+    "nma",
+    "nra",
+    "royalty",
+    "status_category",
+    "status_raw",
+    "date_of_lease",
+    "lease_expiration",
+    "sales_revenue",
+    "sales_per_nra",
+    "sales_per_nma",
+    "regulatory_status",
+    "regulatory_url",
+    "lease_url",
+    "notes",
+  ];
+
+  function _tractToCSVRow(t) {
+    return {
+      tract_id: t.tract_id || "",
+      type: t.type || "",
+      county: t.county || "",
+      str: t.str || "",
+      township_range: t.township_range || "",
+      deal_name: t.type === "mineral" ? t.deal_name || "" : "",
+      nma: t.type === "mineral" && t.nma != null ? t.nma : "",
+      nra: t.nra != null ? t.nra : "",
+      royalty: t.type === "mineral" && t.royalty != null ? t.royalty : "",
+      status_category: t.status_category || "",
+      status_raw: t.status_raw || "",
+      date_of_lease: t.type === "orri" ? t.date_of_lease || "" : "",
+      lease_expiration: t.lease_expiration || "",
+      sales_revenue: t.sales_revenue != null ? t.sales_revenue : "",
+      sales_per_nra: t.sales_per_nra != null ? t.sales_per_nra : "",
+      sales_per_nma:
+        t.type === "mineral" && t.sales_per_nma != null ? t.sales_per_nma : "",
+      regulatory_status: t.regulatory_status || "",
+      regulatory_url: t.regulatory_url || "",
+      lease_url: t.lease_url || "",
+      notes: t.notes || "",
+    };
+  }
+
+  function _isoDateForFilename(maybeIso) {
+    // Accepts an ISO date or null; returns YYYY-MM-DD. Falls back to today.
+    if (maybeIso && typeof maybeIso === "string") {
+      const m = maybeIso.match(/^(\d{4})-(\d{2})-(\d{2})/);
+      if (m) return `${m[1]}-${m[2]}-${m[3]}`;
+    }
+    const d = new Date();
+    const pad = (n) => String(n).padStart(2, "0");
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+  }
+
   // Display-only smart title-case: any whitespace-separated token that is
   // entirely uppercase letters AND at least 5 characters gets title-cased
   // ("MEWBOURNE" → "Mewbourne"). Shorter all-caps tokens are preserved as
@@ -932,6 +1045,31 @@
         render();
       });
 
+      // CSV export: pulls from state.lastFilteredRows (set inside render()
+      // on every filter change), so the file always reflects what the user
+      // currently sees in the table.
+      const downloadBtn = root.querySelector("[data-action='download-csv']");
+      if (downloadBtn) {
+        downloadBtn.addEventListener("click", () => {
+          const rows = state.lastFilteredRows || allTracts;
+          if (!rows.length) return;
+          const csv = _buildCSV(
+            TRACT_CSV_HEADERS,
+            rows.map(_tractToCSVRow)
+          );
+          const stamp = _isoDateForFilename(
+            metaDoc && metaDoc.generated_at
+          );
+          const filtered = rows.length !== allTracts.length;
+          const filename =
+            "WAB-Package-1.0-tracts-" +
+            (filtered ? "filtered-" : "") +
+            stamp +
+            ".csv";
+          _triggerDownload(filename, csv, "text/csv");
+        });
+      }
+
       function _updateTractCharts(rows) {
         if (typeof window.Chart === "undefined") return;
 
@@ -1151,6 +1289,10 @@
         // Sort
         rows.sort((a, b) => _compareTracts(a, b, state.sort.key, state.sort.dir));
 
+        // Stash the filtered+sorted rows so the CSV download handler can
+        // emit exactly what the user is looking at in the table.
+        state.lastFilteredRows = rows;
+
         // Render tbody
         const tbody = root.querySelector("[data-tract-rows]");
         while (tbody.firstChild) tbody.removeChild(tbody.firstChild);
@@ -1162,6 +1304,15 @@
             ? formatNumber(allTracts.length)
             : `${formatNumber(rows.length)} of ${formatNumber(allTracts.length)}`
         );
+
+        // Download-button count hint + enable/disable state
+        _setText(
+          root,
+          "download-count",
+          rows.length > 0 ? "(" + formatNumber(rows.length) + ")" : ""
+        );
+        const dlBtn = root.querySelector("[data-action='download-csv']");
+        if (dlBtn) dlBtn.disabled = rows.length === 0;
 
         // Sort indicators
         root.querySelectorAll("[data-sort]").forEach((th) => {

@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@400;500;700&family=Roboto:wght@400;500;700&display=swap" />
 
-  <link rel="stylesheet" href="styles.css?v=2026-05-22-23" />
+  <link rel="stylesheet" href="styles.css?v=2026-05-22-25" />
 </head>
 
 <body data-page="tracts">
@@ -94,6 +94,12 @@
           <span class="filter-bar__label">Search</span>
           <input type="search" data-filter="search" placeholder="Tract ID, deal, STR, status…" />
         </label>
+        <button type="button" class="filter-bar__download" data-action="download-csv"
+                title="Download the current filtered tract list as a CSV file">
+          <span class="filter-bar__download-icon" aria-hidden="true">&darr;</span>
+          <span class="filter-bar__download-label">Download CSV</span>
+          <span class="filter-bar__download-count" data-text="download-count"></span>
+        </button>
         <button type="button" class="filter-bar__reset" data-action="reset-filters">Reset</button>
       </div>
     </section>
@@ -138,7 +144,7 @@
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
-  <script src="app.js?v=2026-05-22-23"></script>
+  <script src="app.js?v=2026-05-22-25"></script>
   <script>
     if (window.wab) { window.wab.initTracts(); }
   </script>
