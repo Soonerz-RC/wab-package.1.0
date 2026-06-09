@@ -3243,6 +3243,392 @@
   }
 
   // -------------------------------------------------------------------------
+  // Map page (site/map.html)
+  //
+  // Recreates the QGIS-built presentation map as an interactive Leaflet
+  // view: same layer stack (owned tracts + OCC activity + producing leases
+  // + well laterals + PLSS overlay + county outlines), each layer
+  // independently toggleable, click anywhere for the underlying record.
+  // -------------------------------------------------------------------------
+
+  // Layer-style tokens — kept inline so the map page palette stays in sync
+  // with the QGIS export. Edits here should mirror the symbology in
+  // scripts/build_presentation_map.py.
+  const MAP_COLORS = {
+    maroon: "#9b2c31",
+    maroonDark: "#7a2126",
+    counties_owned: "#9b2c31",
+    counties_other: "#aeaea6",
+    owned_fill: "#9b2c31",
+    owned_stroke: "#7a2126",
+    producing_fill: "#a5a5a0",
+    producing_stroke: "#737370",
+    spacing_stroke: "#4a6da7",
+    pooling_stroke: "#a07a3a",
+    permit_fill: "#e68c46",
+    permit_stroke: "#b46428",
+    completion_fill: "#2f6e3f",
+    completion_stroke: "#1e4b2a",
+    lateral_stroke: "#1e1e1e",
+  };
+
+  const COUNTY_FOOTPRINT_FIPS = {
+    "40015": "Caddo",
+    "40039": "Custer",
+    "40129": "Roger Mills",
+    "40149": "Washita",
+  };
+
+  async function initMap() {
+    const root = document.querySelector("[data-page='map']");
+    if (!root) return;
+
+    try {
+      // Optional metadata for the footer
+      const metaDoc = await loadJSON("data/meta.json").catch(() => null);
+      if (metaDoc) {
+        _setText(root, "data-asof", formatDate(metaDoc.generated_at || ""));
+        _setText(root, "inventory-file", metaDoc.inventory_file || "—");
+        _setText(root, "oseberg-folder", metaDoc.oseberg_folder || "—");
+      }
+
+      // Initial map view — same AOI as the QGIS export (4-county bbox).
+      const cartoLight = window.L.tileLayer(
+        "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
+        {
+          attribution:
+            '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+          subdomains: "abcd",
+          maxZoom: 19,
+        }
+      );
+      const esriImagery = window.L.tileLayer(
+        "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+        {
+          attribution:
+            "Tiles &copy; Esri &mdash; Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community",
+          maxZoom: 19,
+        }
+      );
+
+      const plssLayer = window.L && window.L.esri
+        ? window.L.esri.dynamicMapLayer({
+            url:
+              "https://gis.blm.gov/arcgis/rest/services/Cadastral/" +
+              "BLM_Natl_PLSS_CadNSDI/MapServer",
+            opacity: 0.55,
+            format: "png32",
+            transparent: true,
+            attribution:
+              'PLSS grid &copy; <a href="https://www.blm.gov/services/geospatial">BLM National PLSS</a>',
+          })
+        : null;
+
+      const map = window.L.map("wab-map", {
+        center: [35.45, -99.05],
+        zoom: 9,
+        scrollWheelZoom: true,
+        zoomControl: true,
+        layers: plssLayer ? [cartoLight, plssLayer] : [cartoLight],
+      });
+
+      // ---- Vector layers ----
+      // Load all GeoJSON in parallel; render each as a Leaflet GeoJSON layer
+      // with style + popup matched to its symbology in the QGIS export.
+
+      const [
+        countiesDoc,
+        ownedDoc,
+        producingDoc,
+        wellLateralsDoc,
+        spacingDoc,
+        poolingDoc,
+        permitsDoc,
+        completionsDoc,
+      ] = await Promise.all([
+        fetch("assets/ok-counties.geojson")
+          .then((r) => (r.ok ? r.json() : null))
+          .catch(() => null),
+        loadJSON("data/owned_tracts.geojson"),
+        loadJSON("data/maps/producing_leases.geojson"),
+        loadJSON("data/maps/well_laterals.geojson"),
+        loadJSON("data/maps/spacing_units.geojson"),
+        loadJSON("data/maps/pooling_units.geojson"),
+        loadJSON("data/maps/drilling_permits.geojson"),
+        loadJSON("data/maps/completions.geojson"),
+      ]);
+
+      // The OK counties GeoJSON isn't shipped under /assets — fall back to
+      // skipping the county-outlines layer if it's not present. (We don't
+      // strictly need it: the basemap shows county lines faintly already.)
+      const countyOutlines = countiesDoc
+        ? window.L.geoJSON(countiesDoc, {
+            style: (feat) => {
+              const owned = ["Caddo", "Custer", "Roger Mills", "Washita"]
+                .includes(feat.properties.name);
+              return {
+                fillOpacity: 0,
+                color: owned
+                  ? MAP_COLORS.counties_owned
+                  : MAP_COLORS.counties_other,
+                weight: owned ? 2.5 : 1,
+                opacity: owned ? 1 : 0.6,
+                interactive: false,
+              };
+            },
+          })
+        : null;
+
+      const ownedLayer = window.L.geoJSON(ownedDoc, {
+        style: {
+          color: MAP_COLORS.owned_stroke,
+          fillColor: MAP_COLORS.owned_fill,
+          weight: 2,
+          opacity: 1,
+          fillOpacity: 0.85,
+        },
+        onEachFeature: (feat, layer) => {
+          const p = feat.properties || {};
+          layer.bindPopup(_renderOwnedTractPopup(p));
+        },
+      });
+
+      const producingLayer = window.L.geoJSON(producingDoc, {
+        style: {
+          color: MAP_COLORS.producing_stroke,
+          fillColor: MAP_COLORS.producing_fill,
+          weight: 0.6,
+          opacity: 0.55,
+          fillOpacity: 0.35,
+        },
+        onEachFeature: (feat, layer) => {
+          const p = feat.properties || {};
+          layer.bindPopup(_renderProducingLeasePopup(p));
+        },
+      });
+
+      const wellLateralsLayer = window.L.geoJSON(wellLateralsDoc, {
+        style: {
+          color: MAP_COLORS.lateral_stroke,
+          weight: 2.5,
+          opacity: 0.95,
+        },
+        onEachFeature: (feat, layer) => {
+          const p = feat.properties || {};
+          layer.bindPopup(_renderWellLateralPopup(p));
+        },
+      });
+
+      const spacingLayer = window.L.geoJSON(spacingDoc, {
+        style: {
+          color: MAP_COLORS.spacing_stroke,
+          weight: 0.7,
+          opacity: 0.6,
+          fillOpacity: 0,
+          dashArray: "3,3",
+        },
+        onEachFeature: (feat, layer) => {
+          layer.bindPopup(_renderOccPopup("Spacing unit", feat.properties));
+        },
+      });
+
+      const poolingLayer = window.L.geoJSON(poolingDoc, {
+        style: {
+          color: MAP_COLORS.pooling_stroke,
+          weight: 1,
+          opacity: 0.75,
+          fillOpacity: 0,
+          dashArray: "5,3",
+        },
+        onEachFeature: (feat, layer) => {
+          layer.bindPopup(_renderOccPopup("Pooling unit", feat.properties));
+        },
+      });
+
+      const permitsLayer = window.L.geoJSON(permitsDoc, {
+        style: {
+          color: MAP_COLORS.permit_stroke,
+          fillColor: MAP_COLORS.permit_fill,
+          weight: 1.2,
+          opacity: 0.85,
+          fillOpacity: 0.35,
+        },
+        onEachFeature: (feat, layer) => {
+          layer.bindPopup(_renderOccPopup("Drilling permit", feat.properties));
+        },
+      });
+
+      const completionsLayer = window.L.geoJSON(completionsDoc, {
+        pointToLayer: (feat, latlng) =>
+          window.L.circleMarker(latlng, {
+            radius: 4,
+            color: MAP_COLORS.completion_stroke,
+            fillColor: MAP_COLORS.completion_fill,
+            weight: 1,
+            opacity: 1,
+            fillOpacity: 0.85,
+          }),
+        onEachFeature: (feat, layer) => {
+          layer.bindPopup(_renderOccPopup("Completion", feat.properties));
+        },
+      });
+
+      // Add layers to the map. Defaults shown on first load (matches the
+      // QGIS export — every layer visible). Owned tracts last so it's on
+      // top of the Leaflet stack.
+      if (countyOutlines) countyOutlines.addTo(map);
+      producingLayer.addTo(map);
+      spacingLayer.addTo(map);
+      poolingLayer.addTo(map);
+      permitsLayer.addTo(map);
+      completionsLayer.addTo(map);
+      wellLateralsLayer.addTo(map);
+      ownedLayer.addTo(map);
+
+      // ---- Layer control ----
+      const overlays = {
+        "Owned tracts": ownedLayer,
+        "Well laterals": wellLateralsLayer,
+        "Completions (OCC)": completionsLayer,
+        "Drilling permits (OCC)": permitsLayer,
+        "Pooling units (OCC)": poolingLayer,
+        "Spacing units (OCC)": spacingLayer,
+        "Producing leases": producingLayer,
+      };
+      if (countyOutlines) overlays["County outlines"] = countyOutlines;
+      if (plssLayer) overlays["PLSS grid (BLM)"] = plssLayer;
+
+      window.L.control
+        .layers(
+          {
+            "Light cadastral": cartoLight,
+            "Satellite (Esri)": esriImagery,
+          },
+          overlays,
+          { position: "topright", collapsed: false }
+        )
+        .addTo(map);
+
+      // Fit to owned-tracts extent on first load
+      try {
+        map.fitBounds(ownedLayer.getBounds(), {
+          padding: [40, 40],
+          maxZoom: 11,
+        });
+      } catch (e) {
+        // already centered
+      }
+    } catch (err) {
+      renderError(root, err);
+    }
+  }
+
+  // Popup renderers — return HTML strings. Kept compact so the popup body
+  // doesn't dominate small displays.
+
+  function _renderOwnedTractPopup(p) {
+    const parts = [];
+    parts.push(`<div class="map-pop__title">${p.tract_label || p.str}</div>`);
+    parts.push(
+      `<div class="map-pop__meta">${p.county} &middot; ${p.str} &middot; ${
+        p.type_summary || ""
+      }</div>`
+    );
+    const lines = [];
+    if (p.mineral_count) {
+      lines.push(
+        `<dt>Mineral</dt><dd>${p.mineral_count} tract${
+          p.mineral_count === 1 ? "" : "s"
+        } &middot; ${formatNumber(p.total_nra, { decimals: 1 })} NRA</dd>`
+      );
+    }
+    if (p.total_nma) {
+      lines.push(
+        `<dt>NMA</dt><dd>${formatNumber(p.total_nma, { decimals: 1 })}</dd>`
+      );
+    }
+    if (p.orri_count) {
+      const detail =
+        (p.orri_hbp_count ? p.orri_hbp_count + " HBP" : "") +
+        (p.orri_hbp_count && p.orri_nonhbp_count ? " &middot; " : "") +
+        (p.orri_nonhbp_count ? p.orri_nonhbp_count + " non-HBP" : "");
+      lines.push(`<dt>ORRI</dt><dd>${p.orri_count} (${detail})</dd>`);
+    }
+    if (p.deal_names && p.deal_names.length) {
+      lines.push(`<dt>Deal</dt><dd>${p.deal_names.join(", ")}</dd>`);
+    }
+    if (lines.length) {
+      parts.push(`<dl class="map-pop__rows">${lines.join("")}</dl>`);
+    }
+    parts.push(
+      `<a class="map-pop__link" href="tracts.html?county=${encodeURIComponent(
+        p.county
+      )}">View tracts in ${p.county} &rarr;</a>`
+    );
+    return parts.join("");
+  }
+
+  function _renderProducingLeasePopup(p) {
+    const lines = [];
+    if (p.operator) lines.push(`<dt>Operator</dt><dd>${p.operator}</dd>`);
+    if (p.reservoir) lines.push(`<dt>Reservoir</dt><dd>${p.reservoir}</dd>`);
+    if (p.county) lines.push(`<dt>County</dt><dd>${p.county}</dd>`);
+    if (p.legal) lines.push(`<dt>Legal</dt><dd>${p.legal}</dd>`);
+    if (p.first_production)
+      lines.push(`<dt>First prod</dt><dd>${p.first_production}</dd>`);
+    if (p.last_production)
+      lines.push(`<dt>Last prod</dt><dd>${p.last_production}</dd>`);
+    return (
+      `<div class="map-pop__title">${p.lease_name || "Producing lease"}</div>` +
+      (lines.length ? `<dl class="map-pop__rows">${lines.join("")}</dl>` : "")
+    );
+  }
+
+  function _renderWellLateralPopup(p) {
+    const lines = [];
+    if (p.operator) lines.push(`<dt>Operator</dt><dd>${p.operator}</dd>`);
+    if (p.well_status) lines.push(`<dt>Status</dt><dd>${p.well_status}</dd>`);
+    if (p.well_type) lines.push(`<dt>Type</dt><dd>${p.well_type}</dd>`);
+    if (p.spud_date) lines.push(`<dt>Spud</dt><dd>${p.spud_date}</dd>`);
+    if (p.lateral_length_ft)
+      lines.push(
+        `<dt>Lateral</dt><dd>${formatNumber(p.lateral_length_ft)} ft</dd>`
+      );
+    if (p.total_depth_ft)
+      lines.push(`<dt>TD</dt><dd>${formatNumber(p.total_depth_ft)} ft</dd>`);
+    if (p.api_number) lines.push(`<dt>API</dt><dd>${p.api_number}</dd>`);
+    return (
+      `<div class="map-pop__title">${p.well_name || "Well lateral"}</div>` +
+      (lines.length ? `<dl class="map-pop__rows">${lines.join("")}</dl>` : "")
+    );
+  }
+
+  function _renderOccPopup(kind, p) {
+    const lines = [];
+    if (p.operator) lines.push(`<dt>Operator</dt><dd>${p.operator}</dd>`);
+    if (p.applicant) lines.push(`<dt>Applicant</dt><dd>${p.applicant}</dd>`);
+    if (p.cause_number)
+      lines.push(`<dt>Cause</dt><dd>${p.cause_number}</dd>`);
+    if (p.order_number)
+      lines.push(`<dt>Order</dt><dd>${p.order_number}</dd>`);
+    if (p.approval_date)
+      lines.push(`<dt>Approval</dt><dd>${p.approval_date}</dd>`);
+    if (p.completion_date)
+      lines.push(`<dt>Completion</dt><dd>${p.completion_date}</dd>`);
+    if (p.spud_date) lines.push(`<dt>Spud</dt><dd>${p.spud_date}</dd>`);
+    if (p.purpose) lines.push(`<dt>Purpose</dt><dd>${p.purpose}</dd>`);
+    if (p.well_type) lines.push(`<dt>Well type</dt><dd>${p.well_type}</dd>`);
+    if (p.county) lines.push(`<dt>County</dt><dd>${p.county}</dd>`);
+    if (p.legal) lines.push(`<dt>Legal</dt><dd>${p.legal}</dd>`);
+    return (
+      `<div class="map-pop__title">${kind}${
+        p.well_name ? " &middot; " + p.well_name : ""
+      }</div>` +
+      (lines.length ? `<dl class="map-pop__rows">${lines.join("")}</dl>` : "")
+    );
+  }
+
+  // -------------------------------------------------------------------------
   // Export
   // -------------------------------------------------------------------------
 
@@ -3259,5 +3645,6 @@
     initActivity,
     initTownships,
     initWells,
+    initMap,
   };
 })();

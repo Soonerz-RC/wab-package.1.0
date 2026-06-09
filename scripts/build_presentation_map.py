@@ -115,19 +115,22 @@ def add_counties():
     )
     assert layer.isValid()
 
+    # Bold maroon outline on the four owned counties; hairline gray on others.
+    # Width bumped from 1.0 mm → 1.6 mm so it reads at 11x8.5" print scale
+    # (and at thumbnail size when embedded in the data room).
     sym_owned = QgsFillSymbol.createSimple(
         {
             "color": "0,0,0,0",
             "outline_color": "#9b2c31",
-            "outline_width": "1.0",
+            "outline_width": "1.6",
             "outline_width_unit": "MM",
         }
     )
     sym_other = QgsFillSymbol.createSimple(
         {
             "color": "0,0,0,0",
-            "outline_color": "180,180,175,200",
-            "outline_width": "0.3",
+            "outline_color": "150,150,145,230",
+            "outline_width": "0.4",
             "outline_width_unit": "MM",
         }
     )
@@ -194,13 +197,16 @@ def add_producing_leases():
     )
     layer = QgsVectorLayer(str(path), "Producing leases", "ogr")
     assert layer.isValid()
+    # Soft gray activity backdrop. Slightly higher alpha + slightly darker
+    # outline so 1,868 polygons read as a visible "producing-leases blanket"
+    # rather than fading into the cadastral basemap.
     layer.setRenderer(
         QgsSingleSymbolRenderer(
             QgsFillSymbol.createSimple(
                 {
-                    "color": "180,180,175,140",
-                    "outline_color": "130,130,125,160",
-                    "outline_width": "0.15",
+                    "color": "165,165,160,170",
+                    "outline_color": "115,115,110,190",
+                    "outline_width": "0.2",
                     "outline_width_unit": "MM",
                 }
             )
@@ -215,13 +221,128 @@ def add_well_laterals():
     )
     layer = QgsVectorLayer(str(path), "Well laterals", "ogr")
     assert layer.isValid()
+    # Bump line width 0.5 → 1.5 mm so 46 ~1-mile laterals are visible at
+    # the 4-county scale. Pure black at full alpha to read against any base.
     layer.setRenderer(
         QgsSingleSymbolRenderer(
             QgsLineSymbol.createSimple(
                 {
-                    "line_color": "55,55,55,230",
-                    "line_width": "0.5",
+                    "line_color": "30,30,30,255",
+                    "line_width": "1.5",
                     "line_width_unit": "MM",
+                    "capstyle": "round",
+                    "joinstyle": "round",
+                }
+            )
+        )
+    )
+    project.addMapLayer(layer)
+
+
+# ---------------------------------------------------------------------------
+# OCC regulatory activity layers
+#
+# Four shapefile bundles all derive from OCC filings. Each is rendered with
+# a distinct hue + line style so a buyer can read activity type at a glance:
+#   - Spacing  : faint blue dashed outline    (where drilling units exist)
+#   - Pooling  : amber dashed outline         (where forced-pooling ordered)
+#   - Permits  : muted orange polygon fill    (recent drill permits)
+#   - Completions: green dot at surface point (wells brought online)
+# ---------------------------------------------------------------------------
+
+
+def add_spacing_units():
+    path = (
+        REPO / "shape_files" / "unzipped" / "spacing_WAB_shape"
+        / "spacing_WAB_shape_Polygon.shp"
+    )
+    layer = QgsVectorLayer(str(path), "Spacing units (OCC)", "ogr")
+    assert layer.isValid()
+    # 1,301 polygons — go very subtle so the layer reads as background scaffolding
+    layer.setRenderer(
+        QgsSingleSymbolRenderer(
+            QgsFillSymbol.createSimple(
+                {
+                    "color": "0,0,0,0",
+                    "outline_color": "74,109,167,160",   # muted navy
+                    "outline_width": "0.18",
+                    "outline_width_unit": "MM",
+                    "outline_style": "dash",
+                }
+            )
+        )
+    )
+    project.addMapLayer(layer)
+
+
+def add_pooling_units():
+    path = (
+        REPO / "shape_files" / "unzipped" / "Pooling_WAB_shape"
+        / "Pooling_WAB_shape_Polygon.shp"
+    )
+    layer = QgsVectorLayer(str(path), "Pooling units (OCC)", "ogr")
+    assert layer.isValid()
+    # 480 polygons — slightly bolder than spacing since fewer + more meaningful
+    layer.setRenderer(
+        QgsSingleSymbolRenderer(
+            QgsFillSymbol.createSimple(
+                {
+                    "color": "0,0,0,0",
+                    "outline_color": "160,122,58,200",   # muted amber
+                    "outline_width": "0.28",
+                    "outline_width_unit": "MM",
+                    "outline_style": "dash",
+                }
+            )
+        )
+    )
+    project.addMapLayer(layer)
+
+
+def add_permits():
+    path = (
+        REPO / "shape_files" / "unzipped" / "Permits_WAB_shape"
+        / "Permits_WAB_shape_Polygon.shp"
+    )
+    layer = QgsVectorLayer(str(path), "Drilling permits (OCC)", "ogr")
+    assert layer.isValid()
+    # 85 polygons — solid orange-tinted fill at low alpha, so they read as
+    # near-term drilling activity hotspots
+    layer.setRenderer(
+        QgsSingleSymbolRenderer(
+            QgsFillSymbol.createSimple(
+                {
+                    "color": "230,140,70,90",          # warm orange
+                    "outline_color": "180,100,40,200",
+                    "outline_width": "0.35",
+                    "outline_width_unit": "MM",
+                }
+            )
+        )
+    )
+    project.addMapLayer(layer)
+
+
+def add_completions():
+    path = (
+        REPO / "shape_files" / "unzipped" / "completions_WAB_shape"
+        / "completions_WAB_shape_Point.shp"
+    )
+    layer = QgsVectorLayer(str(path), "Completions (OCC)", "ogr")
+    assert layer.isValid()
+    # 88 points — small green dots, matching the green used for HBP/producing
+    # status on the data-room status pills
+    from qgis.core import QgsMarkerSymbol
+    layer.setRenderer(
+        QgsSingleSymbolRenderer(
+            QgsMarkerSymbol.createSimple(
+                {
+                    "name": "circle",
+                    "color": "47,110,63,230",          # #2f6e3f
+                    "outline_color": "30,75,42,255",
+                    "outline_width": "0.2",
+                    "size": "1.6",
+                    "size_unit": "MM",
                 }
             )
         )
@@ -278,10 +399,18 @@ def add_owned_tracts():
     project.addMapLayer(layer)
 
 
+# Order matters: each addMapLayer() inserts at the TOP of the tree, so the
+# last-called function ends up rendered on top. Result top→bottom:
+#   Owned tracts → Well laterals → Completions → Permits → Pooling → Spacing
+#   → Producing leases → PLSS → OK counties → CARTO Light.
 add_xyz_basemap()
 add_counties()
 add_plss()
 add_producing_leases()
+add_spacing_units()
+add_pooling_units()
+add_permits()
+add_completions()
 add_well_laterals()
 add_owned_tracts()
 
@@ -363,9 +492,10 @@ layout.addItem(title)
 
 subtitle = QgsLayoutItemLabel(layout)
 subtitle.setText(
-    "Owned tracts shown in maroon at section resolution. "
-    "Gray polygons are active producing leases; dark gray lines are recent "
-    "well laterals. PLSS section grid drawn from BLM cadastral data."
+    "Owned tracts in maroon at section resolution. Surrounding context: "
+    "producing leases (gray), spacing + pooling units (blue/amber dashed), "
+    "drilling permits (orange), completions (green), and well laterals "
+    "(black). PLSS section grid drawn from BLM cadastral data."
 )
 subtitle.setFont(QFont("Helvetica", 9))
 subtitle.setFontColor(QColor("#54595f"))
@@ -378,21 +508,24 @@ map_item = QgsLayoutItemMap(layout)
 map_item.attemptMove(QgsLayoutPoint(10, 44, QgsUnitTypes.LayoutMillimeters))
 map_item.attemptResize(QgsLayoutSize(200, 160, QgsUnitTypes.LayoutMillimeters))
 map_item.setExtent(iface.mapCanvas().extent())
-map_item.setLayers(
-    [
-        l
-        for l in project.mapLayers().values()
-        if l.name()
-        in (
-            "Owned tracts",
-            "Well laterals",
-            "Producing leases",
-            "PLSS grid (BLM)",
-            "OK counties",
-            "CARTO Light (basemap)",
-        )
-    ]
-)
+# IMPORTANT: in QGIS layout maps, the FIRST entry of setLayers() is the
+# top-rendered layer. dict.values() order is arbitrary, so we explicitly
+# build the list in top→bottom render order.
+_layer_order_top_to_bottom = [
+    "Owned tracts",            # maroon, must be on top
+    "Well laterals",           # black lines, above all OCC layers
+    "Completions (OCC)",       # green dots
+    "Drilling permits (OCC)",  # orange polygons
+    "Pooling units (OCC)",     # amber dashed
+    "Spacing units (OCC)",     # blue dashed
+    "Producing leases",        # gray fill
+    "PLSS grid (BLM)",         # faint watermark
+    "OK counties",             # county outlines + labels
+    "CARTO Light (basemap)",   # bottom
+]
+_by_name = {l.name(): l for l in project.mapLayers().values()}
+map_item.setLayers([_by_name[n] for n in _layer_order_top_to_bottom if n in _by_name])
+map_item.setKeepLayerSet(True)  # lock this order in
 map_item.setFrameEnabled(True)
 map_item.setFrameStrokeColor(QColor("#c7c7c0"))
 map_item.setFrameStrokeWidth(
@@ -405,15 +538,23 @@ layout.addItem(map_item)
 legend = QgsLayoutItemLegend(layout)
 legend.setTitle("LEGEND")
 legend_root = QgsLayerTree()
-for nm in ("Owned tracts", "Producing leases", "Well laterals"):
+for nm in (
+    "Owned tracts",
+    "Well laterals",
+    "Completions (OCC)",
+    "Drilling permits (OCC)",
+    "Pooling units (OCC)",
+    "Spacing units (OCC)",
+    "Producing leases",
+):
     for l in project.mapLayers().values():
         if l.name() == nm:
             legend_root.addLayer(l)
             break
 legend.model().setRootGroup(legend_root)
 legend.setAutoUpdateModel(False)
-legend.attemptMove(QgsLayoutPoint(218, 47, QgsUnitTypes.LayoutMillimeters))
-legend.attemptResize(QgsLayoutSize(58, 50, QgsUnitTypes.LayoutMillimeters))
+legend.attemptMove(QgsLayoutPoint(214, 47, QgsUnitTypes.LayoutMillimeters))
+legend.attemptResize(QgsLayoutSize(64, 105, QgsUnitTypes.LayoutMillimeters))
 legend.setBackgroundEnabled(True)
 legend.setBackgroundColor(QColor("#fafaf8"))
 legend.setFrameEnabled(True)

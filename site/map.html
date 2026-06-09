@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Map — WAB Package 1.0</title>
+  <meta name="robots" content="noindex,nofollow" />
+  <!-- Open Graph (LinkedIn, Facebook) -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="WAB Package 1.0" />
+  <meta property="og:title" content="Map · WAB Package 1.0" />
+  <meta property="og:description" content="A curated mineral and ORRI package across four Anadarko Basin counties — Caddo, Custer, Roger Mills, Washita. 87 tracts. Offered by GBK International Group and TPC Minerals." />
+  <meta property="og:url" content="https://wab-version-ver-1.netlify.app/map.html" />
+  <meta property="og:image" content="https://wab-version-ver-1.netlify.app/assets/og-image.png?v=2026-05-22-26" />
+  <meta property="og:image:secure_url" content="https://wab-version-ver-1.netlify.app/assets/og-image.png?v=2026-05-22-26" />
+  <meta property="og:image:type" content="image/png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="Oklahoma map highlighting the four counties in the WAB Package 1.0 footprint" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Map · WAB Package 1.0" />
+  <meta name="twitter:description" content="A curated mineral and ORRI package across four Anadarko Basin counties — Caddo, Custer, Roger Mills, Washita. 87 tracts. Offered by GBK International Group and TPC Minerals." />
+  <meta name="twitter:image" content="https://wab-version-ver-1.netlify.app/assets/og-image.png?v=2026-05-22-26" />
+  <meta name="twitter:image:alt" content="Oklahoma map highlighting the four counties in the WAB Package 1.0 footprint" />
+
+  <meta name="description" content="A curated mineral and ORRI package across four Anadarko Basin counties — Caddo, Custer, Roger Mills, Washita. 87 tracts. Offered by GBK International Group and TPC Minerals." />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@400;500;700&family=Roboto:wght@400;500;700&display=swap" />
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+        crossorigin="" />
+  <link rel="stylesheet" href="styles.css?v=2026-05-22-27" />
+</head>
+
+<body data-page="map">
+
+  <header class="site-header">
+    <div class="container site-header__inner">
+      <div class="wordmark">
+        <span class="wordmark__primary">Oklahoma Minerals</span>
+        <span class="wordmark__secondary">WAB Package 1.0</span>
+      </div>
+      <nav class="site-nav" aria-label="Primary">
+        <a href="index.html">Overview</a>
+        <a href="map.html" class="is-current">Map</a>
+        <a href="tracts.html">Tracts</a>
+        <a href="activity.html">Activity</a>
+        <a href="townships.html">Coverage</a>
+        <a href="wells.html">Wells</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <!-- Hero / intro -->
+    <section class="container hero hero--compact">
+      <div class="hero__eyebrow">Western Anadarko Basin Footprint</div>
+      <h1 class="hero__title hero__title--compact">Owned tracts and the OCC activity around them</h1>
+      <p class="hero__subtitle">
+        Owned tracts shown in maroon at section resolution. Surrounding context: producing leases, OCC spacing and pooling units, drilling permits, completions, and recent well laterals. PLSS section grid drawn from BLM cadastral data; CARTO light cadastral basemap.
+      </p>
+    </section>
+
+    <!-- Static (deck-style) map -->
+    <section class="container section--tight">
+      <div class="map-static">
+        <img src="assets/maps/wab-footprint-overview.png?v=2026-05-22-27"
+             alt="WAB Package 1.0 footprint map: four Anadarko Basin counties with 87 owned tracts on 43 sections, surrounded by OCC regulatory activity."
+             class="map-static__img" />
+        <div class="map-static__caption">
+          <span class="map-static__caption-title">Western Anadarko Basin Footprint &middot; 11&times;8.5&Prime; printable</span>
+          <a class="map-static__download" href="assets/maps/wab-footprint-overview.pdf"
+             download="WAB-Package-1.0-footprint-map.pdf"
+             title="Download the print-quality PDF for buyer presentations">
+            <span>&darr;</span> Download PDF (vector, 300 DPI)
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Interactive Leaflet map -->
+    <section class="container section--tight">
+      <div class="section-heading">Interactive view</div>
+      <p class="map-interactive__intro">
+        Pan, zoom, and toggle layers on the live map below. Click any owned tract for its detail; click any well lateral, producing lease, or OCC unit for the underlying record. Layer-control widget in the top-right.
+      </p>
+      <div class="map-interactive">
+        <div id="wab-map" class="wab-map" role="region" aria-label="Interactive WAB footprint map"></div>
+      </div>
+      <div class="map-interactive__hint">
+        Tip: at township zoom (out wide) the PLSS overlay shows township labels (e.g. <em>12N 23W</em>). Zoom in to see section numbers 1&ndash;36 inside each township.
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container site-footer__row">
+      <div class="site-footer__brand">
+        GBK International Group, Ltd &middot; TPC Minerals, LLC
+      </div>
+      <div class="site-footer__meta">
+        Data as of <span data-text="data-asof">&mdash;</span> &middot;
+        Inventory: <span data-text="inventory-file">&mdash;</span> &middot;
+        Oseberg: <span data-text="oseberg-folder">&mdash;</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+          integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+          crossorigin=""></script>
+  <script src="https://unpkg.com/esri-leaflet@3.0.12/dist/esri-leaflet.js"
+          crossorigin=""></script>
+  <script src="app.js?v=2026-05-22-27"></script>
+  <script>
+    if (window.wab) { window.wab.initMap(); }
+  </script>
+</body>
+</html>

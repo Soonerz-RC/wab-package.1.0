@@ -1730,6 +1730,156 @@ a.reg-badge:hover {
   width: 100%;
 }
 
+/* ------------------------------------------------------------------------- */
+/* Map page (site/map.html)                                                   */
+/* ------------------------------------------------------------------------- */
+
+[data-page="map"] .container {
+  max-width: min(1400px, calc(100vw - 32px));
+}
+
+.map-static {
+  border: 1px solid var(--color-hairline);
+  background: var(--color-bg);
+}
+
+.map-static__img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.map-static__caption {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-top: 1px solid var(--color-hairline);
+  background: var(--color-bg-alt);
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.map-static__caption-title {
+  font-weight: 500;
+  color: var(--color-text);
+  font-family: var(--font-serif);
+  font-size: 13px;
+  letter-spacing: 0.02em;
+}
+
+.map-static__download {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-maroon);
+  font-weight: 500;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  border: 1px solid var(--color-maroon);
+  padding: 7px 14px;
+  background: var(--color-bg);
+  text-decoration: none;
+  border-bottom: 1px solid var(--color-maroon);
+}
+
+.map-static__download:hover {
+  background: var(--color-maroon);
+  color: var(--color-bg);
+}
+
+.map-static__download span {
+  font-size: 14px;
+  line-height: 1;
+}
+
+.map-interactive {
+  border: 1px solid var(--color-hairline);
+  background: var(--color-bg);
+}
+
+.map-interactive__intro {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  margin: 0 0 var(--space-3);
+  max-width: 820px;
+}
+
+.map-interactive__hint {
+  font-size: 12px;
+  color: var(--color-text-muted);
+  margin-top: var(--space-2);
+  font-style: italic;
+}
+
+.wab-map {
+  height: 680px;
+  width: 100%;
+}
+
+@media (max-width: 720px) {
+  .wab-map {
+    height: 520px;
+  }
+}
+
+/* Map popups — same Leaflet popup shell, layout-specific content classes */
+.map-pop__title {
+  font-family: var(--font-serif);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text);
+  margin-bottom: 2px;
+}
+
+.map-pop__meta {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin-bottom: var(--space-2);
+}
+
+.map-pop__rows {
+  margin: 0 0 var(--space-2);
+  padding: 0;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 3px 10px;
+  font-size: 12px;
+}
+
+.map-pop__rows dt {
+  color: var(--color-text-muted);
+  font-weight: 400;
+  margin: 0;
+}
+
+.map-pop__rows dd {
+  margin: 0;
+  font-weight: 500;
+  color: var(--color-text);
+  font-variant-numeric: tabular-nums;
+}
+
+.map-pop__link {
+  display: inline-block;
+  margin-top: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--color-maroon);
+  text-decoration: none;
+  border-bottom: 1px solid var(--color-maroon);
+}
+
+.map-pop__link:hover {
+  color: var(--color-maroon-dark);
+}
+
 /* Override Leaflet popup styling to match the McKinsey palette */
 .leaflet-popup-content-wrapper {
   background: var(--color-bg);

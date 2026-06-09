@@ -11,7 +11,11 @@
 
 [build]
   publish = "site"
-  command = "mkdir -p site/data && cp data/*.json site/data/"
+  # Copy:
+  #   data/*.json       → site/data/      (tracts, wells, permits, etc.)
+  #   data/*.geojson    → site/data/      (owned tract section polygons)
+  #   data/maps/        → site/data/maps/ (web-ready GeoJSON for the Map page)
+  command = "mkdir -p site/data/maps && cp data/*.json site/data/ && cp data/*.geojson site/data/ 2>/dev/null || true && cp data/maps/*.geojson site/data/maps/"
 
 # Cache strategy:
 # - HTML files: minimal cache + must-revalidate. The HTML carries
@@ -31,6 +35,22 @@
   for = "/data/*.json"
   [headers.values]
     Cache-Control = "public, max-age=300"
+
+[[headers]]
+  for = "/data/*.geojson"
+  [headers.values]
+    Cache-Control = "public, max-age=300"
+
+[[headers]]
+  for = "/data/maps/*"
+  [headers.values]
+    Cache-Control = "public, max-age=300"
+
+[[headers]]
+  for = "/assets/maps/*"
+  [headers.values]
+    # Map exports change rarely; cache aggressively. Updated via ?v= bumps.
+    Cache-Control = "public, max-age=604800"
 
 [[headers]]
   for = "/*.css"
