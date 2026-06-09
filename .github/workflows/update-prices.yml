@@ -1,0 +1,45 @@
+name: Update commodity prices
+
+on:
+  # Run weekdays at 13:00 UTC (≈ 8 AM CDT / 7 AM CST). NYMEX energy
+  # futures settle the prior business day by ~2:30 PM CT, so this runs
+  # well after settlement data is available on yfinance.
+  schedule:
+    - cron: "0 13 * * 1-5"
+  # Allow on-demand runs from the Actions tab when you need a fresh
+  # tick mid-day before a meeting.
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Refresh prices
+        run: python3 scripts/update_prices.py --fetch
+
+      - name: Commit and push if changed
+        run: |
+          if [[ -n "$(git status --porcelain data/prices.json)" ]]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add data/prices.json
+            git commit -m "chore(prices): daily refresh [skip ci]"
+            git push
+          else
+            echo "No price changes to commit."
+          fi
