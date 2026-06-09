@@ -50,8 +50,8 @@ YAHOO_TICKERS = {
 }
 
 
-def fetch_via_yahoo() -> Tuple[str, float, float]:
-    """Return (as_of_iso, wti_close, hh_close) via yfinance.
+def fetch_via_yahoo() -> Tuple[str, float, float, Optional[float], Optional[float]]:
+    """Return (as_of_iso, wti_close, hh_close, wti_prior, hh_prior) via yfinance.
 
     Pulls NYMEX front-month continuous futures: CL=F for WTI, NG=F for
     Henry Hub natural gas. yfinance handles Yahoo's cookies and rate
@@ -95,8 +95,22 @@ def fetch_via_yahoo() -> Tuple[str, float, float]:
     if hh is None or (isinstance(hh, float) and (hh != hh)):
         raise RuntimeError(f"No Henry Hub close in last 5 days. Last attempted: {last_date}")
 
+    # Prior-day closes from the SAME fetch, for a proper 1-day delta. (The
+    # delta-vs-prior-file logic only kicked in when the file was up to date;
+    # if the file was stale, the "daily" delta was actually weeks of change
+    # collapsed into a single tick.)
+    wti_prior = hh_prior = None
+    if len(closes) >= 2:
+        prev = closes.iloc[-2]
+        wti_v = prev[YAHOO_TICKERS["wti"]]
+        hh_v = prev[YAHOO_TICKERS["henry_hub"]]
+        if wti_v is not None and not (isinstance(wti_v, float) and wti_v != wti_v):
+            wti_prior = float(wti_v)
+        if hh_v is not None and not (isinstance(hh_v, float) and hh_v != hh_v):
+            hh_prior = float(hh_v)
+
     as_of = last_date.strftime("%Y-%m-%d") if hasattr(last_date, "strftime") else str(last_date)
-    return as_of, float(wti), float(hh)
+    return as_of, float(wti), float(hh), wti_prior, hh_prior
 
 
 # ---------------------------------------------------------------------------
@@ -211,13 +225,23 @@ def write_prices(
     hh_close: float,
     source: str,
     updated_by: str,
+    wti_prior: Optional[float] = None,
+    hh_prior: Optional[float] = None,
 ) -> dict:
-    prior = _load_prior(PRICES_PATH)
-    prior_wti = (prior or {}).get("wti", {}).get("close_usd")
-    prior_hh = (prior or {}).get("henry_hub", {}).get("close_usd_mmbtu")
+    # Preferred: use prior-day closes from the SAME fetch (true 1-day delta).
+    # Fallback only if the data source couldn't provide them: use the
+    # previously-saved file. The fallback path can produce misleading deltas
+    # when the file is stale, so the caller should always supply the prior
+    # closes in the modern path.
+    if wti_prior is None or hh_prior is None:
+        prior = _load_prior(PRICES_PATH)
+        if wti_prior is None:
+            wti_prior = (prior or {}).get("wti", {}).get("close_usd")
+        if hh_prior is None:
+            hh_prior = (prior or {}).get("henry_hub", {}).get("close_usd_mmbtu")
 
-    wti_change, wti_pct = _compute_delta(wti_close, prior_wti)
-    hh_change, hh_pct = _compute_delta(hh_close, prior_hh)
+    wti_change, wti_pct = _compute_delta(wti_close, wti_prior)
+    hh_change, hh_pct = _compute_delta(hh_close, hh_prior)
 
     payload = {
         "as_of": as_of,
@@ -269,7 +293,7 @@ def main(argv: Optional[list[str]] = None) -> int:
             if args.source == "yahoo":
                 source_label = args.source_label or "Yahoo Finance (NYMEX front-month: CL=F + NG=F)"
                 updated_by = "scripts/update_prices.py --fetch (yahoo)"
-                as_of, wti_close, hh_close = fetch_via_yahoo()
+                as_of, wti_close, hh_close, wti_prior, hh_prior = fetch_via_yahoo()
             elif args.source == "eia":
                 api_key = resolve_eia_api_key()
                 if not api_key:
@@ -280,6 +304,7 @@ def main(argv: Optional[list[str]] = None) -> int:
                 source_label = args.source_label or "EIA Open Data v2 (RWTC + RNGWHHD spot)"
                 updated_by = "scripts/update_prices.py --fetch (eia)"
                 as_of, wti_close, hh_close = fetch_via_eia(api_key)
+                wti_prior = hh_prior = None  # EIA fetch returns only the latest
         except Exception as e:
             print(f"ERROR: {e}", file=sys.stderr)
             return 3
@@ -291,6 +316,8 @@ def main(argv: Optional[list[str]] = None) -> int:
             hh_close=hh_close,
             source=source_label,
             updated_by=updated_by,
+            wti_prior=wti_prior,
+            hh_prior=hh_prior,
         )
         print(f"prices.json updated ({args.source}):")
         print(f"  WTI:       ${wti_close:.2f}/bbl   "
