@@ -3477,6 +3477,47 @@
       // occlude one another; same goes for other multi-bore pads.
       _spreadCoincidentPoints(permitsPointsDoc.features, 35);
 
+      // Derive lateral trajectory lines: a thin orange line from each
+      // permit's surface marker to the inferred BHL section centroid, plus
+      // a compass direction (North / South / NorthEast / etc.) for the
+      // popup. Only fires when the well name encodes <SHL>-<BHL> sections.
+      const _sectionCentroids = _buildSectionCentroidLookup([
+        producingDoc, spacingDoc, poolingDoc, ownedDoc,
+      ]);
+      const _trajectoryFeats = [];
+      for (const feat of permitsPointsDoc.features) {
+        const t = _deriveLateralTrajectory(feat, _sectionCentroids);
+        if (!t) continue;
+        _trajectoryFeats.push(t);
+        // Stash direction back onto the permit point so its popup can show it
+        feat.properties.direction = t.properties.direction;
+        feat.properties.bhl_section = t.properties.bhl_section;
+        feat.properties.surface_section = t.properties.surface_section;
+      }
+      const permitsTrajectories = window.L.geoJSON(
+        { type: "FeatureCollection", features: _trajectoryFeats },
+        {
+          style: {
+            color: MAP_COLORS.permit_stroke,
+            weight: 2,
+            opacity: 0.85,
+            dashArray: "6,5",
+          },
+          onEachFeature: (feat, layer) => {
+            const p = feat.properties || {};
+            layer.bindTooltip(
+              p.well_name +
+                " · " +
+                (p.direction || "") +
+                " (to §" +
+                p.bhl_section +
+                ")",
+              { sticky: true, className: "permit-tooltip" }
+            );
+          },
+        }
+      );
+
       const permitsPoints = window.L.geoJSON(permitsPointsDoc, {
         pointToLayer: (feat, latlng) =>
           window.L.circleMarker(latlng, {
@@ -3508,6 +3549,7 @@
       });
       const permitsLayer = window.L.layerGroup([
         permitsPolygons,
+        permitsTrajectories,
         permitsPoints,
       ]);
 
@@ -3574,6 +3616,106 @@
     } catch (err) {
       renderError(root, err);
     }
+  }
+
+  // ---- Lateral-trajectory derivation for OCC drilling permits ----
+  //
+  // Many Mewbourne / OCC well names encode the lateral path as
+  // "<SHL section>-<BHL section>" or "<SHL section>/<BHL section>" (e.g.
+  // "CHIQUITA 22-10" = surface section 22 → bottom-hole section 10).
+  // Combined with the legal description's township-range, we can derive an
+  // approximate lateral trajectory and a compass direction for each well.
+  //
+  // _buildSectionCentroidLookup walks a list of polygon FeatureCollections
+  // and indexes section centroids by (section, township, range). Used to
+  // resolve a parsed BHL section to a coordinate.
+  function _buildSectionCentroidLookup(featureCollections) {
+    const lookup = new Map();
+    for (const fc of featureCollections) {
+      if (!fc || !fc.features) continue;
+      for (const f of fc.features) {
+        const p = f.properties || {};
+        const legal = p.legal || p.str || "";
+        const m = legal.match(/^(\d{1,2})-(\d{1,2}N)-(\d{1,2}W)/);
+        if (!m) continue;
+        const key = parseInt(m[1], 10) + "|" + m[2] + "|" + m[3];
+        if (lookup.has(key)) continue;
+        const c = _averageVertices(f.geometry);
+        if (c) lookup.set(key, c);
+      }
+    }
+    return lookup;
+  }
+
+  function _averageVertices(geom) {
+    let coords = null;
+    if (!geom) return null;
+    if (geom.type === "Polygon") coords = geom.coordinates[0];
+    else if (geom.type === "MultiPolygon") coords = geom.coordinates[0][0];
+    else return null;
+    if (!coords || coords.length === 0) return null;
+    let sx = 0, sy = 0;
+    for (const [x, y] of coords) { sx += x; sy += y; }
+    return [sx / coords.length, sy / coords.length];
+  }
+
+  // Standard PLSS township section numbering snakes: row 1 (north, sections
+  // 1-6) runs east→west, row 2 (sections 7-12) runs west→east, etc.
+  function _sectionRowCol(sec) {
+    if (sec < 1 || sec > 36) return null;
+    const row = Math.floor((sec - 1) / 6) + 1;        // 1 = north
+    const pos = sec - (row - 1) * 6;                  // 1..6 within row
+    const col = row % 2 === 0 ? pos : 7 - pos;        // 1 = west
+    return [row, col];
+  }
+
+  function _compassDirection(surfSec, bhlSec) {
+    const a = _sectionRowCol(surfSec), b = _sectionRowCol(bhlSec);
+    if (!a || !b) return null;
+    const dRow = b[0] - a[0];   // positive = south
+    const dCol = b[1] - a[1];   // positive = east
+    if (dRow === 0 && dCol === 0) return null;
+    const ns = dRow < 0 ? "North" : dRow > 0 ? "South" : "";
+    const ew = dCol > 0 ? "East" : dCol < 0 ? "West" : "";
+    return ns && ew ? ns + ew.toLowerCase() : ns || ew;
+  }
+
+  // Returns a LineString feature from the permit's (possibly spread)
+  // surface coords to the BHL section centroid, with direction encoded in
+  // the properties. Returns null if the well name doesn't parse or the BHL
+  // centroid isn't known.
+  function _deriveLateralTrajectory(permitFeat, sectionCentroids) {
+    const p = permitFeat.properties || {};
+    const legal = p.legal || "";
+    const wellName = p.well_name || "";
+    const m1 = legal.match(/^(\d{1,2})-(\d{1,2}N)-(\d{1,2}W)/);
+    if (!m1) return null;
+    const surfSec = parseInt(m1[1], 10);
+    const twp = m1[2];
+    const rng = m1[3];
+    const m2 = wellName.match(/\b(\d{1,2})\s*[-/]\s*(\d{1,2})\b/);
+    if (!m2) return null;
+    const a = parseInt(m2[1], 10), b = parseInt(m2[2], 10);
+    if (surfSec !== a && surfSec !== b) return null;
+    const bhlSec = (a === surfSec) ? b : a;
+    if (bhlSec === surfSec) return null;
+    const bhl = sectionCentroids.get(bhlSec + "|" + twp + "|" + rng);
+    if (!bhl) return null;
+    return {
+      type: "Feature",
+      properties: {
+        well_name: p.well_name,
+        api_number: p.api_number,
+        operator: p.operator,
+        surface_section: surfSec,
+        bhl_section: bhlSec,
+        direction: _compassDirection(surfSec, bhlSec),
+      },
+      geometry: {
+        type: "LineString",
+        coordinates: [permitFeat.geometry.coordinates, bhl],
+      },
+    };
   }
 
   // When two or more permit/well points share the same surface location
@@ -3708,6 +3850,12 @@
     if (p.well_type) lines.push(`<dt>Well type</dt><dd>${p.well_type}</dd>`);
     if (p.county) lines.push(`<dt>County</dt><dd>${p.county}</dd>`);
     if (p.legal) lines.push(`<dt>Legal</dt><dd>${p.legal}</dd>`);
+    // Lateral direction (derived from <SHL>-<BHL> well-name pattern)
+    if (p.direction && p.bhl_section) {
+      lines.push(
+        `<dt>Direction</dt><dd>${p.direction} (toward §${p.bhl_section})</dd>`
+      );
+    }
     return (
       `<div class="map-pop__title">${kind}${
         p.well_name ? " &middot; " + p.well_name : ""
