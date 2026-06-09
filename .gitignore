@@ -38,10 +38,14 @@ site/CLAUDE.md
 # Map-build cache (Census TIGER shapefile download, regeneratable)
 scripts/.cache/
 
-# Oseberg shapefile working directory — the .zip files in shape_files/ are
-# the source of record; this is unzipped working data, regeneratable.
+# Oseberg shapefile zips (~700 MB total) — these are source data, kept
+# locally for re-running scripts/build_presentation_map.py but too large to
+# commit. See shape_files/README.md for what they contain and how to refresh.
+shape_files/*.zip
+
+# Unzipped Oseberg working dir — regenerable from the zips above.
 shape_files/unzipped/
 
-# Generated map exports (QGIS PNG/PDF outputs; regeneratable from the
-# .qgz project + scripts/build_presentation_map.py)
-site/assets/maps/
+# Map exports are checked in (they're sale-process deliverables), but ignore
+# any per-iteration drafts a future revision may produce.
+site/assets/maps/_draft*
