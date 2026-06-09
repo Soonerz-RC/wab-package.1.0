@@ -3263,8 +3263,8 @@
     owned_stroke: "#7a2126",
     producing_fill: "#a5a5a0",
     producing_stroke: "#737370",
-    spacing_stroke: "#4a6da7",
-    pooling_stroke: "#a07a3a",
+    spacing_stroke: "#1e3a6b",
+    pooling_stroke: "#704a18",
     permit_fill: "#e68c46",
     permit_stroke: "#b46428",
     completion_fill: "#2f6e3f",
@@ -3422,10 +3422,10 @@
       const spacingLayer = window.L.geoJSON(spacingDoc, {
         style: {
           color: MAP_COLORS.spacing_stroke,
-          weight: 0.7,
-          opacity: 0.6,
+          weight: 1.6,
+          opacity: 0.95,
           fillOpacity: 0,
-          dashArray: "3,3",
+          dashArray: "5,4",
         },
         onEachFeature: (feat, layer) => {
           layer.bindPopup(_renderOccPopup("Spacing unit", feat.properties));
@@ -3435,10 +3435,10 @@
       const poolingLayer = window.L.geoJSON(poolingDoc, {
         style: {
           color: MAP_COLORS.pooling_stroke,
-          weight: 1,
-          opacity: 0.75,
+          weight: 2.1,
+          opacity: 0.95,
           fillOpacity: 0,
-          dashArray: "5,3",
+          dashArray: "7,4",
         },
         onEachFeature: (feat, layer) => {
           layer.bindPopup(_renderOccPopup("Pooling unit", feat.properties));

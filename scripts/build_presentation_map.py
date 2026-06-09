@@ -258,14 +258,15 @@ def add_spacing_units():
     )
     layer = QgsVectorLayer(str(path), "Spacing units (OCC)", "ogr")
     assert layer.isValid()
-    # 1,301 polygons — go very subtle so the layer reads as background scaffolding
+    # 1,301 polygons. Deep navy at full opacity + wider dashed stroke so the
+    # spacing grid clearly reads on top of the producing-leases gray blanket.
     layer.setRenderer(
         QgsSingleSymbolRenderer(
             QgsFillSymbol.createSimple(
                 {
                     "color": "0,0,0,0",
-                    "outline_color": "74,109,167,160",   # muted navy
-                    "outline_width": "0.18",
+                    "outline_color": "#1e3a6b",          # deep navy
+                    "outline_width": "0.45",
                     "outline_width_unit": "MM",
                     "outline_style": "dash",
                 }
@@ -282,14 +283,15 @@ def add_pooling_units():
     )
     layer = QgsVectorLayer(str(path), "Pooling units (OCC)", "ogr")
     assert layer.isValid()
-    # 480 polygons — slightly bolder than spacing since fewer + more meaningful
+    # 480 polygons. Deep brown-amber at full opacity, slightly bolder than
+    # spacing so pooling reads as the more meaningful regulatory signal.
     layer.setRenderer(
         QgsSingleSymbolRenderer(
             QgsFillSymbol.createSimple(
                 {
                     "color": "0,0,0,0",
-                    "outline_color": "160,122,58,200",   # muted amber
-                    "outline_width": "0.28",
+                    "outline_color": "#704a18",          # deep brown-amber
+                    "outline_width": "0.6",
                     "outline_width_unit": "MM",
                     "outline_style": "dash",
                 }
