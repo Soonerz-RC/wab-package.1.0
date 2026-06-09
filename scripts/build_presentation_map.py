@@ -272,15 +272,15 @@ def add_spacing_units():
     )
     layer = QgsVectorLayer(str(path), "Spacing units (OCC)", "ogr")
     assert layer.isValid()
-    # 1,301 polygons. Deep navy at full opacity + wider dashed stroke so the
-    # spacing grid clearly reads on top of the producing-leases gray blanket.
+    # 1,301 polygons. Softened mid-navy at alpha 180 so the layer reads as
+    # quiet regulatory scaffolding rather than a competing visual axis.
     layer.setRenderer(
         QgsSingleSymbolRenderer(
             QgsFillSymbol.createSimple(
                 {
                     "color": "0,0,0,0",
-                    "outline_color": "#1e3a6b",          # deep navy
-                    "outline_width": "0.45",
+                    "outline_color": "62,85,135,180",
+                    "outline_width": "0.3",
                     "outline_width_unit": "MM",
                     "outline_style": "dash",
                 }
@@ -297,15 +297,15 @@ def add_pooling_units():
     )
     layer = QgsVectorLayer(str(path), "Pooling units (OCC)", "ogr")
     assert layer.isValid()
-    # 480 polygons. Deep brown-amber at full opacity, slightly bolder than
+    # 480 polygons. Softened mid-amber at alpha 190 — a touch bolder than
     # spacing so pooling reads as the more meaningful regulatory signal.
     layer.setRenderer(
         QgsSingleSymbolRenderer(
             QgsFillSymbol.createSimple(
                 {
                     "color": "0,0,0,0",
-                    "outline_color": "#704a18",          # deep brown-amber
-                    "outline_width": "0.6",
+                    "outline_color": "140,100,45,190",
+                    "outline_width": "0.42",
                     "outline_width_unit": "MM",
                     "outline_style": "dash",
                 }
@@ -416,18 +416,19 @@ def add_owned_tracts():
 
 
 # Order matters: each addMapLayer() inserts at the TOP of the tree, so the
-# last-called function ends up rendered on top. Result top→bottom:
-#   Owned tracts → Well laterals → Completions → Permits → Pooling → Spacing
-#   → Producing leases → PLSS → OK counties → CARTO Light.
+# last-called function ends up rendered on top. Result top→bottom for the
+# CLEAN static map: Owned tracts → Pooling → Spacing → Producing → PLSS →
+# Counties → CARTO. Well laterals, drilling permits, and completions are
+# intentionally excluded here — they're available as toggleable layers on
+# the interactive Leaflet map (site/map.html) but make the static deck
+# visual too busy. The functions still exist above so iterations can flip
+# them back on by adding the call.
 add_xyz_basemap()
 add_counties()
 add_plss()
 add_producing_leases()
 add_spacing_units()
 add_pooling_units()
-add_permits()
-add_completions()
-add_well_laterals()
 add_owned_tracts()
 
 
@@ -508,10 +509,10 @@ layout.addItem(title)
 
 subtitle = QgsLayoutItemLabel(layout)
 subtitle.setText(
-    "Owned tracts in maroon at section resolution. Surrounding context: "
-    "producing leases (gray), spacing + pooling units (blue/amber dashed), "
-    "drilling permits (orange), completions (green), and well laterals "
-    "(black). PLSS section grid drawn from BLM cadastral data."
+    "Owned tracts in maroon at section resolution. Producing leases shown in "
+    "gray; OCC spacing and pooling units in blue and amber dashed outlines. "
+    "PLSS section grid drawn from BLM cadastral data. See the interactive "
+    "map online for permits, completions, and well laterals."
 )
 subtitle.setFont(QFont("Helvetica", 9))
 subtitle.setFontColor(QColor("#54595f"))
@@ -529,11 +530,8 @@ map_item.setExtent(iface.mapCanvas().extent())
 # build the list in top→bottom render order.
 _layer_order_top_to_bottom = [
     "Owned tracts",            # maroon, must be on top
-    "Well laterals",           # black lines, above all OCC layers
-    "Completions (OCC)",       # green dots
-    "Drilling permits (OCC)",  # orange polygons
-    "Pooling units (OCC)",     # amber dashed
-    "Spacing units (OCC)",     # blue dashed
+    "Pooling units (OCC)",     # softened amber dashed
+    "Spacing units (OCC)",     # softened blue dashed
     "Producing leases",        # gray fill
     "PLSS grid (BLM)",         # faint watermark
     "OK counties",             # county outlines + labels
@@ -556,9 +554,6 @@ legend.setTitle("LEGEND")
 legend_root = QgsLayerTree()
 for nm in (
     "Owned tracts",
-    "Well laterals",
-    "Completions (OCC)",
-    "Drilling permits (OCC)",
     "Pooling units (OCC)",
     "Spacing units (OCC)",
     "Producing leases",
@@ -569,8 +564,8 @@ for nm in (
             break
 legend.model().setRootGroup(legend_root)
 legend.setAutoUpdateModel(False)
-legend.attemptMove(QgsLayoutPoint(214, 47, QgsUnitTypes.LayoutMillimeters))
-legend.attemptResize(QgsLayoutSize(64, 105, QgsUnitTypes.LayoutMillimeters))
+legend.attemptMove(QgsLayoutPoint(218, 50, QgsUnitTypes.LayoutMillimeters))
+legend.attemptResize(QgsLayoutSize(60, 65, QgsUnitTypes.LayoutMillimeters))
 legend.setBackgroundEnabled(True)
 legend.setBackgroundColor(QColor("#fafaf8"))
 legend.setFrameEnabled(True)
