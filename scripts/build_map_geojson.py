@@ -256,6 +256,11 @@ def main() -> int:
     raw["features"] = deduped
     _write(raw, OUT_DIR / "drilling_permits_points.geojson")
 
+    # 8) Leasing — aggregated to per-section choropleth so 32k point records
+    # collapse to ~650 polygons. Drives the "leasing pressure" layer on the
+    # interactive map. See _build_leasing_by_section() below.
+    _build_leasing_by_section()
+
     # 7) Completions (points)
     fc = _convert(
         "OCC completions",
@@ -277,6 +282,167 @@ def main() -> int:
     print()
     print("Done. All outputs in data/maps/")
     return 0
+
+
+def _build_leasing_by_section() -> None:
+    """Aggregate 32k Oseberg lease points to per-section summaries.
+
+    Output schema (one feature per section that has at least 1 oil & gas
+    lease in the dataset):
+        - section_legal (e.g. "16-12N-23W")
+        - county
+        - total_leases
+        - leases_24mo  ← drives the choropleth color/opacity
+        - leases_12mo
+        - latest_recording
+        - top_lessees   (list of {name, count}, top 3)
+
+    Lessor names are deliberately omitted — these are private parties whose
+    names are public record but inappropriate for a sale-process map.
+
+    Section polygons are pulled from the existing layer-build outputs
+    (producing leases / spacing / pooling / owned tracts). Any section we
+    don't have a polygon for is skipped (a handful at the AOI edges).
+    """
+    import re
+    from collections import Counter, defaultdict
+    from datetime import datetime, timedelta
+
+    today = datetime.now()
+    cutoff_24 = (today - timedelta(days=365 * 2)).strftime("%Y-%m-%d")
+    cutoff_12 = (today - timedelta(days=365)).strftime("%Y-%m-%d")
+
+    src_shp = SHAPES / "Leasing_WAB_shape" / "Leasing_WAB_shape_Point.shp"
+    if not src_shp.exists():
+        print("  · skipping leasing aggregate (shapefile not present)")
+        return
+
+    print("  · aggregating 32k lease points → per-section choropleth …")
+    sf = shapefile.Reader(str(src_shp), encoding="latin-1")
+    fields = [f[0] for f in sf.fields[1:]]
+    i_legal = fields.index("legal")
+    i_county = fields.index("county")
+    i_recorded = fields.index("recorded")
+    i_lessee = fields.index("lessee")
+    i_classifi = fields.index("classifi")
+    legal_re = re.compile(r"^(\d{1,2})-(\d{1,2}N)-(\d{1,2}W)")
+
+    by_section = defaultdict(
+        lambda: {
+            "total_leases": 0,
+            "leases_24mo": 0,
+            "leases_12mo": 0,
+            "lessees": Counter(),
+            "latest_recording": "",
+            "county": "",
+        }
+    )
+    for rec in sf.iterRecords():
+        legal = rec[i_legal] or ""
+        m = legal_re.match(legal)
+        if not m:
+            continue
+        classifi = rec[i_classifi] or ""
+        if "Lease" not in classifi:
+            continue
+        sec = int(m.group(1))
+        twp = m.group(2)
+        rng = m.group(3)
+        key = (sec, twp, rng)
+        agg = by_section[key]
+        agg["total_leases"] += 1
+        agg["county"] = rec[i_county] or agg["county"]
+        recorded = rec[i_recorded]
+        rec_str = (
+            recorded.isoformat()
+            if hasattr(recorded, "isoformat")
+            else str(recorded or "")
+        )
+        if rec_str > agg["latest_recording"]:
+            agg["latest_recording"] = rec_str
+        if rec_str >= cutoff_24:
+            agg["leases_24mo"] += 1
+        if rec_str >= cutoff_12:
+            agg["leases_12mo"] += 1
+        lessee = (rec[i_lessee] or "").strip()
+        if lessee:
+            agg["lessees"][lessee] += 1
+
+    print(f"    Unique sections with leasing activity: {len(by_section)}")
+
+    # Build section→polygon lookup from already-derived layers
+    section_polys = {}
+    for source in (
+        OUT_DIR / "producing_leases.geojson",
+        OUT_DIR / "spacing_units.geojson",
+        OUT_DIR / "pooling_units.geojson",
+        REPO / "data" / "owned_tracts.geojson",
+    ):
+        if not source.exists():
+            continue
+        fc = json.loads(source.read_text())
+        for f in fc.get("features", []):
+            p = f.get("properties") or {}
+            legal_str = p.get("legal") or p.get("str") or ""
+            m = legal_re.match(legal_str)
+            if not m:
+                continue
+            key = (int(m.group(1)), m.group(2), m.group(3))
+            if key in section_polys:
+                continue
+            try:
+                g = shape(f["geometry"])
+                # Simplify a touch to stay compact
+                if g.geom_type in ("Polygon", "MultiPolygon"):
+                    g = g.simplify(SIMPLIFY_TOL, preserve_topology=True)
+                section_polys[key] = g
+            except Exception:
+                continue
+    print(f"    Section-polygon lookup built from existing layers: "
+          f"{len(section_polys)} sections")
+
+    # Assemble features
+    features = []
+    no_poly = 0
+    for key, agg in by_section.items():
+        sec, twp, rng = key
+        geom = section_polys.get(key)
+        if geom is None or geom.is_empty:
+            no_poly += 1
+            continue
+        top3 = [
+            {"name": n, "count": c}
+            for n, c in agg["lessees"].most_common(3)
+        ]
+        features.append(
+            {
+                "type": "Feature",
+                "properties": {
+                    "section_legal": f"{sec:02d}-{twp}-{rng}",
+                    "county": agg["county"],
+                    "total_leases": agg["total_leases"],
+                    "leases_24mo": agg["leases_24mo"],
+                    "leases_12mo": agg["leases_12mo"],
+                    "latest_recording": agg["latest_recording"],
+                    "top_lessees": top3,
+                },
+                "geometry": mapping(geom),
+            }
+        )
+    if no_poly:
+        print(f"    Skipped {no_poly} sections (no polygon available)")
+
+    fc = {
+        "type": "FeatureCollection",
+        "name": "Oseberg leasing — aggregated by PLSS section",
+        "crs": {
+            "type": "name",
+            "properties": {"name": "urn:ogc:def:crs:OGC:1.3:CRS84"},
+        },
+        "features": features,
+    }
+    out = OUT_DIR / "leasing_by_section.geojson"
+    _write(fc, out)
 
 
 if __name__ == "__main__":

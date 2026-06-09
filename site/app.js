@@ -3270,6 +3270,8 @@
     completion_fill: "#2f6e3f",
     completion_stroke: "#1e4b2a",
     lateral_stroke: "#1e1e1e",
+    leasing_fill: "#5b21b6",
+    leasing_stroke: "#3b0f78",
   };
 
   const COUNTY_FOOTPRINT_FIPS = {
@@ -3359,6 +3361,10 @@
         loadJSON("data/maps/drilling_permits_points.geojson"),
         loadJSON("data/maps/completions.geojson"),
       ]);
+      // Leasing is heavy enough (~200 kB) that we let it load lazily; if it
+      // fails (e.g. asset not yet deployed) the layer just isn't offered.
+      const leasingDoc = await loadJSON("data/maps/leasing_by_section.geojson")
+        .catch(() => null);
 
       // The OK counties GeoJSON isn't shipped under /assets — fall back to
       // skipping the county-outlines layer if it's not present. (We don't
@@ -3568,6 +3574,31 @@
         },
       });
 
+      // Leasing pressure — section-level choropleth colored by 24-month
+      // lease count. Opacity scales 0 → 0.7 across the count range so a
+      // section with 1 lease barely tints purple, 300+ leases reads as
+      // intense violet. Off by default to keep the first impression
+      // uncluttered; buyers opt in via the layer toggle.
+      let leasingLayer = null;
+      if (leasingDoc) {
+        leasingLayer = window.L.geoJSON(leasingDoc, {
+          style: (feat) => {
+            const n = (feat.properties || {}).leases_24mo || 0;
+            const op = Math.min(0.7, 0.08 + n / 320);
+            return {
+              color: MAP_COLORS.leasing_stroke,
+              fillColor: MAP_COLORS.leasing_fill,
+              weight: 0.4,
+              opacity: 0.5,
+              fillOpacity: op,
+            };
+          },
+          onEachFeature: (feat, layer) => {
+            layer.bindPopup(_renderLeasingPopup(feat.properties));
+          },
+        });
+      }
+
       // Add layers to the map. Defaults shown on first load (matches the
       // QGIS export — every layer visible). Owned tracts last so it's on
       // top of the Leaflet stack.
@@ -3579,6 +3610,8 @@
       completionsLayer.addTo(map);
       wellLateralsLayer.addTo(map);
       ownedLayer.addTo(map);
+      // Note: leasingLayer is intentionally NOT addTo'd here — off by
+      // default to keep the first impression uncluttered.
 
       // ---- Layer control ----
       const overlays = {
@@ -3590,6 +3623,7 @@
         "Spacing units (OCC)": spacingLayer,
         "Producing leases": producingLayer,
       };
+      if (leasingLayer) overlays["Leasing pressure (24 mo)"] = leasingLayer;
       if (countyOutlines) overlays["County outlines"] = countyOutlines;
       if (plssLayer) overlays["PLSS grid (BLM)"] = plssLayer;
 
@@ -3831,6 +3865,47 @@
       `<div class="map-pop__title">${p.well_name || "Well lateral"}</div>` +
       (lines.length ? `<dl class="map-pop__rows">${lines.join("")}</dl>` : "")
     );
+  }
+
+  function _renderLeasingPopup(p) {
+    const parts = [];
+    parts.push(`<div class="map-pop__title">Section ${p.section_legal}</div>`);
+    parts.push(
+      `<div class="map-pop__meta">${p.county || ""} County &middot; leasing activity</div>`
+    );
+    const rows = [];
+    rows.push(
+      `<dt>Total leases</dt><dd>${formatNumber(p.total_leases)}</dd>`
+    );
+    rows.push(
+      `<dt>Last 24 mo</dt><dd>${formatNumber(p.leases_24mo)}</dd>`
+    );
+    rows.push(
+      `<dt>Last 12 mo</dt><dd>${formatNumber(p.leases_12mo)}</dd>`
+    );
+    if (p.latest_recording) {
+      rows.push(
+        `<dt>Latest recording</dt><dd>${p.latest_recording.slice(0, 10)}</dd>`
+      );
+    }
+    parts.push(`<dl class="map-pop__rows">${rows.join("")}</dl>`);
+    // Top lessees as a sub-list — operator names only, lessor names are
+    // intentionally suppressed for privacy on a public-facing map.
+    if (Array.isArray(p.top_lessees) && p.top_lessees.length) {
+      parts.push(
+        `<div class="map-pop__meta" style="margin-top:6px">Top lessees</div>`
+      );
+      const sub = p.top_lessees
+        .map(
+          (l) =>
+            `<dt>${(l.name || "").slice(0, 32)}</dt><dd>${formatNumber(
+              l.count
+            )}</dd>`
+        )
+        .join("");
+      parts.push(`<dl class="map-pop__rows">${sub}</dl>`);
+    }
+    return parts.join("");
   }
 
   function _renderOccPopup(kind, p) {
