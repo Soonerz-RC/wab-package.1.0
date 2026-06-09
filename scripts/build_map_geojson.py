@@ -204,7 +204,8 @@ def main() -> int:
     )
     _write(fc, OUT_DIR / "pooling_units.geojson")
 
-    # 6) Drilling permits (polygons)
+    # 6a) Drilling permits — POLYGONS (surface-hole squares ~175 m; used
+    # for high-zoom rendering only)
     fc = _convert(
         "OCC drilling permits",
         SHAPES / "Permits_WAB_shape" / "Permits_WAB_shape_Polygon.shp",
@@ -219,6 +220,41 @@ def main() -> int:
         },
     )
     _write(fc, OUT_DIR / "drilling_permits.geojson")
+
+    # 6b) Drilling permits — POINTS, deduplicated by API+well_name. Used as
+    # the primary visualization on the interactive map (visible at AOI zoom).
+    raw = _convert(
+        "OCC drilling permit points",
+        SHAPES / "Permits_WAB_shape" / "Permits_WAB_shape_Point.shp",
+        keep_fields={
+            "county", "legal", "operator", "well_nam", "api_numb",
+            "purpose_", "approval", "filed_da", "spud", "well_typ",
+            "type_of_",
+        },
+        rename={
+            "well_nam": "well_name", "api_numb": "api_number",
+            "purpose_": "purpose", "approval": "approval_date",
+            "filed_da": "filed_date", "well_typ": "well_type",
+            "type_of_": "type_of_filing",
+        },
+        simplify=False,
+    )
+    # Dedup by (api OR well_name, approval_date) — the source has multiple
+    # filing records per well; one marker per unique permit is enough.
+    seen = set()
+    deduped = []
+    for f in raw["features"]:
+        props = f["properties"]
+        key = (
+            props.get("api_number") or props.get("well_name", ""),
+            props.get("approval_date", ""),
+        )
+        if key in seen:
+            continue
+        seen.add(key)
+        deduped.append(f)
+    raw["features"] = deduped
+    _write(raw, OUT_DIR / "drilling_permits_points.geojson")
 
     # 7) Completions (points)
     fc = _convert(

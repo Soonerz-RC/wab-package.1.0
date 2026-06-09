@@ -3344,6 +3344,7 @@
         spacingDoc,
         poolingDoc,
         permitsDoc,
+        permitsPointsDoc,
         completionsDoc,
       ] = await Promise.all([
         fetch("assets/ok-counties.geojson")
@@ -3355,6 +3356,7 @@
         loadJSON("data/maps/spacing_units.geojson"),
         loadJSON("data/maps/pooling_units.geojson"),
         loadJSON("data/maps/drilling_permits.geojson"),
+        loadJSON("data/maps/drilling_permits_points.geojson"),
         loadJSON("data/maps/completions.geojson"),
       ]);
 
@@ -3453,7 +3455,11 @@
         },
       });
 
-      const permitsLayer = window.L.geoJSON(permitsDoc, {
+      // Drilling permits: combine surface-hole polygons (visible at deep
+      // zoom only) with circle markers at the surface point (visible at AOI
+      // zoom). The polygons add nothing visible at the default extent, so
+      // the points are what actually communicate "here are the permits."
+      const permitsPolygons = window.L.geoJSON(permitsDoc, {
         style: {
           color: MAP_COLORS.permit_stroke,
           fillColor: MAP_COLORS.permit_fill,
@@ -3465,6 +3471,39 @@
           layer.bindPopup(_renderOccPopup("Drilling permit", feat.properties));
         },
       });
+      const permitsPoints = window.L.geoJSON(permitsPointsDoc, {
+        pointToLayer: (feat, latlng) =>
+          window.L.circleMarker(latlng, {
+            radius: 6,
+            color: MAP_COLORS.permit_stroke,
+            fillColor: MAP_COLORS.permit_fill,
+            weight: 1.5,
+            opacity: 1,
+            fillOpacity: 0.85,
+          }),
+        onEachFeature: (feat, layer) => {
+          const p = feat.properties || {};
+          layer.bindPopup(_renderOccPopup("Drilling permit", p));
+          // Always-visible label so a buyer can identify the well at AOI
+          // zoom without clicking. Truncated to keep the map tidy.
+          if (p.well_name) {
+            const label =
+              p.well_name.length > 28
+                ? p.well_name.slice(0, 26) + "…"
+                : p.well_name;
+            layer.bindTooltip(label, {
+              permanent: false,
+              direction: "top",
+              offset: [0, -6],
+              className: "permit-tooltip",
+            });
+          }
+        },
+      });
+      const permitsLayer = window.L.layerGroup([
+        permitsPolygons,
+        permitsPoints,
+      ]);
 
       const completionsLayer = window.L.geoJSON(completionsDoc, {
         pointToLayer: (feat, latlng) =>
