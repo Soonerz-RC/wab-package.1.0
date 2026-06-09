@@ -216,26 +216,40 @@ def add_producing_leases():
 
 
 def add_well_laterals():
+    from qgis.core import QgsSimpleLineSymbolLayer
+
     path = (
         REPO / "shape_files" / "unzipped" / "Wells_WAB_shape" / "POLYLINE.shp"
     )
     layer = QgsVectorLayer(str(path), "Well laterals", "ogr")
     assert layer.isValid()
-    # Bump line width 0.5 → 1.5 mm so 46 ~1-mile laterals are visible at
-    # the 4-county scale. Pure black at full alpha to read against any base.
-    layer.setRenderer(
-        QgsSingleSymbolRenderer(
-            QgsLineSymbol.createSimple(
-                {
-                    "line_color": "30,30,30,255",
-                    "line_width": "1.5",
-                    "line_width_unit": "MM",
-                    "capstyle": "round",
-                    "joinstyle": "round",
-                }
-            )
-        )
+    # Two-layer halo symbol: a thin (1.0 mm) white halo under a crisp
+    # (0.4 mm) dark line. The halo gives the lateral enough contrast
+    # against the busy spacing/pooling/producing backdrop without making
+    # the line itself look like a fat bar (1.5 mm at ~1 mi long laterals
+    # was reading as a blob, not a horizontal well lateral).
+    halo = QgsSimpleLineSymbolLayer.create(
+        {
+            "line_color": "255,255,255,220",
+            "line_width": "1.0",
+            "line_width_unit": "MM",
+            "capstyle": "flat",
+            "joinstyle": "bevel",
+        }
     )
+    core = QgsSimpleLineSymbolLayer.create(
+        {
+            "line_color": "20,20,20,255",
+            "line_width": "0.4",
+            "line_width_unit": "MM",
+            "capstyle": "flat",
+            "joinstyle": "bevel",
+        }
+    )
+    line_sym = QgsLineSymbol()
+    line_sym.changeSymbolLayer(0, halo)
+    line_sym.appendSymbolLayer(core)
+    layer.setRenderer(QgsSingleSymbolRenderer(line_sym))
     project.addMapLayer(layer)
 
 

@@ -3407,17 +3407,25 @@
         },
       });
 
-      const wellLateralsLayer = window.L.geoJSON(wellLateralsDoc, {
-        style: {
-          color: MAP_COLORS.lateral_stroke,
-          weight: 2.5,
-          opacity: 0.95,
-        },
+      // Well laterals — drawn as two stacked Leaflet GeoJSON layers so we
+      // get a halo effect: wide white line under a thin dark line. Reads
+      // as a crisp lateral against any busy backdrop.
+      const wellLateralsHalo = window.L.geoJSON(wellLateralsDoc, {
+        style: { color: "#ffffff", weight: 3.5, opacity: 0.9 },
+        interactive: false,
+      });
+      const wellLateralsCore = window.L.geoJSON(wellLateralsDoc, {
+        style: { color: MAP_COLORS.lateral_stroke, weight: 1.4, opacity: 1 },
         onEachFeature: (feat, layer) => {
           const p = feat.properties || {};
           layer.bindPopup(_renderWellLateralPopup(p));
         },
       });
+      // Group them so layer toggle controls both at once
+      const wellLateralsLayer = window.L.layerGroup([
+        wellLateralsHalo,
+        wellLateralsCore,
+      ]);
 
       const spacingLayer = window.L.geoJSON(spacingDoc, {
         style: {
