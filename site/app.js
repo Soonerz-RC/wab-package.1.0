@@ -3471,6 +3471,12 @@
           layer.bindPopup(_renderOccPopup("Drilling permit", feat.properties));
         },
       });
+      // Spread markers that share a surface location so they don't render
+      // on top of each other. CHIQUITA 22-10 and QUARTER CIRCLE S 22-34
+      // (same Mewbourne pad at 22-13N-23W) are 11 m apart and would otherwise
+      // occlude one another; same goes for other multi-bore pads.
+      _spreadCoincidentPoints(permitsPointsDoc.features, 35);
+
       const permitsPoints = window.L.geoJSON(permitsPointsDoc, {
         pointToLayer: (feat, latlng) =>
           window.L.circleMarker(latlng, {
@@ -3567,6 +3573,41 @@
       }
     } catch (err) {
       renderError(root, err);
+    }
+  }
+
+  // When two or more permit/well points share the same surface location
+  // (multi-bore Mewbourne pads, for example), their Leaflet markers stack on
+  // top of each other and only the topmost is visible/clickable. This walks
+  // the feature collection, groups features whose lat/lon agrees to ~10 m,
+  // and applies a small radial offset so each becomes individually visible
+  // at AOI zoom — while still telling the truth that they share a pad.
+  //
+  // Mutates `features` in place. Coordinates are in [lon, lat] order.
+  function _spreadCoincidentPoints(features, spreadMeters) {
+    const groups = new Map();
+    for (const f of features) {
+      if (!f || !f.geometry || f.geometry.type !== "Point") continue;
+      const [lon, lat] = f.geometry.coordinates;
+      const key = lat.toFixed(4) + "," + lon.toFixed(4); // ~10 m grid
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key).push(f);
+    }
+    const mPerDegLat = 111320;
+    for (const group of groups.values()) {
+      if (group.length < 2) continue;
+      const baseLat = group[0].geometry.coordinates[1];
+      const mPerDegLon = mPerDegLat * Math.cos((baseLat * Math.PI) / 180);
+      const dLat = spreadMeters / mPerDegLat;
+      const dLon = spreadMeters / mPerDegLon;
+      group.forEach((f, i) => {
+        const angle = (2 * Math.PI * i) / group.length;
+        const [lon, lat] = f.geometry.coordinates;
+        f.geometry.coordinates = [
+          lon + dLon * Math.cos(angle),
+          lat + dLat * Math.sin(angle),
+        ];
+      });
     }
   }
 
