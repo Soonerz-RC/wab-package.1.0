@@ -38,7 +38,7 @@ jobs:
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
             git add data/prices.json
-            git commit -m "chore(prices): daily refresh [skip ci]"
+            git commit -m "chore(prices): daily refresh"
             git push
           else
             echo "No price changes to commit."
