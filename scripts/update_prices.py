@@ -70,15 +70,51 @@ def fetch_via_yahoo() -> Tuple[str, float, float, Optional[float], Optional[floa
     import warnings
     warnings.filterwarnings("ignore", category=FutureWarning)
 
-    data = yf.download(
-        list(YAHOO_TICKERS.values()),
-        period="5d",
-        interval="1d",
-        progress=False,
-        auto_adjust=False,
-    )
+    # Retry the download up to 3 times with backoff. yfinance uses a SQLite
+    # cache under ~/.cache/py-yfinance for cookie/rate-limit state, and in
+    # ephemeral CI runners it occasionally hits
+    # `OperationalError('database is locked')`. Clearing the cache between
+    # attempts unblocks the retry — the observed failure mode.
+    import shutil, time
+    from pathlib import Path as _Path
+
+    last_error = None
+    data = None
+    for attempt in range(1, 4):
+        try:
+            data = yf.download(
+                list(YAHOO_TICKERS.values()),
+                period="5d",
+                interval="1d",
+                progress=False,
+                auto_adjust=False,
+            )
+            if data is not None and not data.empty:
+                break
+            last_error = RuntimeError("yfinance returned empty dataframe")
+        except Exception as exc:
+            last_error = exc
+        # On any failure/empty, wipe the yfinance SQLite cache and sleep
+        # briefly before retrying. Fresh cache typically resolves the
+        # `database is locked` case.
+        for cache_dir in (
+            _Path.home() / ".cache" / "py-yfinance",
+            _Path("/tmp/py-yfinance"),
+        ):
+            if cache_dir.exists():
+                shutil.rmtree(cache_dir, ignore_errors=True)
+        if attempt < 3:
+            print(
+                f"  yfinance attempt {attempt} failed ({last_error}); "
+                f"retrying in {attempt * 15}s …",
+                file=sys.stderr,
+            )
+            time.sleep(attempt * 15)
+
     if data is None or data.empty:
-        raise RuntimeError("yfinance returned no data")
+        raise RuntimeError(
+            f"yfinance failed after 3 attempts. Last error: {last_error}"
+        )
 
     # yfinance returns a multi-level columns dataframe: ("Close", "CL=F") etc.
     closes = data["Close"]
