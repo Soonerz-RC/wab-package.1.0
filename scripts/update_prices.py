@@ -71,29 +71,32 @@ def fetch_via_yahoo() -> Tuple[str, float, float, Optional[float], Optional[floa
     warnings.filterwarnings("ignore", category=FutureWarning)
 
     # Retry the ENTIRE fetch-and-validate flow up to 3 times with backoff.
-    # yfinance uses a SQLite cache under ~/.cache/py-yfinance for cookie /
-    # rate-limit state, and in ephemeral CI runners it occasionally hits
-    # `OperationalError('database is locked')` on one ticker while the other
-    # succeeds. In that partial-success case, yf.download() returns a
-    # dataframe with data for one ticker and NaN for the other. So retrying
-    # only on total-empty won't catch it — we have to retry on any per-ticker
-    # NaN too. Clearing the cache between attempts unblocks the retry.
-    import shutil, time
-    from pathlib import Path as _Path
-
-    def _wipe_yf_cache():
-        for cache_dir in (
-            _Path.home() / ".cache" / "py-yfinance",
-            _Path("/tmp/py-yfinance"),
-        ):
-            if cache_dir.exists():
-                shutil.rmtree(cache_dir, ignore_errors=True)
+    # yfinance stores cookies/rate-limit state in a SQLite DB under a cache
+    # dir resolved via XDG_CACHE_HOME (or ~/.cache). In ephemeral CI runners
+    # that DB occasionally hits `OperationalError('database is locked')` on
+    # one ticker while the other succeeds — yielding a dataframe with a NaN
+    # column, which our per-ticker validation catches and triggers a retry.
+    #
+    # Point each retry at a FRESH isolated cache directory (via XDG_CACHE_HOME
+    # + explicit tz-cache location). Deleting the cache in place was tried
+    # and made attempt 2+ fail with 'unable to open database file' because
+    # yfinance couldn't recreate its internal structure mid-process — better
+    # to hand it an empty, writable directory instead.
+    import os, tempfile, time
 
     def _isnan(v):
         return isinstance(v, float) and v != v
 
     last_error = None
     for attempt in range(1, 4):
+        # Fresh cache directory per attempt keeps yfinance's SQLite from
+        # inheriting a locked or corrupt state.
+        fresh_cache = tempfile.mkdtemp(prefix=f"yf-cache-attempt{attempt}-")
+        os.environ["XDG_CACHE_HOME"] = fresh_cache
+        try:
+            yf.set_tz_cache_location(fresh_cache)
+        except Exception:
+            pass  # older yfinance versions may not expose this
         try:
             data = yf.download(
                 list(YAHOO_TICKERS.values()),
@@ -131,14 +134,17 @@ def fetch_via_yahoo() -> Tuple[str, float, float, Optional[float], Optional[floa
 
         except Exception as exc:
             last_error = exc
-            _wipe_yf_cache()
+            # Wait longer than the previous attempt — SQLite locks tend to
+            # clear on their own within 30 s, and yfinance's rate-limit
+            # cookies age out over a similar horizon.
             if attempt < 3:
+                delay = attempt * 20
                 print(
                     f"  yfinance attempt {attempt} failed ({last_error}); "
-                    f"retrying in {attempt * 15}s …",
+                    f"retrying in {delay}s with a fresh cache dir …",
                     file=sys.stderr,
                 )
-                time.sleep(attempt * 15)
+                time.sleep(delay)
     else:
         # All 3 attempts failed — re-raise the last error.
         raise RuntimeError(
