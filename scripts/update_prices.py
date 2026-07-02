@@ -70,16 +70,29 @@ def fetch_via_yahoo() -> Tuple[str, float, float, Optional[float], Optional[floa
     import warnings
     warnings.filterwarnings("ignore", category=FutureWarning)
 
-    # Retry the download up to 3 times with backoff. yfinance uses a SQLite
-    # cache under ~/.cache/py-yfinance for cookie/rate-limit state, and in
-    # ephemeral CI runners it occasionally hits
-    # `OperationalError('database is locked')`. Clearing the cache between
-    # attempts unblocks the retry — the observed failure mode.
+    # Retry the ENTIRE fetch-and-validate flow up to 3 times with backoff.
+    # yfinance uses a SQLite cache under ~/.cache/py-yfinance for cookie /
+    # rate-limit state, and in ephemeral CI runners it occasionally hits
+    # `OperationalError('database is locked')` on one ticker while the other
+    # succeeds. In that partial-success case, yf.download() returns a
+    # dataframe with data for one ticker and NaN for the other. So retrying
+    # only on total-empty won't catch it — we have to retry on any per-ticker
+    # NaN too. Clearing the cache between attempts unblocks the retry.
     import shutil, time
     from pathlib import Path as _Path
 
+    def _wipe_yf_cache():
+        for cache_dir in (
+            _Path.home() / ".cache" / "py-yfinance",
+            _Path("/tmp/py-yfinance"),
+        ):
+            if cache_dir.exists():
+                shutil.rmtree(cache_dir, ignore_errors=True)
+
+    def _isnan(v):
+        return isinstance(v, float) and v != v
+
     last_error = None
-    data = None
     for attempt in range(1, 4):
         try:
             data = yf.download(
@@ -89,60 +102,58 @@ def fetch_via_yahoo() -> Tuple[str, float, float, Optional[float], Optional[floa
                 progress=False,
                 auto_adjust=False,
             )
-            if data is not None and not data.empty:
-                break
-            last_error = RuntimeError("yfinance returned empty dataframe")
+            if data is None or data.empty:
+                raise RuntimeError("yfinance returned empty dataframe")
+
+            closes = data["Close"].dropna(how="all")
+            if closes.empty:
+                raise RuntimeError(
+                    "yfinance returned no Close prices in the lookback window"
+                )
+
+            last_date = closes.index[-1]
+            wti = closes[YAHOO_TICKERS["wti"]].iloc[-1]
+            hh = closes[YAHOO_TICKERS["henry_hub"]].iloc[-1]
+
+            if wti is None or _isnan(wti):
+                raise RuntimeError(
+                    f"No WTI close in last 5 days (partial download failure). "
+                    f"Last attempted: {last_date}"
+                )
+            if hh is None or _isnan(hh):
+                raise RuntimeError(
+                    f"No Henry Hub close in last 5 days (partial download "
+                    f"failure). Last attempted: {last_date}"
+                )
+
+            # Full success — break out of the retry loop.
+            break
+
         except Exception as exc:
             last_error = exc
-        # On any failure/empty, wipe the yfinance SQLite cache and sleep
-        # briefly before retrying. Fresh cache typically resolves the
-        # `database is locked` case.
-        for cache_dir in (
-            _Path.home() / ".cache" / "py-yfinance",
-            _Path("/tmp/py-yfinance"),
-        ):
-            if cache_dir.exists():
-                shutil.rmtree(cache_dir, ignore_errors=True)
-        if attempt < 3:
-            print(
-                f"  yfinance attempt {attempt} failed ({last_error}); "
-                f"retrying in {attempt * 15}s …",
-                file=sys.stderr,
-            )
-            time.sleep(attempt * 15)
-
-    if data is None or data.empty:
+            _wipe_yf_cache()
+            if attempt < 3:
+                print(
+                    f"  yfinance attempt {attempt} failed ({last_error}); "
+                    f"retrying in {attempt * 15}s …",
+                    file=sys.stderr,
+                )
+                time.sleep(attempt * 15)
+    else:
+        # All 3 attempts failed — re-raise the last error.
         raise RuntimeError(
             f"yfinance failed after 3 attempts. Last error: {last_error}"
         )
 
-    # yfinance returns a multi-level columns dataframe: ("Close", "CL=F") etc.
-    closes = data["Close"]
-    closes = closes.dropna(how="all")
-    if closes.empty:
-        raise RuntimeError("yfinance returned no Close prices in the lookback window")
-
-    last_date = closes.index[-1]
-    wti = closes[YAHOO_TICKERS["wti"]].iloc[-1]
-    hh = closes[YAHOO_TICKERS["henry_hub"]].iloc[-1]
-
-    if wti is None or (isinstance(wti, float) and (wti != wti)):  # NaN guard
-        raise RuntimeError(f"No WTI close in last 5 days. Last attempted: {last_date}")
-    if hh is None or (isinstance(hh, float) and (hh != hh)):
-        raise RuntimeError(f"No Henry Hub close in last 5 days. Last attempted: {last_date}")
-
-    # Prior-day closes from the SAME fetch, for a proper 1-day delta. (The
-    # delta-vs-prior-file logic only kicked in when the file was up to date;
-    # if the file was stale, the "daily" delta was actually weeks of change
-    # collapsed into a single tick.)
+    # Prior-day closes from the SAME fetch, for a proper 1-day delta.
     wti_prior = hh_prior = None
     if len(closes) >= 2:
         prev = closes.iloc[-2]
         wti_v = prev[YAHOO_TICKERS["wti"]]
         hh_v = prev[YAHOO_TICKERS["henry_hub"]]
-        if wti_v is not None and not (isinstance(wti_v, float) and wti_v != wti_v):
+        if wti_v is not None and not _isnan(wti_v):
             wti_prior = float(wti_v)
-        if hh_v is not None and not (isinstance(hh_v, float) and hh_v != hh_v):
+        if hh_v is not None and not _isnan(hh_v):
             hh_prior = float(hh_v)
 
     as_of = last_date.strftime("%Y-%m-%d") if hasattr(last_date, "strftime") else str(last_date)
