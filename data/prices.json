@@ -1,15 +1,15 @@
 {
-  "as_of": "2026-08-31",
+  "as_of": "2026-09-01",
   "henry_hub": {
-    "change_pct": 0.013158,
-    "change_usd": 0.038,
-    "close_usd_mmbtu": 2.926
+    "change_pct": -0.013629,
+    "change_usd": -0.04,
+    "close_usd_mmbtu": 2.895
   },
   "source": "Yahoo Finance (NYMEX front-month: CL=F + NG=F)",
   "updated_by": "scripts/update_prices.py --fetch (yahoo)",
   "wti": {
-    "change_pct": 0.027338,
-    "change_usd": 2.28,
-    "close_usd": 85.68
+    "change_pct": 0.043843,
+    "change_usd": 3.76,
+    "close_usd": 89.52
   }
 }
